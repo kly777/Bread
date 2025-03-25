@@ -1,8 +1,23 @@
+import info from "./info.vue";
+import { ref, createApp, watch } from 'vue';
+
 export default defineContentScript({
-  matches: ['*'],
+  matches: ['<all_urls>'],
   main() {
-    console.log('Hello content.');
-    const pTags = document.getElementsByTagName('p');
-    console.log(`Number of <p> tags: ${pTags.length}`);
-  },
-});
+
+    const container = document.createElement('div');
+    container.id = 'bread';
+    container.className = 'bread-container'
+    container.style.zIndex = '1000000';
+    container.style.top = "10px";
+    container.style.left = "10px";
+    container.style.position = "fixed";
+
+    document.body.appendChild(container);
+
+    const app = createApp(info);
+
+    app.mount('#bread', true);
+
+  }
+})

@@ -6,3 +6,4 @@ export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
   browser: 'chrome',
 });
+
