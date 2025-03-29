@@ -1,4 +1,4 @@
-import { initHighlight } from "./content/highlight";
+import { HighlightFeature } from "./content/highlightClass";
 import { initInfo } from "./content/info";
 import { initStripe } from "./content/stripe";
 
@@ -6,21 +6,26 @@ export default defineContentScript({
     matches: ["<all_urls>"],
 
     async main() {
-        initStripe();
-        initInfo();
-        console.log("Content script loaded!");
-        console.log("highlight", await storage.getItem("local:highlight"));
+        const Highlight = new HighlightFeature();
+
+        if (await storage.getItem("local:stripe")) {
+            initStripe();
+        }
+        if (await storage.getItem("local:highlight")) {
+            Highlight.init();
+        }
+        if (await storage.getItem("local:info")) {
+            initInfo();
+        }
+
         storage.watch<boolean>("local:highlight", async (newValue) => {
             if (newValue) {
                 console.log("Highlight enabled");
-                initHighlight();
+                Highlight.init();
             } else {
                 console.log("Highlight disabled");
+                Highlight.stop();
             }
         });
-
-        if (await storage.getItem("local:highlight")) {
-            initHighlight();
-        }
     },
 });
