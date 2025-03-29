@@ -46,7 +46,12 @@ export class HighlightFeature {
         });
         this.currentHighlight.spans = [];
     }
-
+    /**
+     * 在指定的文本节点中高亮所有匹配的文本
+     *
+     * @param node - 要处理的文本节点
+     * @param lowerCaseText - 要高亮的文本（小写形式）
+     */
     private highlightTextInNode(node: Text, lowerCaseText: string) {
         const textLength = lowerCaseText.length;
         let nodeText = node.textContent || "";
@@ -87,30 +92,33 @@ export class HighlightFeature {
         console.log("switchHighlight");
         const selectedText = getSelectedText();
         console.log("selectedText", selectedText);
+
         if (selectedText.length === 1 && /[a-zA-Z0-9]/.test(selectedText)) {
             return;
         }
-        if (selectedText === "") {
+
+        if (selectedText !== this.currentHighlight.text) {
             this.removeExistingHighlights();
             this.currentHighlight.text = selectedText;
-        }
-        if (selectedText && selectedText !== this.currentHighlight.text) {
-            console.log(selectedText, this.currentHighlight.text);
-            // 清除旧高亮
-            this.removeExistingHighlights();
-            // 高亮新内容
-            this.highlightAllOccurrences(selectedText);
-            this.currentHighlight.text = selectedText;
+
+            if (selectedText) {
+                this.highlightAllOccurrences(selectedText);
+            }
         }
     }
-
+    /**
+     * 高亮页面内所有匹配的文本
+     *
+     * @param text - 要高亮的文本
+     */
     private highlightAllOccurrences(text: string) {
         // 高亮所有匹配的文本
         console.log("highlightAllOccurrences", text);
         this.observer.disconnect();
+        // 获取所有可见的文本节点
         const textNodes = getTextNodes();
         const lowerCaseText = text.toLowerCase();
-
+        // 遍历每个文本节点并高亮匹配的文本
         textNodes.forEach((node) => {
             this.highlightTextInNode(node, lowerCaseText);
         });
