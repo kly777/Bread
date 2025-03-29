@@ -132,7 +132,7 @@ export function initHighlight() {
             span.textContent = highlightedNode.textContent;
             // span.style.border = "2px solid rgb(255, 153, 0)";
             // span.style.boxSizing = "border-box";
-            span.style.backgroundColor   = "rgba(255, 153, 0, 0.5)";
+            span.style.backgroundColor = "rgba(255, 153, 0, 0.5)";
             span.style.display = "inline";
             span.style.lineHeight = "inherit"; // 继承行高
             span.style.verticalAlign = "baseline";
