@@ -6,24 +6,24 @@ export function initHighlight() {
         spans: [] as HTMLElement[],
     };
 
-    let isMouseDown = false;
-    let mouseDownElement: HTMLElement | null = null;
-    // 监听鼠标按下事件
-    document.addEventListener("mousedown", (event) => {
-        isMouseDown = true;
-        mouseDownElement = event.target as HTMLElement;
-    });
+    // let isMouseDown = false;
+    // let mouseDownElement: HTMLElement | null = null;
+    // // 监听鼠标按下事件
+    // document.addEventListener("mousedown", (event) => {
+    //     isMouseDown = true;
+    //     mouseDownElement = event.target as HTMLElement;
+    // });
 
-    // 监听鼠标移动事件
-    document.addEventListener("mousemove", () => {
-        if (isMouseDown) {
-            switchHighlight();
-        }
-    });
+    // // 监听鼠标移动事件
+    // document.addEventListener("mousemove", () => {
+    //     if (isMouseDown) {
+    //         switchHighlight();
+    //     }
+    // });
 
     // 监听鼠标释放事件
     document.addEventListener("mouseup", () => {
-        isMouseDown = false;
+        // isMouseDown = false;
         switchHighlight();
     });
     function switchHighlight() {

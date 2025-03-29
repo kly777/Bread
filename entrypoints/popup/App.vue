@@ -1,29 +1,21 @@
 <script lang="ts" setup>
-import HelloWorld from '@/components/HelloWorld.vue';
+import featureSwitch from "./featureSwitch.vue";
+
 </script>
 
 <template>
-  <div>
-    <a href="https://wxt.dev" target="_blank">
-      <img src="/wxt.svg" class="logo" alt="WXT logo" />
-    </a>
+  <div class="popup">
+    Console
+    <hr/>
+    <featureSwitch feature-name="highlight" />
+    <featureSwitch feature-name="stripe" />
+    <featureSwitch feature-name="info" />
   </div>
-  <HelloWorld msg="WXT" />
 </template>
 
+
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em #54bc4ae0);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+.popup {
+  padding: 5px;
 }
 </style>
