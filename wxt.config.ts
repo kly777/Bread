@@ -4,7 +4,7 @@ import { defineConfig } from "wxt";
 export default defineConfig({
     extensionApi: "chrome",
     modules: ["@wxt-dev/module-vue"],
-    browser: "firefox",
+    browser: "chrome",
     manifest: {
         permissions: ["storage"],
     },
