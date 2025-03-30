@@ -1,5 +1,5 @@
 function getGoodStrong(text: string): HTMLElement {
-    const strong = document.createElement("strong");
+    const strong = document.createElement("b");
     strong.textContent = text;
     strong.style.display = "inline";
     strong.classList = "bionic-text";
@@ -28,14 +28,18 @@ function bionicCn(word: string): DocumentFragment {
     return bionicWord(word, boldIndex);
 }
 
+/**
+ * 处理文本节点，将其内容拆分为英文单词和中文字符，并分别应用不同的处理方式
+ * @param node 待处理的文本节点
+ */
 function processTextNode(node: Text): void {
-    console.log("processTextNode");
+    // console.log("processTextNode");
     const text = node.textContent || "";
-    console.log(text);
+    // console.log(text);
     // 使用正则表达式匹配英文单词和中文字符
     // const parts = text.split(/([a-zA-Z]+)|([\u4e00-\u9fa5]+)/);
     const parts = text.split(/([a-zA-Z\u4e00-\u9fa5]+)/);
-    console.log(parts);
+    // console.log(parts);
 
     const fragment = document.createDocumentFragment();
     parts.forEach((part) => {
@@ -50,6 +54,7 @@ function processTextNode(node: Text): void {
             fragment.appendChild(document.createTextNode(part));
         }
     });
+    // console.log(fragment.textContent);
 
     node.parentNode?.replaceChild(fragment, node);
 
@@ -65,22 +70,8 @@ export class BionicFeature {
             this.observer.disconnect();
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
-                    if (
-                        node.parentElement &&
-                        [
-                            "input",
-                            "textarea",
-                            "select",
-                            "button",
-                            "script",
-                            "style",
-                            "img",
-                            "source"
-                        ].includes(node.parentElement.tagName.toLowerCase())
-                    ) {
-                    } else {
-                        this.processAddedNode(node);
-                    }
+                    node.parentElement?.classList.add("observer");
+                    this.processTextNodes(node);
                 });
             });
             this.observer.observe(document.body, {
@@ -88,38 +79,6 @@ export class BionicFeature {
                 subtree: true,
             });
         });
-    }
-    private processAddedNode(node: Node): void {
-        if (node.nodeType === Node.TEXT_NODE) {
-            processTextNode(node as Text);
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-            const walker = document.createTreeWalker(
-                node,
-                NodeFilter.SHOW_TEXT,
-                {
-                    acceptNode: (node: Node) => {
-                        if (
-                            node.parentElement &&
-                            [
-                                "input",
-                                "textarea",
-                                "select",
-                                "button",
-                                "script",
-                                "style",
-                            ].includes(node.parentElement.tagName.toLowerCase())
-                        ) {
-                            return NodeFilter.FILTER_SKIP;
-                        }
-                        return NodeFilter.FILTER_ACCEPT;
-                    },
-                }
-            );
-            let textNode;
-            while ((textNode = walker.nextNode()) !== null) {
-                processTextNode(textNode as Text);
-            }
-        }
     }
 
     public init(): void {
@@ -137,13 +96,25 @@ export class BionicFeature {
         });
     }
 
+    /**
+     * 遍历并处理给定节点下的所有文本节点
+     * 此函数首先获取所有文本节点，然后逐个处理它们
+     * 在处理文本节点之前和之后，它会停止和重新启动对DOM树的观察，以确保性能和准确性
+     *
+     * @param root {Node} - 开始遍历的DOM树的根节点默认为文档的body元素
+     */
     private processTextNodes(root: Node = document.body) {
         console.log("processTextNodes");
-        const textNodes = getTextNodes();
+        // 获取指定根节点下的所有文本节点
+        const textNodes = getTextNodes(root);
+        // 在处理文本节点之前，停止观察DOM树的变化
         this.observer.disconnect();
+        console.log("textNodes");
+        // 遍历所有文本节点并逐个处理
         for (const text of textNodes) {
             processTextNode(text);
         }
+        // 处理完文本节点后，重新开始观察DOM树的变化，以监控未来的更改
         this.observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -158,32 +129,29 @@ export class BionicFeature {
  *
  * @returns {Text[]} 文本节点数组，包含所有可见的文本节点
  */
-function getTextNodes(): Text[] {
+function getTextNodes(root: Node = document.body): Text[] {
     console.log("getTextNodes");
     // 获取要处理的nodes
     const textNodes: Text[] = [];
-    const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-        {
-            acceptNode: (node: Node) => {
-                if (
-                    node.parentElement &&
-                    [
-                        "input",
-                        "textarea",
-                        "select",
-                        "button",
-                        "script",
-                        "style",
-                    ].includes(node.parentElement.tagName.toLowerCase())
-                ) {
-                    return NodeFilter.FILTER_SKIP;
-                }
-                return NodeFilter.FILTER_ACCEPT;
-            },
-        }
-    );
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: (node: Node) => {
+            if (
+                node.parentElement &&
+                [
+                    "input",
+                    "textarea",
+                    "select",
+                    "button",
+                    "script",
+                    "style",
+                    "div",
+                ].includes(node.parentElement.tagName.toLowerCase())
+            ) {
+                return NodeFilter.FILTER_SKIP;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+        },
+    });
     let node;
     while ((node = walker.nextNode()) !== null) {
         if (node.nodeType === Node.TEXT_NODE) {
