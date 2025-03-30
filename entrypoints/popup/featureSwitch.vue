@@ -11,7 +11,7 @@ const props = defineProps(
 import { ref, watch } from "vue"
 
 
-const feature = ref(true)
+const feature = ref(false)
 
 type StorageKey = `local:${string}` | `session:${string}` | `sync:${string}` | `managed:${string}`;
 
@@ -62,7 +62,7 @@ watch(feature, async (newVal) => {
 <style scoped>
 .feature-switch {
     display: flex;
-    align-items:center;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 5px;
 }
