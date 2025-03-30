@@ -1,31 +1,32 @@
-function getGoodStrong(text: string): HTMLElement {
+function createBoldElement(text: string): HTMLElement {
     const strong = document.createElement("b");
     strong.textContent = text;
     strong.style.display = "inline";
-    strong.classList = "bionic-text";
+    strong.classList.add("bionic-text");
     return strong;
 }
 
-function bionicWord(word: string, boldIndex: number): DocumentFragment {
+function createBionicWord(word: string, boldIndex: number): DocumentFragment {
+    if (word.length === 0) return document.createDocumentFragment(); // 处理空字符串
+
     const firstHalf = word.slice(0, boldIndex);
     const secondHalf = word.slice(boldIndex);
 
     const fragment = document.createDocumentFragment();
-    const strong = getGoodStrong(firstHalf);
-    fragment.appendChild(strong);
-    fragment.appendChild(document.createTextNode(secondHalf));
+    if (firstHalf) fragment.appendChild(createBoldElement(firstHalf)); // 避免空文本节点
+    if (secondHalf) fragment.appendChild(document.createTextNode(secondHalf)); // 避免空文本节点
 
     return fragment;
 }
 
 function bionicEn(word: string): DocumentFragment {
     const halfIndex = Math.floor(word.length / 3);
-    return bionicWord(word, halfIndex);
+    return createBionicWord(word, halfIndex);
 }
 
 function bionicCn(word: string): DocumentFragment {
     const boldIndex = word.length >= 4 ? 2 : 1;
-    return bionicWord(word, boldIndex);
+    return createBionicWord(word, boldIndex);
 }
 
 /**
@@ -33,13 +34,10 @@ function bionicCn(word: string): DocumentFragment {
  * @param node 待处理的文本节点
  */
 function processTextNode(node: Text): void {
-    // console.log("processTextNode");
     const text = node.textContent || "";
-    // console.log(text);
-    // 使用正则表达式匹配英文单词和中文字符
-    // const parts = text.split(/([a-zA-Z]+)|([\u4e00-\u9fa5]+)/);
+    if (!text.trim()) return; // 忽略空白文本节点
+
     const parts = text.split(/([a-zA-Z\u4e00-\u9fa5]+)/);
-    // console.log(parts);
 
     const fragment = document.createDocumentFragment();
     parts.forEach((part) => {
