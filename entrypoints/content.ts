@@ -1,4 +1,5 @@
 import { HighlightFeature } from "./content/highlightClass";
+import { BionicFeature } from "./content/bionic";
 import { initInfo } from "./content/info";
 import { initStripe } from "./content/stripe";
 
@@ -7,6 +8,7 @@ export default defineContentScript({
 
     async main() {
         const Highlight = new HighlightFeature();
+        const Bionic = new BionicFeature();
 
         if (await storage.getItem("local:stripe")) {
             initStripe();
@@ -16,6 +18,10 @@ export default defineContentScript({
         }
         if (await storage.getItem("local:info")) {
             initInfo();
+        }
+        if (await storage.getItem("local:bionic")) {
+            console.log("Bionic enabled");
+            Bionic.init();
         }
 
         storage.watch<boolean>("local:highlight", async (newValue) => {
@@ -27,5 +33,15 @@ export default defineContentScript({
                 Highlight.stop();
             }
         });
+                storage.watch<boolean>("local:bionic", async (newValue) => {
+                    if (newValue) {
+                        console.log("bionic enabled");
+                        Bionic.init();
+                    } else {
+                        console.log("bionic disabled");
+                        Bionic.stop();
+                    }
+                });
+
     },
 });
