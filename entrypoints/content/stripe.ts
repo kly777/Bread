@@ -28,7 +28,26 @@ export function initStripe() {
 function stripeAll() {
     const walker = document.createTreeWalker(
         document.body,
-        NodeFilter.SHOW_TEXT
+        NodeFilter.SHOW_TEXT,
+        {
+            acceptNode: (node: Node) => {
+                if (
+                    node.parentElement &&
+                    [
+                        "input",
+                        "textarea",
+                        "select",
+                        "button",
+                        "script",
+                        "style",
+                        "a",
+                    ].includes(node.parentElement.tagName.toLowerCase())
+                ) {
+                    return NodeFilter.FILTER_SKIP;
+                }
+                return NodeFilter.FILTER_ACCEPT;
+            },
+        }
     );
     let node: Node | null;
     while ((node = walker.nextNode())) {
@@ -110,7 +129,7 @@ function generateStripeColor(backgroundColor: string): string {
     const color = tinycolor(backgroundColor);
     const complementColor = color
         .complement() // 获取互补色
-        .setAlpha(0.3) // 设置透明度
+        .setAlpha(0.2) // 设置透明度
         .darken(30) // 使颜色变暗
         .toRgbString(); // 转换为 RGB 字符串
     return complementColor;

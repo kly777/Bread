@@ -74,6 +74,8 @@ export class BionicFeature {
                             "button",
                             "script",
                             "style",
+                            "img",
+                            "source"
                         ].includes(node.parentElement.tagName.toLowerCase())
                     ) {
                     } else {

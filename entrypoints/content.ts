@@ -33,15 +33,14 @@ export default defineContentScript({
                 Highlight.stop();
             }
         });
-                storage.watch<boolean>("local:bionic", async (newValue) => {
-                    if (newValue) {
-                        console.log("bionic enabled");
-                        Bionic.init();
-                    } else {
-                        console.log("bionic disabled");
-                        Bionic.stop();
-                    }
-                });
-
+        storage.watch<boolean>("local:bionic", async (newValue) => {
+            if (newValue) {
+                console.log("bionic enabled");
+                Bionic.init();
+            } else {
+                console.log("bionic disabled");
+                Bionic.stop();
+            }
+        });
     },
 });
