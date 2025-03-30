@@ -129,8 +129,8 @@ function generateStripeColor(backgroundColor: string): string {
     const color = tinycolor(backgroundColor);
     const complementColor = color
         .complement() // 获取互补色
-        .setAlpha(0.2) // 设置透明度
-        .darken(30) // 使颜色变暗
+        .setAlpha(0.09) // 设置透明度
+        .darken(20) // 使颜色变暗
         .toRgbString(); // 转换为 RGB 字符串
     return complementColor;
 }
