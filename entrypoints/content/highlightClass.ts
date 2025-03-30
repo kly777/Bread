@@ -34,6 +34,7 @@ export class HighlightFeature {
 
     private removeExistingHighlights() {
         console.log("removeExistingHighlights");
+        this.observer.disconnect();
         this.currentHighlight.spans.forEach((span) => {
             const parent = span.parentNode;
             parent?.replaceChild(
@@ -45,6 +46,10 @@ export class HighlightFeature {
             parent?.normalize(); // 合并相邻文本节点
         });
         this.currentHighlight.spans = [];
+        this.observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
     }
     /**
      * 在指定的文本节点中高亮所有匹配的文本
@@ -66,7 +71,6 @@ export class HighlightFeature {
 
             const beforeSplit = node.splitText(startIdx);
             const afterHighlight = beforeSplit.splitText(textLength);
-
             const highlightedNode = beforeSplit;
 
             const span = document.createElement("span");
@@ -90,7 +94,9 @@ export class HighlightFeature {
     }
     private switchHighlight() {
         console.log("switchHighlight");
-        const selectedText = getSelectedText();
+        const selection = window.getSelection();
+        if (!selection) return;
+        const selectedText = getSelectedText(selection);
         console.log("selectedText", selectedText);
 
         if (selectedText.length === 1 && /[a-zA-Z0-9]/.test(selectedText)) {
@@ -137,11 +143,11 @@ export class HighlightFeature {
  *
  * @returns {string} 用户选中的文本内容，如果没有选中则返回空字符串
  */
-function getSelectedText(): string {
+function getSelectedText(selection: Selection): string {
     // 获取选中的文本
     console.log("getSelectedText");
-    const selection = window.getSelection();
-    return selection?.toString().trim() || "";
+    if (!selection) return "";
+    return selection.toString().trim() || "";
 }
 
 /**

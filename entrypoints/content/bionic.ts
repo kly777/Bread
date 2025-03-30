@@ -55,9 +55,6 @@ function processTextNode(node: Text): void {
     // console.log(fragment.textContent);
 
     node.parentNode?.replaceChild(fragment, node);
-
-    // node.parentNode?.replaceChild(document.createTextNode(processedWords.join("")), node);
-    //  node.textContent = processedWords.join("");
 }
 
 export class BionicFeature {
@@ -68,7 +65,6 @@ export class BionicFeature {
             this.observer.disconnect();
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
-                    node.parentElement?.classList.add("observer");
                     this.processTextNodes(node);
                 });
             });
