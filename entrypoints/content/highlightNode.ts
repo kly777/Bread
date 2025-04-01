@@ -9,15 +9,17 @@ class HighlightFeature {
         spans: [] as HTMLElement[],
     };
 
+    private needInit = true;
+
     constructor() {
         //绑定switchHighlight方法，以确保其在事件监听器中的this指向正确
         this.switchHighlight = this.switchHighlight.bind(this);
-    }
-
-    public start(): void {
-        console.log("highlight start");
         document.addEventListener("mouseup", this.switchHighlight);
     }
+
+    // public start(): void {
+    //     console.log("highlight start");
+    // }
 
     public stop(): void {
         console.log("highlight stop");
@@ -58,6 +60,9 @@ class HighlightFeature {
      */
     public highlightTextNodes(root: Node = document.body) {
         // 打印当前高亮的文本内容，用于调试
+        if (this.currentHighlight.text === "") {
+            return;
+        }
         console.log("highlight-", this.currentHighlight.text);
 
         // 获取根节点下的所有可见文本节点

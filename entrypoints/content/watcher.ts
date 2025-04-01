@@ -28,7 +28,7 @@ class Observer {
     }
     init() {
         storage.getItem<boolean>("local:highlight").then((newValue) => {
-            this.initHighlight(newValue);
+            this.updateHighlight(newValue);
         });
 
         storage.watch<boolean>("local:highlight", async (newValue) => {
@@ -69,11 +69,6 @@ class Observer {
             childList: true,
             subtree: true,
         });
-    }
-    private initHighlight(newValue: boolean | null) {
-        if (newValue) {
-            highlightFeature.start();
-        }
     }
 
     private updateHighlight(newValue: boolean | null) {
