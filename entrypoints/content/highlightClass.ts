@@ -8,11 +8,17 @@ export class HighlightFeature {
 
     constructor() {
         this.observer = new MutationObserver((mutations) => {
+            console.log("observe");
+            this.observer.disconnect();
             if (this.currentHighlight.text) {
                 // 重新高亮以覆盖新内容
                 this.removeExistingHighlights();
                 this.highlightAllOccurrences(this.currentHighlight.text);
             }
+            this.observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+            });
         });
         this.switchHighlight = this.switchHighlight.bind(this);
     }
@@ -34,7 +40,6 @@ export class HighlightFeature {
 
     private removeExistingHighlights() {
         console.log("removeExistingHighlights");
-        this.observer.disconnect();
         this.currentHighlight.spans.forEach((span) => {
             const parent = span.parentNode;
             parent?.replaceChild(
@@ -46,10 +51,6 @@ export class HighlightFeature {
             parent?.normalize(); // 合并相邻文本节点
         });
         this.currentHighlight.spans = [];
-        this.observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-        });
     }
     /**
      * 在指定的文本节点中高亮所有匹配的文本
@@ -104,12 +105,17 @@ export class HighlightFeature {
         }
 
         if (selectedText !== this.currentHighlight.text) {
+            this.observer.disconnect();
             this.removeExistingHighlights();
             this.currentHighlight.text = selectedText;
 
             if (selectedText) {
                 this.highlightAllOccurrences(selectedText);
             }
+            this.observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+            });
         }
     }
     /**
@@ -120,18 +126,13 @@ export class HighlightFeature {
     private highlightAllOccurrences(text: string) {
         // 高亮所有匹配的文本
         console.log("highlightAllOccurrences", text);
-        this.observer.disconnect();
+
         // 获取所有可见的文本节点
         const textNodes = getTextNodes();
         const lowerCaseText = text.toLowerCase();
         // 遍历每个文本节点并高亮匹配的文本
         textNodes.forEach((node) => {
             this.highlightTextInNode(node, lowerCaseText);
-        });
-
-        this.observer.observe(document.body, {
-            childList: true,
-            subtree: true,
         });
     }
 }
