@@ -1,5 +1,3 @@
-import { HighlightFeature } from "./content/highlightClass";
-import { BionicFeature } from "./content/bionic";
 import { initInfo } from "./content/info";
 import { initStripe } from "./content/stripe";
 import observer from "./content/watcher";
