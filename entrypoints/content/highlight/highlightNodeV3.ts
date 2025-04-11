@@ -64,7 +64,7 @@ function getTextNodes(
             }
 
             // 3. 内容过滤：检查文本内容长度是否达标
-            const content = node.textContent?.trim() || "";
+            const content = node.textContent || "";
             if (content.length < minContentLength) {
                 return NodeFilter.FILTER_SKIP;
             }
@@ -97,6 +97,7 @@ function getTextNodes(
 
 let lastSelectedText = "";
 export function highlightNode(root: Node = document.body) {
+    console.log("highlightNode");
     removeHighlights();
     const text = getSelectedText();
     if (text !== "" && text !== lastSelectedText) {
@@ -235,87 +236,89 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
 function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
     console.log(`开始处理 ${matches.length} 处匹配项`);
 
-    // 预处理：将匹配项按起始位置排序，确保后续顺序处理
+    // 预处理：将匹配项按起始位置排序
     const sortedMatches = [...matches].sort((a, b) => a.start - b.start);
-    let currentMatchIndex = 0;
-    let offsetAdjustment = 0;
 
-    // 遍历所有文本节点进行批量处理
-    texts.forEach((entry, index) => {
+    texts.forEach((entry) => {
         const node = entry.node;
-        let nodeContent = node.textContent || "";
+        const nodeContent = node.textContent || "";
+        const entryStart = entry.start;
+        const entryEnd = entry.end;
+        const nodeLength = nodeContent.length;
 
-        // 收集当前节点需要处理的所有匹配范围（包含跨节点匹配的部分处理）
-        const nodeMatches: MatchRange[] = [];
-        while (currentMatchIndex < sortedMatches.length) {
-            const match = sortedMatches[currentMatchIndex];
-            const matchStart = match.start - entry.start;
-            const matchEnd = match.end - entry.start;
+        // 找出所有与当前文本节点相关的匹配范围
+        const relevantMatches = sortedMatches.filter(
+            (match) => match.start < entryEnd && match.end > entryStart
+        );
 
-            // 匹配范围完全包含在当前节点的情况
-            if (match.start >= entry.start && match.end <= entry.end) {
-                nodeMatches.push({
-                    start: Math.max(0, matchStart),
-                    end: Math.min(nodeContent.length, matchEnd),
-                });
-                currentMatchIndex++;
-            }
-            // 匹配范围跨节点，记录当前节点部分
-            // 处理跨节点匹配的情况（仅处理当前节点包含的部分）
-            else if (match.start < entry.end && match.end > entry.start) {
-                const partialMatch = {
-                    start: Math.max(0, match.start - entry.start),
-                    end: Math.min(nodeContent.length, match.end - entry.start),
-                };
-                nodeMatches.push(partialMatch);
-                break; // 剩余部分由后续节点处理
-            } else {
-                break;
-            }
-        }
+        // 转换为相对于当前节点的局部范围
+        const localRanges = relevantMatches.map((match) => ({
+            start: Math.max(0, match.start - entryStart),
+            end: Math.min(nodeLength, match.end - entryStart),
+        }));
 
-        // 处理当前节点的所有匹配范围
-        // 执行节点内容修改操作
-        if (nodeMatches.length > 0) {
-            console.group(`处理节点 #${index} (长度:${nodeContent.length})`);
-            console.log("原始内容:", nodeContent);
+        // 合并重叠/相邻的范围
+        const mergedRanges = mergeRanges(localRanges);
 
-            // 反向处理匹配范围以防止分割操作影响后续索引
-            nodeMatches.reverse().forEach((match) => {
-                const span = createSpanElement();
+        if (mergedRanges.length === 0) return;
+
+        console.group(`处理节点 (长度:${nodeContent.length})`);
+        console.log("原始内容:", nodeContent);
+
+        // 按起始位置降序处理，避免分割影响索引
+        mergedRanges
+            .sort((a, b) => b.start - a.start)
+            .forEach((range) => {
+                const { start, end } = range;
                 console.log(
-                    `高亮范围: [${match.start}-${
-                        match.end
-                    }] "${nodeContent.slice(match.start, match.end)}"`
+                    `高亮范围: [${start}-${end}] "${nodeContent.slice(
+                        start,
+                        end
+                    )}"`
                 );
 
-                // 执行三次分割操作形成高亮区域：
-                // 1. 在匹配开始处分割
-                // 2. 在匹配结束处分割
-                // 3. 用span包裹中间部分
-                const pre = node.splitText(match.start);
-                const highlighted = pre.splitText(match.end - match.start);
+                // 执行三次分割操作
+                const pre = node.splitText(start);
+                const highlighted = pre.splitText(end - start);
+                const span = createSpanElement();
 
                 span.appendChild(pre.cloneNode(true));
                 node.parentNode?.replaceChild(span, pre);
 
-                // 保留分割后的剩余文本节点
                 if (highlighted.textContent) {
                     span.after(highlighted);
                 }
-
-                nodeContent = node.textContent || ""; // 更新节点内容
             });
 
-            console.log("处理后内容:", nodeContent);
-            console.groupEnd();
-        }
+        console.log("处理后内容:", node.textContent);
+        console.groupEnd();
     });
 
     console.log(
         "最终高亮元素数:",
         document.querySelectorAll(".highlight").length
     );
+}
+
+// 辅助函数：合并重叠范围
+function mergeRanges(ranges: MatchRange[]): MatchRange[] {
+    if (ranges.length === 0) return [];
+
+    const sorted = [...ranges].sort((a, b) => a.start - b.start);
+    const merged = [sorted[0]];
+
+    for (let i = 1; i < sorted.length; i++) {
+        const last = merged[merged.length - 1];
+        const current = sorted[i];
+
+        if (current.start <= last.end) {
+            last.end = Math.max(last.end, current.end);
+        } else {
+            merged.push(current);
+        }
+    }
+
+    return merged;
 }
 
 /**
