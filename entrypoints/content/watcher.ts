@@ -1,4 +1,4 @@
-import { highlightFeature } from "./highlightNode";
+import { highlightNode, removeHighlights } from "./highlight/highlightNodeV3";
 import { stopBionic, bionicTextNodes } from "./bionicNode";
 
 class Observer {
@@ -13,7 +13,7 @@ class Observer {
                 mutation.addedNodes.forEach((node) => {
                     if (this.highlight) {
                         console.log("highlight", this.highlight);
-                        highlightFeature.highlightTextNodes(node);
+                        highlightNode(node);
                     }
                     if (this.bionic) {
                         bionicTextNodes(node);
@@ -27,11 +27,12 @@ class Observer {
         });
     }
     init() {
+        // 高亮功能监听
         storage.getItem<boolean>("local:highlight").then((newValue) => {
             this.updateHighlight(newValue);
         });
 
-        storage.watch<boolean>("local:highlight", async (newValue) => {
+        storage.watch<boolean>("local:highlight", (newValue) => {
             this.updateHighlight(newValue);
         });
         storage.getItem<boolean>("local:bionic").then((newValue) => {
@@ -47,6 +48,38 @@ class Observer {
             subtree: true,
         });
     }
+
+    private switchHighlight(highlight: boolean) {
+        this.observer.disconnect();
+        highlightNode();
+        this.observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
+    }
+
+    private async updateHighlight(newValue: boolean | null) {
+        this.observer.disconnect();
+        this.highlight = newValue ?? false; // 默认关闭
+
+        // 状态变化时立即更新页面
+        if (this.highlight) {
+            document.addEventListener("mouseup", this.boundSwitchHandler);
+        } else {
+            document.removeEventListener("mouseup", this.boundSwitchHandler);
+            removeHighlights();
+        }
+
+        this.observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
+    }
+    private boundSwitchHandler = (e: MouseEvent) => {
+        if (this.highlight) {
+            this.switchHighlight(false);
+        }
+    };
 
     private updateBionic(newValue: boolean | null) {
         this.observer.disconnect();
@@ -71,36 +104,8 @@ class Observer {
         });
     }
 
-    private updateHighlight(newValue: boolean | null) {
-        this.observer.disconnect();
-        if (newValue === null) {
-            console.log("highlight is null");
-            storage.setItem("local:highlight", true);
-            this.highlight = true;
-            bionicTextNodes();
-        } else {
-            this.highlight = newValue;
-            if (newValue) {
-                highlightFeature.highlightTextNodes();
-            } else {
-                highlightFeature.stop();
-            }
-        }
-        this.observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-        });
-    }
     stop() {
         this.observer.disconnect();
-    }
-    public change(fn: Function) {
-        this.observer.disconnect();
-        fn();
-        this.observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-        });
     }
 }
 const observer = new Observer();

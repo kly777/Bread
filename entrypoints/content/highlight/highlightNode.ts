@@ -1,4 +1,11 @@
-import { getTextNodes } from "./kit/getNodes";
+import { getTextNodes } from "../kit/getNodes";
+
+type TextNodeEntry = {
+    node: Text;
+    start: number;
+    end: number;
+};
+
 /**
  * HighlightFeature 类用于管理和执行文本高亮功能
  */
@@ -18,6 +25,7 @@ class HighlightFeature {
     }
 
     // public start(): void {
+    //     document.addEventListener("mouseup", this.switchHighlight);
     //     console.log("highlight start");
     // }
 
@@ -63,7 +71,7 @@ class HighlightFeature {
         if (this.currentHighlight.text === "") {
             return;
         }
-        console.log("highlight-", this.currentHighlight.text);
+        // console.log("highlight", this.currentHighlight.text);
 
         // 获取根节点下的所有可见文本节点
         const textNodes = getTextNodes(root);
@@ -72,6 +80,7 @@ class HighlightFeature {
 
         // 遍历每个文本节点，并在其中高亮匹配的文本
         textNodes.forEach((node) => {
+            // console.log("highlightTextNodes", node);
             this.highlightTextInNode(node, lowerCaseText);
         });
     }
@@ -93,19 +102,48 @@ class HighlightFeature {
         ) {
             if (node.length < startIdx) break;
 
-            const beforeSplit = node.splitText(startIdx);
-            const afterHighlight = beforeSplit.splitText(textLength);
-            const highlightedNode = beforeSplit;
+            // 创建文档片段来保存分割后的节点
+            const fragment = document.createDocumentFragment();
 
-            const span = createSpanElement(highlightedNode.textContent || "");
+            // 保留分割前的文本
+            if (startIdx > 0) {
+                fragment.appendChild(
+                    document.createTextNode(nodeText.slice(0, startIdx))
+                );
+            }
 
-            highlightedNode.parentNode?.replaceChild(span, highlightedNode);
+            // 创建高亮span并添加到片段
+            const span = createSpanElement(
+                nodeText.slice(startIdx, startIdx + textLength)
+            );
+            fragment.appendChild(span);
+
+            // 保留分割后的文本
+            if (startIdx + textLength < nodeText.length) {
+                fragment.appendChild(
+                    document.createTextNode(
+                        nodeText.slice(startIdx + textLength)
+                    )
+                );
+            }
+
+            // 用文档片段替换原始节点
+            node.parentNode?.replaceChild(fragment, node);
+
+            // 获取新的文本节点用于后续处理
+            const newTextNode = fragment.lastChild as Text | null;
 
             this.currentHighlight.spans.push(span);
 
-            lowerCaseNodeText = afterHighlight.textContent?.toLowerCase() || "";
-            node = afterHighlight;
-            startIdx = 0;
+            // 更新循环变量
+            if (newTextNode) {
+                lowerCaseNodeText =
+                    newTextNode.textContent?.toLowerCase() || "";
+                node = newTextNode;
+                startIdx = 0;
+            } else {
+                break; // 没有剩余文本则退出循环
+            }
         }
     }
 
@@ -144,8 +182,128 @@ class HighlightFeature {
 
             // 如果有选中的文本，则对其进行高亮处理
             if (selectedText) {
-                this.highlightTextNodes();
+                // this.highlightTextNodes();
+                this.highlightTextInNodeV2(selectedText);
             }
+        }
+    }
+
+    /**
+     * 收集文本节点及其位置信息
+     */
+    private collectTextNodes(root: Node): {
+        nodes: TextNodeEntry[];
+        mergedText: string;
+    } {
+        const nodes: TextNodeEntry[] = [];
+        let offset = 0;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+
+        while (walker.nextNode()) {
+            const node = walker.currentNode as Text;
+            const text = node.textContent || "";
+            nodes.push({
+                node,
+                start: offset,
+                end: offset + text.length,
+            });
+            offset += text.length;
+        }
+        return {
+            nodes,
+            mergedText: nodes.map((n) => n.node.textContent).join(""),
+        };
+    }
+
+    /**
+     * 在合并文本中查找所有匹配项
+     */
+    private findMatches(
+        mergedText: string,
+        selectedText: string
+    ): Array<{ start: number; end: number }> {
+        const lowerMerged = mergedText.toLowerCase();
+        const lowerSelected = selectedText.toLowerCase();
+        const matches = [];
+        let index = 0;
+
+        while ((index = lowerMerged.indexOf(lowerSelected, index)) !== -1) {
+            matches.push({ start: index, end: index + selectedText.length });
+            index += selectedText.length;
+        }
+        return matches;
+    }
+
+    /**
+     * 新版本的高亮处理方法
+     */
+    private highlightTextInNodeV2(selectedText: string) {
+        // 收集所有文本节点
+        const { nodes, mergedText } = this.collectTextNodes(document.body);
+
+        // 查找所有匹配项
+        const matches = this.findMatches(mergedText, selectedText);
+
+        // 处理每个匹配项
+        matches.forEach((match) => {
+            let startNode: Text | null = null;
+            let endNode: Text | null = null;
+            let startPos = 0;
+            let endPos = 0;
+
+            // 查找匹配的起始结束节点
+            nodes.forEach((entry) => {
+                if (entry.start <= match.start && entry.end >= match.start) {
+                    startNode = entry.node;
+                    startPos = match.start - entry.start;
+                }
+                if (entry.start <= match.end && entry.end >= match.end) {
+                    endNode = entry.node;
+                    endPos = match.end - entry.start;
+                }
+            });
+
+            if (startNode && endNode) {
+                this.highlightSingleMatch(startNode, endNode, startPos, endPos);
+            }
+        });
+    }
+
+    /**
+     * 处理单个匹配项的高亮
+     */
+    private highlightSingleMatch(
+        startNode: Text,
+        endNode: Text,
+        startPos: number,
+        endPos: number
+    ) {
+        try {
+            // 处理同一节点的情况
+            if (startNode === endNode) {
+                const span = createSpanElement(
+                    startNode.textContent!.slice(startPos, endPos)
+                );
+
+                // 拆分文本节点
+                const middle = startNode.splitText(startPos);
+                const end = middle.splitText(endPos - startPos);
+
+                // 用span包裹匹配部分
+                middle.parentNode?.replaceChild(span, middle);
+                return;
+            }
+
+            // 处理跨节点的情况
+            const range = document.createRange();
+            range.setStart(startNode, startPos);
+            range.setEnd(endNode, endPos);
+
+            const span = createSpanElement(range.toString());
+            range.surroundContents(span);
+            this.currentHighlight.spans.push(span);
+        } catch (error) {
+            console.warn("Highlight failed:", error);
         }
     }
 }

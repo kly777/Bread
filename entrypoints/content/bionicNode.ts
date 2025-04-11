@@ -8,12 +8,12 @@ import { getTextNodes } from "./kit/getNodes";
  * @param root {Node} - 开始遍历的DOM树的根节点默认为文档的body元素
  */
 export function bionicTextNodes(root: Node = document.body) {
-    console.log("processTextNodes");
+    // console.log("processTextNodes");
     // 获取指定根节点下的所有文本节点
     const textNodes = getTextNodes(root);
     // 在处理文本节点之前，停止观察DOM树的变化
 
-    console.log("textNodes");
+    // console.log("textNodes");
     // 遍历所有文本节点并逐个处理
     for (const text of textNodes) {
         processTextNode(text);
