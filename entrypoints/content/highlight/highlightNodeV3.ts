@@ -95,34 +95,45 @@ function getTextNodes(
     };
 }
 
-let lastSelectedText = "";
+let lastSelectedText: string = "";
+/**
+ * 高亮显示文档中与选中文本匹配的文本节点（排除当前选中文本本身）
+ *
+ * @param root - 需要遍历的DOM根节点，默认为document.body。函数会在此节点的子树中查找匹配
+ * @returns void 本函数不返回任何值
+ */
 export function highlightNode(root: Node = document.body) {
     console.log("highlightNode");
     removeHighlights();
     const text = getSelectedText();
+
+    // 仅当存在有效选中文本且与上次不同时执行高亮
     if (text !== "" && text !== lastSelectedText) {
         lastSelectedText = text;
 
-        // 获取根节点下的所有文本节点及合并后的完整文本
+        // 获取所有文本节点及其合并后的完整文本内容
         let { texts, mergedText } = getTextNodes(root);
 
+        // 调试信息：输出文本节点结构及合并后的完整文本
         console.table(
             texts.map((t) => ({
                 ...t,
-                text: t.node.textContent, // 新增text列显示节点文本内容
+                text: t.node.textContent,
             }))
         );
         console.info(mergedText);
 
+        // 存在有效文本时执行匹配逻辑
         if (texts.length > 0 && text !== "") {
-            // 查找所有匹配的文本位置
+            // 在合并文本中查找所有匹配位置
             const matches = findMatches(mergedText, text);
 
-            // 新增过滤逻辑：排除当前选中文本对应的匹配项
+            // 过滤掉当前选中文本对应的匹配项（避免高亮自己）
             const filteredMatches = matches.filter(
                 (m) => !isInSelection(m, texts, window.getSelection())
             );
 
+            // 调试信息：输出所有匹配项详情
             console.table(
                 matches.map((m) => ({
                     ...m,
@@ -130,6 +141,7 @@ export function highlightNode(root: Node = document.body) {
                 }))
             );
 
+            // 对过滤后的匹配项应用高亮
             highlightMatches(texts, filteredMatches);
         } else {
             return;
@@ -205,9 +217,17 @@ interface MatchRange {
     end: number;
 }
 
+/**
+ * 在目标文本中查找指定子文本的所有匹配范围
+ *
+ * @param mergedText 被搜索的主文本内容
+ * @param selectedText 需要查找的子文本内容
+ * @returns 返回包含所有匹配位置信息的数组，每个元素包含匹配的起始(start)和结束(end)索引
+ */
 function findMatches(mergedText: string, selectedText: string): MatchRange[] {
     const matches: MatchRange[] = [];
-    // 增加有效性检查
+
+    // 检查搜索文本有效性：当搜索文本为空时提前返回
     if (!selectedText || selectedText.length === 0) {
         console.warn("Invalid search text");
         return matches;
@@ -215,12 +235,14 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
 
     let index = 0;
 
+    // 循环查找所有匹配项
     while ((index = mergedText.indexOf(selectedText, index)) !== -1) {
+        // 记录匹配范围（左闭右开区间）
         matches.push({
             start: index,
             end: index + selectedText.length,
         });
-        index += selectedText.length;
+        index += selectedText.length; // 跳过已匹配区域继续搜索
     }
 
     return matches;
@@ -300,20 +322,36 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
     );
 }
 
-// 辅助函数：合并重叠范围
+/**
+ * 合并重叠或相邻的范围区间，返回新的有序范围数组
+ *
+ * 实现原理：
+ * 1. 先对范围按起始位置排序
+ * 2. 依次合并相邻的重叠范围
+ *
+ * @param ranges - 需要合并的范围数组，每个范围应包含 start 和 end 属性
+ *                 (示例: [{start:1,end:3}, {start:2,end:5}])
+ * @returns 合并后的新范围数组，按起始位置升序排列且无重叠
+ *          (示例输入返回: [{start:1,end:5}])
+ */
 function mergeRanges(ranges: MatchRange[]): MatchRange[] {
+    // 处理空输入特殊情况
     if (ranges.length === 0) return [];
 
+    // 创建排序副本以保持原始数据不变，按起始位置升序排列
     const sorted = [...ranges].sort((a, b) => a.start - b.start);
     const merged = [sorted[0]];
 
+    // 遍历处理每个范围，合并重叠/相邻的区间
     for (let i = 1; i < sorted.length; i++) {
         const last = merged[merged.length - 1];
         const current = sorted[i];
 
+        // 当当前区间与最后合并区间重叠时，扩展合并区间的结束位置
         if (current.start <= last.end) {
             last.end = Math.max(last.end, current.end);
         } else {
+            // 非重叠区间直接添加到结果集
             merged.push(current);
         }
     }
