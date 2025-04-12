@@ -1,4 +1,4 @@
-import { getTextNodes } from "./kit/getNodes";
+import { getTextNodes } from "./kit/getNodesV2";
 
 /**
  * 遍历并处理给定节点下的所有文本节点
@@ -43,14 +43,20 @@ function processTextNode(node: Text): void {
      * 使用正则表达式将文本分割成多个部分
      * 正则表达式([a-zA-Z\u4e00-\u9fa5]+)用于匹配并保留英文单词和中文字符
      */
-    const parts = text.split(/([a-zA-Z\u4e00-\u9fa5]+)/);
+    const splitRegex = /([a-zA-Z'-]+)|([\u3400-\u9FFF]+)/g;
+    const parts = Array.from(text.matchAll(splitRegex)).flatMap((match) => {
+        return match.slice(1).filter(Boolean); // 提取非空匹配项
+    });
 
     const fragment = document.createDocumentFragment();
+    const isEnglish = /^[a-zA-Z'-]+$/;
+    const isChinese = /^[\u3400-\u9FFF]+$/;
+
     parts.forEach((part) => {
-        if (/^[a-zA-Z]+$/.test(part)) {
+        if (isEnglish.test(part)) {
             // 处理英文单词，调用bionicEn函数进行特殊处理
             fragment.appendChild(bionicEn(part));
-        } else if (/^[\u4e00-\u9fa5]+$/.test(part)) {
+        } else if (isChinese.test(part)) {
             // 处理中文字符，调用bionicCn函数进行特殊处理
             fragment.appendChild(bionicCn(part));
         } else {
@@ -64,21 +70,42 @@ function processTextNode(node: Text): void {
     node.parentNode?.replaceChild(fragment, node);
 }
 
+/**
+ * 将英文单词按照特定规则进行“仿生阅读”处理。
+ * 规则：将单词的前三分之一（向下取整）部分加粗，其余部分保持不变。
+ *
+ * @param word - 需要处理的英文单词字符串。
+ * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
+ */
 function bionicEn(word: string): DocumentFragment {
     const halfIndex = Math.floor(word.length / 3);
     return createBionicWord(word, halfIndex);
 }
 
+/**
+ * 将中文单词按照特定规则进行“仿生阅读”处理。
+ * 规则：如果单词长度大于等于4，则前两个字符加粗；否则第一个字符加粗，其余部分保持不变。
+ *
+ * @param word - 需要处理的中文单词字符串。
+ * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
+ */
 function bionicCn(word: string): DocumentFragment {
     const boldIndex = word.length >= 4 ? 2 : 1;
     return createBionicWord(word, boldIndex);
 }
 
+/**
+ * 根据指定的分割索引，将单词分为加粗部分和普通部分，并生成对应的文档片段。
+ *
+ * @param word - 需要处理的单词字符串。
+ * @param boldIndex - 加粗部分的结束索引（不包括该索引）。
+ * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
+ */
 function createBionicWord(word: string, boldIndex: number): DocumentFragment {
     if (word.length === 0) return document.createDocumentFragment(); // 处理空字符串
 
-    const firstHalf = word.slice(0, boldIndex);
-    const secondHalf = word.slice(boldIndex);
+    const firstHalf = word.slice(0, boldIndex); // 提取需要加粗的部分
+    const secondHalf = word.slice(boldIndex); // 提取不需要加粗的部分
 
     const fragment = document.createDocumentFragment();
     if (firstHalf) fragment.appendChild(createBoldElement(firstHalf)); // 避免空文本节点
@@ -86,10 +113,17 @@ function createBionicWord(word: string, boldIndex: number): DocumentFragment {
 
     return fragment;
 }
+
+/**
+ * 创建一个加粗的 HTML 元素，用于仿生阅读的加粗部分。
+ *
+ * @param text - 需要加粗的文本内容。
+ * @returns HTMLElement - 包含加粗样式的 HTML 元素。
+ */
 function createBoldElement(text: string): HTMLElement {
     const strong = document.createElement("b");
     strong.textContent = text;
-    strong.style.display = "inline";
-    strong.classList.add("bionic-text");
+    // strong.style.display = "inline"; // 确保样式为行内显示
+    strong.classList.add("bionic-text"); // 添加样式类名
     return strong;
 }
