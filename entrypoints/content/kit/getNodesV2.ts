@@ -59,7 +59,7 @@ export function getTextNodes(
             // 3. 内容过滤：检查文本内容长度是否达标
             const content = node.textContent?.trim() || "";
             if (content.length < minContentLength) {
-                return NodeFilter.FILTER_SKIP;
+                return NodeFilter.FILTER_REJECT;
             }
 
             return NodeFilter.FILTER_ACCEPT;

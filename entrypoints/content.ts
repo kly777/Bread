@@ -14,5 +14,6 @@ export default defineContentScript({
         }
 
         observer.init();
+
     },
 });
