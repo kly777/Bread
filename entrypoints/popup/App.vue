@@ -5,7 +5,7 @@ import featureSwitch from "./featureSwitch.vue";
 
 <template>
   <div class="popup">
-    Console
+    Bread
     <hr/>
     <featureSwitch feature-name="highlight" />
     <featureSwitch feature-name="stripe" />
@@ -17,6 +17,6 @@ import featureSwitch from "./featureSwitch.vue";
 
 <style scoped>
 .popup {
-  padding: 5px;
+  padding: 8px;
 }
 </style>

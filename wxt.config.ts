@@ -8,4 +8,10 @@ export default defineConfig({
     manifest: {
         permissions: ["storage"],
     },
+    zip: {
+        downloadPackages: [
+            "@kly777/bread",
+            //...
+        ],
+    },
 });
