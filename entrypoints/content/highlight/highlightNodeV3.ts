@@ -95,7 +95,6 @@ function getTextNodes(
     };
 }
 
-let lastSelectedText: string = "";
 /**
  * 高亮显示文档中与选中文本匹配的文本节点（排除当前选中文本本身）
  *
@@ -107,10 +106,8 @@ export function highlightNode(root: Node = document.body) {
     removeHighlights();
     const text = getSelectedText();
 
-    // 仅当存在有效选中文本且与上次不同时执行高亮
-    if (text !== "" && text !== lastSelectedText) {
-        lastSelectedText = text;
-
+    // 仅当存在有效选中文本时执行高亮
+    if (text !== "") {
         // 获取所有文本节点及其合并后的完整文本内容
         let { texts, mergedText } = getTextNodes(root);
 
