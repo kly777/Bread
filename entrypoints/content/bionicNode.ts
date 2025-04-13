@@ -43,10 +43,8 @@ function processTextNode(node: Text): void {
      * 使用正则表达式将文本分割成多个部分
      * 正则表达式([a-zA-Z\u4e00-\u9fa5]+)用于匹配并保留英文单词和中文字符
      */
-    const splitRegex = /([a-zA-Z'-]+)|([\u3400-\u9FFF]+)/g;
-    const parts = Array.from(text.matchAll(splitRegex)).flatMap((match) => {
-        return match.slice(1).filter(Boolean); // 提取非空匹配项
-    });
+    const splitRegex = /([a-zA-Z\u3400-\u9FFF]+)/;
+    const parts = text.split(splitRegex);
 
     const fragment = document.createDocumentFragment();
     const isEnglish = /^[a-zA-Z'-]+$/;
