@@ -296,7 +296,7 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
                     )}"`
                 );
 
-                // 执行三次分割操作
+                // 分割
                 const pre = node.splitText(start);
                 const highlighted = pre.splitText(end - start);
                 const span = createSpanElement();
