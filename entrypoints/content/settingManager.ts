@@ -11,11 +11,11 @@ export class SettingsManager {
             (await storage.getItem<boolean>("local:highlight")) ?? false;
         this.bionic = (await storage.getItem<boolean>("local:bionic")) ?? true;
 
-        storage.watch<boolean>("local:highlight", async (newValue) => {
+        storage.watch<boolean>("local:highlight", async (newValue: boolean | null) => {
             this.updateHighlight(newValue);
         });
 
-        storage.watch<boolean>("local:bionic", async (newValue) => {
+        storage.watch<boolean>("local:bionic", async (newValue: boolean | null) => {
             this.updateBionic(newValue);
         });
     }

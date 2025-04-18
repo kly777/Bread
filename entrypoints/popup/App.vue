@@ -5,11 +5,9 @@ import featureSwitch from "./featureSwitch.vue";
 
 <template>
   <div class="popup">
-    Bread
-    <hr/>
+
     <featureSwitch feature-name="highlight" />
     <featureSwitch feature-name="stripe" />
-    <featureSwitch feature-name="info" />
     <featureSwitch feature-name="bionic" />
   </div>
 </template>
@@ -18,5 +16,6 @@ import featureSwitch from "./featureSwitch.vue";
 <style scoped>
 .popup {
   padding: 8px;
+  border-radius: 5px;
 }
 </style>

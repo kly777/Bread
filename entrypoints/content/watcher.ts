@@ -28,18 +28,18 @@ class Observer {
     }
     init() {
         // 高亮功能监听
-        storage.getItem<boolean>("local:highlight").then((newValue) => {
+        storage.getItem<boolean>("local:highlight").then((newValue: boolean | null) => {
             this.updateHighlight(newValue);
         });
 
-        storage.watch<boolean>("local:highlight", (newValue) => {
+        storage.watch<boolean>("local:highlight", (newValue: boolean | null) => {
             this.updateHighlight(newValue);
         });
-        storage.getItem<boolean>("local:bionic").then((newValue) => {
+        storage.getItem<boolean>("local:bionic").then((newValue: boolean | null) => {
             this.updateBionic(newValue);
         });
 
-        storage.watch<boolean>("local:bionic", async (newValue) => {
+        storage.watch<boolean>("local:bionic", async (newValue: boolean | null) => {
             this.updateBionic(newValue);
         });
 
