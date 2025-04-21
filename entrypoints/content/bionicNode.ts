@@ -8,22 +8,22 @@ import { getTextNodes } from "./kit/getNodesV2";
  * @param root {Node} - 开始遍历的DOM树的根节点默认为文档的body元素
  */
 export function bionicTextNodes(root: Node = document.body) {
-    // console.log("processTextNodes");
-    // 获取指定根节点下的所有文本节点
-    const textNodes = getTextNodes(root);
-    // 在处理文本节点之前，停止观察DOM树的变化
+	// console.log("processTextNodes");
+	// 获取指定根节点下的所有文本节点
+	const textNodes = getTextNodes(root);
+	// 在处理文本节点之前，停止观察DOM树的变化
 
-    // console.log("textNodes");
-    // 遍历所有文本节点并逐个处理
-    for (const text of textNodes) {
-        processTextNode(text);
-    }
+	// console.log("textNodes");
+	// 遍历所有文本节点并逐个处理   
+	for (const text of textNodes) {
+		processTextNode(text);
+	}
 }
 
 export function stopBionic() {
-    document.querySelectorAll(".bionic-text").forEach((el) => {
-        el.outerHTML = el.innerHTML;
-    });
+	document.querySelectorAll(".bionic-text").forEach((el) => {
+		el.outerHTML = el.innerHTML;
+	});
 }
 
 /**
@@ -36,36 +36,36 @@ export function stopBionic() {
  * @param node 待处理的文本节点
  */
 function processTextNode(node: Text): void {
-    const text = node.textContent || "";
-    if (!text.trim()) return; // 忽略空白文本节点
+	const text = node.textContent || "";
+	if (!text.trim()) return; // 忽略空白文本节点
 
-    /**
-     * 使用正则表达式将文本分割成多个部分
-     * 正则表达式([a-zA-Z\u4e00-\u9fa5]+)用于匹配并保留英文单词和中文字符
-     */
-    const splitRegex = /([a-zA-Z\u3400-\u9FFF]+)/;
-    const parts = text.split(splitRegex);
+	/**
+	 * 使用正则表达式将文本分割成多个部分
+	 * 正则表达式([a-zA-Z\u4e00-\u9fa5]+)用于匹配并保留英文单词和中文字符
+	 */
+	const splitRegex = /([a-zA-Z\u3400-\u9FFF]+)/;
+	const parts = text.split(splitRegex);
 
-    const fragment = document.createDocumentFragment();
-    const isEnglish = /^[a-zA-Z'-]+$/;
-    const isChinese = /^[\u3400-\u9FFF]+$/;
+	const fragment = document.createDocumentFragment();
+	const isEnglish = /^[a-zA-Z'-]+$/;
+	const isChinese = /^[\u3400-\u9FFF]+$/;
 
-    parts.forEach((part) => {
-        if (isEnglish.test(part)) {
-            // 处理英文单词，调用bionicEn函数进行特殊处理
-            fragment.appendChild(bionicEn(part));
-        } else if (isChinese.test(part)) {
-            // 处理中文字符，调用bionicCn函数进行特殊处理
-            fragment.appendChild(bionicCn(part));
-        } else {
-            // 对于其他字符（如标点符号等），保持原样不变
-            fragment.appendChild(document.createTextNode(part));
-        }
-    });
-    // console.log(fragment.textContent);
+	parts.forEach((part) => {
+		if (isEnglish.test(part)) {
+			// 处理英文单词，调用bionicEn函数进行特殊处理
+			fragment.appendChild(bionicEn(part));
+		} else if (isChinese.test(part)) {
+			// 处理中文字符，调用bionicCn函数进行特殊处理
+			fragment.appendChild(bionicCn(part));
+		} else {
+			// 对于其他字符（如标点符号等），保持原样不变
+			fragment.appendChild(document.createTextNode(part));
+		}
+	});
+	// console.log(fragment.textContent);
 
-    // 使用新生成的DOM片段替换原始文本节点
-    node.parentNode?.replaceChild(fragment, node);
+	// 使用新生成的DOM片段替换原始文本节点
+	node.parentNode?.replaceChild(fragment, node);
 }
 
 /**
@@ -76,8 +76,8 @@ function processTextNode(node: Text): void {
  * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
  */
 function bionicEn(word: string): DocumentFragment {
-    const halfIndex = Math.floor(word.length / 3);
-    return createBionicWord(word, halfIndex);
+	const halfIndex = Math.floor(word.length / 3);
+	return createBionicWord(word, halfIndex);
 }
 
 /**
@@ -88,8 +88,8 @@ function bionicEn(word: string): DocumentFragment {
  * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
  */
 function bionicCn(word: string): DocumentFragment {
-    const boldIndex = word.length >= 4 ? 2 : 1;
-    return createBionicWord(word, boldIndex);
+	const boldIndex = word.length >= 4 ? 2 : 1;
+	return createBionicWord(word, boldIndex);
 }
 
 /**
@@ -100,16 +100,16 @@ function bionicCn(word: string): DocumentFragment {
  * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
  */
 function createBionicWord(word: string, boldIndex: number): DocumentFragment {
-    if (word.length === 0) return document.createDocumentFragment(); // 处理空字符串
+	if (word.length === 0) return document.createDocumentFragment(); // 处理空字符串
 
-    const firstHalf = word.slice(0, boldIndex); // 提取需要加粗的部分
-    const secondHalf = word.slice(boldIndex); // 提取不需要加粗的部分
+	const firstHalf = word.slice(0, boldIndex); // 提取需要加粗的部分
+	const secondHalf = word.slice(boldIndex); // 提取不需要加粗的部分
 
-    const fragment = document.createDocumentFragment();
-    if (firstHalf) fragment.appendChild(createBoldElement(firstHalf)); // 避免空文本节点
-    if (secondHalf) fragment.appendChild(document.createTextNode(secondHalf)); // 避免空文本节点
+	const fragment = document.createDocumentFragment();
+	if (firstHalf) fragment.appendChild(createBoldElement(firstHalf)); // 避免空文本节点
+	if (secondHalf) fragment.appendChild(document.createTextNode(secondHalf)); // 避免空文本节点
 
-    return fragment;
+	return fragment;
 }
 
 /**
@@ -119,9 +119,9 @@ function createBionicWord(word: string, boldIndex: number): DocumentFragment {
  * @returns HTMLElement - 包含加粗样式的 HTML 元素。
  */
 function createBoldElement(text: string): HTMLElement {
-    const strong = document.createElement("b");
-    strong.textContent = text;
-    // strong.style.display = "inline"; // 确保样式为行内显示
-    strong.classList.add("bionic-text"); // 添加样式类名
-    return strong;
+	const strong = document.createElement("b");
+	strong.textContent = text;
+	strong.style.display = "inline"; // 确保样式为行内显示
+	strong.classList.add("bionic-text"); // 添加样式类名
+	return strong;
 }
