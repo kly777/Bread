@@ -148,7 +148,7 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
 
 export function removeHighlights() {
 	// 查找所有高亮元素
-	document.querySelectorAll<HTMLSpanElement>(".highlight").forEach((span) => {
+	document.querySelectorAll<HTMLSpanElement>(".bread-highlight").forEach((span) => {
 		// 创建新的文本节点替代高亮元素
 		const text = document.createTextNode(span.textContent || "");
 		span.parentNode?.replaceChild(text, span);
@@ -284,7 +284,7 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
 				// 分割
 				const pre = node.splitText(start);
 				const highlighted = pre.splitText(end - start);
-				const span = createSpanElement();
+				const span = createMarkElement();
 
 				span.appendChild(pre.cloneNode(true));
 				node.parentNode?.replaceChild(span, pre);
@@ -350,17 +350,17 @@ function mergeRanges(ranges: MatchRange[]): MatchRange[] {
  * @param textContent - span元素的文本内容
  * @returns 返回一个带有高亮样式的span元素
  */
-function createSpanElement(): HTMLElement {
+function createMarkElement(): HTMLElement {
 	//return document.createElement("span");
-	const span = document.createElement("span");
-	span.className = "highlight";
-	// span.textContent = textContent;
-	// span.style.border = "2px solid rgb(255, 153, 0)";
-	span.style.boxSizing = "border-box";
-	span.style.backgroundColor = "rgba(255, 153, 0, 0.5)";
-	span.style.display = "inline";
-	span.style.lineHeight = "inherit"; // 继承行高
-	span.style.verticalAlign = "baseline";
+	const span = document.createElement("mark");
+	span.className = "bread-highlight";
+	// // span.textContent = textContent;
+	// // span.style.border = "2px solid rgb(255, 153, 0)";
+	// span.style.boxSizing = "border-box";
+	// span.style.backgroundColor = "rgba(255, 153, 0, 0.5)";
+	// span.style.display = "inline";
+	// span.style.lineHeight = "inherit"; // 继承行高
+	// span.style.verticalAlign = "baseline";
 
 	return span;
 }
