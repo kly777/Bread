@@ -82,13 +82,20 @@ function bionicEn(word: string): DocumentFragment {
 
 /**
  * 将中文单词按照特定规则进行“仿生阅读”处理。
- * 规则：如果单词长度大于等于4，则前两个字符加粗；否则第一个字符加粗，其余部分保持不变。
  *
  * @param word - 需要处理的中文单词字符串。
  * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
  */
 function bionicCn(word: string): DocumentFragment {
-	const boldIndex = word.length >= 4 ? 2 : 1;
+	// 根据单词长度确定需要加粗的字符数量
+	let boldIndex = 1;
+	if (word.length <= 2) {
+		boldIndex = 0;
+	} else if (word.length === 3) {
+		boldIndex = 1;
+	} else if (word.length >= 4) {
+		boldIndex = 2;
+	}
 	return createBionicWord(word, boldIndex);
 }
 
@@ -101,12 +108,17 @@ function bionicCn(word: string): DocumentFragment {
  */
 function createBionicWord(word: string, boldIndex: number): DocumentFragment {
 	if (word.length === 0) return document.createDocumentFragment(); // 处理空字符串
+	if (boldIndex === 0) {
+		const fragment = document.createDocumentFragment()
+		fragment.appendChild(document.createTextNode(word));
+		return fragment
+	}
 
 	const firstHalf = word.slice(0, boldIndex); // 提取需要加粗的部分
 	const secondHalf = word.slice(boldIndex); // 提取不需要加粗的部分
 
 	const fragment = document.createDocumentFragment();
-	if (firstHalf) fragment.appendChild(createBoldElement(firstHalf)); // 避免空文本节点
+	if (firstHalf) fragment.appendChild(createUElement(firstHalf)); // 避免空文本节点
 	if (secondHalf) fragment.appendChild(document.createTextNode(secondHalf)); // 避免空文本节点
 
 	return fragment;
@@ -118,10 +130,9 @@ function createBionicWord(word: string, boldIndex: number): DocumentFragment {
  * @param text - 需要加粗的文本内容。
  * @returns HTMLElement - 包含加粗样式的 HTML 元素。
  */
-function createBoldElement(text: string): HTMLElement {
-	const strong = document.createElement("b");
-	strong.textContent = text;
-	strong.style.display = "inline"; // 确保样式为行内显示
-	strong.classList.add("bionic-text"); // 添加样式类名
-	return strong;
+function createUElement(text: string): HTMLElement {
+	const underlineElement = document.createElement("u"); // 1. 使用<u>标签实现下划线
+	underlineElement.textContent = text;
+	underlineElement.classList.add("bionic-text"); // 2. 保留原有样式类名
+	return underlineElement;
 }
