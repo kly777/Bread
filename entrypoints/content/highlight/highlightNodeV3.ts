@@ -1,25 +1,25 @@
 // highlightNodeV3.ts
 
 interface TextNodeEntry {
-    node: Text;
-    start: number;
-    end: number;
+	node: Text;
+	start: number;
+	end: number;
 }
 
 const EXCLUDED_TAGS = new Set([
-    "input",
-    "textarea",
-    "select",
-    "button",
-    "script",
-    "style",
-    "noscript",
-    "template",
+	"input",
+	"textarea",
+	"select",
+	"button",
+	"script",
+	"style",
+	"noscript",
+	"template",
 ]);
 
 interface GetTextNodesOptions {
-    excludeHidden?: boolean; // 是否排除隐藏元素
-    minContentLength?: number; // 最小文本长度要求
+	excludeHidden?: boolean; // 是否排除隐藏元素
+	minContentLength?: number; // 最小文本长度要求
 }
 
 /**
@@ -37,62 +37,62 @@ interface GetTextNodesOptions {
  * 3. 过滤空白内容及满足最小长度要求的文本
  */
 function getTextNodes(
-    root: Node = document.body,
-    options: GetTextNodesOptions = {}
+	root: Node = document.body,
+	options: GetTextNodesOptions = {}
 ): { texts: TextNodeEntry[]; mergedText: string } {
-    // 合并默认配置选项
-    const { excludeHidden = true, minContentLength = 1 } = options;
+	// 合并默认配置选项
+	const { excludeHidden = true, minContentLength = 1 } = options;
 
-    // 创建TreeWalker进行节点遍历，配置复合过滤条件
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-        acceptNode: (node: Node) => {
-            const parent = node.parentElement;
-            if (!parent) return NodeFilter.FILTER_ACCEPT;
+	// 创建TreeWalker进行节点遍历，配置复合过滤条件
+	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+		acceptNode: (node: Node) => {
+			const parent = node.parentElement;
+			if (!parent) return NodeFilter.FILTER_ACCEPT;
 
-            /* 过滤逻辑分三个层级处理 */
-            // 1. 标签名称过滤：直接拒绝整个子树
-            if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
-                return NodeFilter.FILTER_REJECT;
-            }
+			/* 过滤逻辑分三个层级处理 */
+			// 1. 标签名称过滤：直接拒绝整个子树
+			if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
+				return NodeFilter.FILTER_REJECT;
+			}
 
-            // 2. 可见性过滤：根据计算样式判断元素是否隐藏
-            if (excludeHidden) {
-                const style = window.getComputedStyle(parent);
-                if (style.display === "none" || style.visibility === "hidden") {
-                    return NodeFilter.FILTER_REJECT;
-                }
-            }
+			// 2. 可见性过滤：根据计算样式判断元素是否隐藏
+			if (excludeHidden) {
+				const style = window.getComputedStyle(parent);
+				if (style.display === "none" || style.visibility === "hidden") {
+					return NodeFilter.FILTER_REJECT;
+				}
+			}
 
-            // 3. 内容过滤：检查文本内容长度是否达标
-            const content = node.textContent || "";
-            if (content.length < minContentLength) {
-                return NodeFilter.FILTER_SKIP;
-            }
+			// 3. 内容过滤：检查文本内容长度是否达标
+			const content = node.textContent || "";
+			if (content.length < minContentLength) {
+				return NodeFilter.FILTER_SKIP;
+			}
 
-            return NodeFilter.FILTER_ACCEPT;
-        },
-    });
-    const texts: TextNodeEntry[] = [];
-    let offset = 0;
+			return NodeFilter.FILTER_ACCEPT;
+		},
+	});
+	const texts: TextNodeEntry[] = [];
+	let offset = 0;
 
-    // 遍历收集所有符合条件的文本节点
-    while (walker.nextNode()) {
-        const node = walker.currentNode as Text;
-        const text = node.textContent || "";
-        texts.push({
-            node,
-            start: offset,
-            end: offset + text.length,
-        });
-        offset += text.length;
-    }
+	// 遍历收集所有符合条件的文本节点
+	while (walker.nextNode()) {
+		const node = walker.currentNode as Text;
+		const text = node.textContent || "";
+		texts.push({
+			node,
+			start: offset,
+			end: offset + text.length,
+		});
+		offset += text.length;
+	}
 
-    return {
-        texts,
-        mergedText: texts
-            .map((n) => n.node.textContent?.toLowerCase())
-            .join(""),
-    };
+	return {
+		texts,
+		mergedText: texts
+			.map((n) => n.node.textContent?.toLowerCase())
+			.join(""),
+	};
 }
 
 /**
@@ -101,58 +101,58 @@ function getTextNodes(
  * @param root - 需要遍历的DOM根节点，默认为document.body。函数会在此节点的子树中查找匹配
  * @returns void 本函数不返回任何值
  */
-export function highlightNode(root: Node = document.body) {
-    console.log("highlightNode");
-    removeHighlights();
-    const text = getSelectedText();
+export function highlightTextInNode(text: string, root: Node = document.body) {
+	// console.log("highlightNode");
+	// removeHighlights();
+	// const text = getSelectedText();
 
-    // 仅当存在有效选中文本时执行高亮
-    if (text !== "") {
-        // 获取所有文本节点及其合并后的完整文本内容
-        let { texts, mergedText } = getTextNodes(root);
+	// 仅当存在有效选中文本时执行高亮
+	if (text !== "") {
+		// 获取所有文本节点及其合并后的完整文本内容
+		let { texts, mergedText } = getTextNodes(root);
 
-        // 调试信息：输出文本节点结构及合并后的完整文本
-        console.table(
-            texts.map((t) => ({
-                ...t,
-                text: t.node.textContent,
-            }))
-        );
-        console.info(mergedText);
+		// 调试信息：输出文本节点结构及合并后的完整文本
+		console.table(
+			texts.map((t) => ({
+				...t,
+				text: t.node.textContent,
+			}))
+		);
+		console.info(mergedText);
 
-        // 存在有效文本时执行匹配逻辑
-        if (texts.length > 0 && text !== "") {
-            // 在合并文本中查找所有匹配位置
-            const matches = findMatches(mergedText, text);
+		// 存在有效文本时执行匹配逻辑
+		if (texts.length > 0 && text !== "") {
+			// 在合并文本中查找所有匹配位置
+			const matches = findMatches(mergedText, text);
 
-            // 过滤掉当前选中文本对应的匹配项（避免高亮自己）
-            const filteredMatches = matches.filter(
-                (m) => !isInSelection(m, texts, window.getSelection())
-            );
+			// 过滤掉当前选中文本对应的匹配项（避免高亮自己）
+			const filteredMatches = matches.filter(
+				(m) => !isInSelection(m, texts, window.getSelection())
+			);
 
-            // 调试信息：输出所有匹配项详情
-            console.table(
-                matches.map((m) => ({
-                    ...m,
-                    text: mergedText.substring(m.start, m.end),
-                }))
-            );
+			// 调试信息：输出所有匹配项详情
+			console.table(
+				matches.map((m) => ({
+					...m,
+					text: mergedText.substring(m.start, m.end),
+				}))
+			);
 
-            // 对过滤后的匹配项应用高亮
-            highlightMatches(texts, filteredMatches);
-        } else {
-            return;
-        }
-    }
+			// 对过滤后的匹配项应用高亮
+			highlightMatches(texts, filteredMatches);
+		} else {
+			return;
+		}
+	}
 }
 
 export function removeHighlights() {
-    // 查找所有高亮元素
-    document.querySelectorAll<HTMLSpanElement>(".highlight").forEach((span) => {
-        // 创建新的文本节点替代高亮元素
-        const text = document.createTextNode(span.textContent || "");
-        span.parentNode?.replaceChild(text, span);
-    });
+	// 查找所有高亮元素
+	document.querySelectorAll<HTMLSpanElement>(".highlight").forEach((span) => {
+		// 创建新的文本节点替代高亮元素
+		const text = document.createTextNode(span.textContent || "");
+		span.parentNode?.replaceChild(text, span);
+	});
 }
 
 /**
@@ -164,54 +164,39 @@ export function removeHighlights() {
  * @returns 如果匹配项在选区内返回true，否则false
  */
 function isInSelection(
-    match: MatchRange,
-    texts: TextNodeEntry[],
-    selection: Selection | null
+	match: MatchRange,
+	texts: TextNodeEntry[],
+	selection: Selection | null
 ): boolean {
-    if (!selection || selection.rangeCount === 0) return false;
+	if (!selection || selection.rangeCount === 0) return false;
 
-    // 获取第一个选区范围（通常只有一个）
-    const range = selection.getRangeAt(0);
-    const { startContainer, startOffset, endContainer, endOffset } = range;
+	// 获取第一个选区范围（通常只有一个）
+	const range = selection.getRangeAt(0);
+	const { startContainer, startOffset, endContainer, endOffset } = range;
 
-    // 查找选区起始节点对应的全局偏移
-    const findGlobalOffset = (node: Node, offset: number): number => {
-        const entry = texts.find((t) => t.node === node);
-        return entry ? entry.start + offset : -1;
-    };
+	// 查找选区起始节点对应的全局偏移
+	const findGlobalOffset = (node: Node, offset: number): number => {
+		const entry = texts.find((t) => t.node === node);
+		return entry ? entry.start + offset : -1;
+	};
 
-    // 计算选区全局范围
-    const selStart = findGlobalOffset(startContainer, startOffset);
-    const selEnd = findGlobalOffset(endContainer, endOffset);
+	// 计算选区全局范围
+	const selStart = findGlobalOffset(startContainer, startOffset);
+	const selEnd = findGlobalOffset(endContainer, endOffset);
 
-    // 有效性检查
-    if (selStart === -1 || selEnd === -1) return false;
+	// 有效性检查
+	if (selStart === -1 || selEnd === -1) return false;
 
-    // 判断匹配范围是否与选区范围重叠
-    return (
-        (match.start >= selStart && match.end <= selEnd) || // 完全包含
-        (match.start < selEnd && match.end > selStart) // 部分重叠
-    );
-}
-/**
- * 获取当前选中的文本
- *
- * 此函数的目的是从给定的Selection对象中提取选中的文本并返回
- * 如果没有选中的文本或者selection对象为空，则返回空字符串
- *
- * @returns 返回选中的文本，如果无文本被选中则返回空字符串
- */
-function getSelectedText(): string {
-    // 获取当前用户选中的内容
-    const selection = window.getSelection();
-    // 检查是否有选中的文本，如果没有则直接返回
-    if (!selection) return "";
-    return selection.toString().trim().toLowerCase() || "";
+	// 判断匹配范围是否与选区范围重叠
+	return (
+		(match.start >= selStart && match.end <= selEnd) || // 完全包含
+		(match.start < selEnd && match.end > selStart) // 部分重叠
+	);
 }
 
 interface MatchRange {
-    start: number;
-    end: number;
+	start: number;
+	end: number;
 }
 
 /**
@@ -222,27 +207,27 @@ interface MatchRange {
  * @returns 返回包含所有匹配位置信息的数组，每个元素包含匹配的起始(start)和结束(end)索引
  */
 function findMatches(mergedText: string, selectedText: string): MatchRange[] {
-    const matches: MatchRange[] = [];
+	const matches: MatchRange[] = [];
 
-    // 检查搜索文本有效性：当搜索文本为空时提前返回
-    if (!selectedText || selectedText.length === 0) {
-        console.warn("Invalid search text");
-        return matches;
-    }
+	// 检查搜索文本有效性：当搜索文本为空时提前返回
+	if (!selectedText || selectedText.length === 0) {
+		console.warn("Invalid search text");
+		return matches;
+	}
 
-    let index = 0;
+	let index = 0;
 
-    // 循环查找所有匹配项
-    while ((index = mergedText.indexOf(selectedText, index)) !== -1) {
-        // 记录匹配范围（左闭右开区间）
-        matches.push({
-            start: index,
-            end: index + selectedText.length,
-        });
-        index += selectedText.length; // 跳过已匹配区域继续搜索
-    }
+	// 循环查找所有匹配项
+	while ((index = mergedText.indexOf(selectedText, index)) !== -1) {
+		// 记录匹配范围（左闭右开区间）
+		matches.push({
+			start: index,
+			end: index + selectedText.length,
+		});
+		index += selectedText.length; // 跳过已匹配区域继续搜索
+	}
 
-    return matches;
+	return matches;
 }
 
 /**
@@ -253,70 +238,70 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
  * @returns void
  */
 function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
-    console.log(`开始处理 ${matches.length} 处匹配项`);
+	console.log(`开始处理 ${matches.length} 处匹配项`);
 
-    // 预处理：将匹配项按起始位置排序
-    const sortedMatches = [...matches].sort((a, b) => a.start - b.start);
+	// 预处理：将匹配项按起始位置排序
+	const sortedMatches = [...matches].sort((a, b) => a.start - b.start);
 
-    texts.forEach((entry) => {
-        const node = entry.node;
-        const nodeContent = node.textContent || "";
-        const entryStart = entry.start;
-        const entryEnd = entry.end;
-        const nodeLength = nodeContent.length;
+	texts.forEach((entry) => {
+		const node = entry.node;
+		const nodeContent = node.textContent || "";
+		const entryStart = entry.start;
+		const entryEnd = entry.end;
+		const nodeLength = nodeContent.length;
 
-        // 找出所有与当前文本节点相关的匹配范围
-        const relevantMatches = sortedMatches.filter(
-            (match) => match.start < entryEnd && match.end > entryStart
-        );
+		// 找出所有与当前文本节点相关的匹配范围
+		const relevantMatches = sortedMatches.filter(
+			(match) => match.start < entryEnd && match.end > entryStart
+		);
 
-        // 转换为相对于当前节点的局部范围
-        const localRanges = relevantMatches.map((match) => ({
-            start: Math.max(0, match.start - entryStart),
-            end: Math.min(nodeLength, match.end - entryStart),
-        }));
+		// 转换为相对于当前节点的局部范围
+		const localRanges = relevantMatches.map((match) => ({
+			start: Math.max(0, match.start - entryStart),
+			end: Math.min(nodeLength, match.end - entryStart),
+		}));
 
-        // 合并重叠/相邻的范围
-        const mergedRanges = mergeRanges(localRanges);
+		// 合并重叠/相邻的范围
+		const mergedRanges = mergeRanges(localRanges);
 
-        if (mergedRanges.length === 0) return;
+		if (mergedRanges.length === 0) return;
 
-        console.group(`处理节点 (长度:${nodeContent.length})`);
-        console.log("原始内容:", nodeContent);
+		console.group(`处理节点 (长度:${nodeContent.length})`);
+		console.log("原始内容:", nodeContent);
 
-        // 按起始位置降序处理，避免分割影响索引
-        mergedRanges
-            .sort((a, b) => b.start - a.start)
-            .forEach((range) => {
-                const { start, end } = range;
-                console.log(
-                    `高亮范围: [${start}-${end}] "${nodeContent.slice(
-                        start,
-                        end
-                    )}"`
-                );
+		// 按起始位置降序处理，避免分割影响索引
+		mergedRanges
+			.sort((a, b) => b.start - a.start)
+			.forEach((range) => {
+				const { start, end } = range;
+				console.log(
+					`高亮范围: [${start}-${end}] "${nodeContent.slice(
+						start,
+						end
+					)}"`
+				);
 
-                // 分割
-                const pre = node.splitText(start);
-                const highlighted = pre.splitText(end - start);
-                const span = createSpanElement();
+				// 分割
+				const pre = node.splitText(start);
+				const highlighted = pre.splitText(end - start);
+				const span = createSpanElement();
 
-                span.appendChild(pre.cloneNode(true));
-                node.parentNode?.replaceChild(span, pre);
+				span.appendChild(pre.cloneNode(true));
+				node.parentNode?.replaceChild(span, pre);
 
-                if (highlighted.textContent) {
-                    span.after(highlighted);
-                }
-            });
+				if (highlighted.textContent) {
+					span.after(highlighted);
+				}
+			});
 
-        console.log("处理后内容:", node.textContent);
-        console.groupEnd();
-    });
+		console.log("处理后内容:", node.textContent);
+		console.groupEnd();
+	});
 
-    console.log(
-        "最终高亮元素数:",
-        document.querySelectorAll(".highlight").length
-    );
+	console.log(
+		"最终高亮元素数:",
+		document.querySelectorAll(".highlight").length
+	);
 }
 
 /**
@@ -332,28 +317,28 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
  *          (示例输入返回: [{start:1,end:5}])
  */
 function mergeRanges(ranges: MatchRange[]): MatchRange[] {
-    // 处理空输入特殊情况
-    if (ranges.length === 0) return [];
+	// 处理空输入特殊情况
+	if (ranges.length === 0) return [];
 
-    // 创建排序副本以保持原始数据不变，按起始位置升序排列
-    const sorted = [...ranges].sort((a, b) => a.start - b.start);
-    const merged = [sorted[0]];
+	// 创建排序副本以保持原始数据不变，按起始位置升序排列
+	const sorted = [...ranges].sort((a, b) => a.start - b.start);
+	const merged = [sorted[0]];
 
-    // 遍历处理每个范围，合并重叠/相邻的区间
-    for (let i = 1; i < sorted.length; i++) {
-        const last = merged[merged.length - 1];
-        const current = sorted[i];
+	// 遍历处理每个范围，合并重叠/相邻的区间
+	for (let i = 1; i < sorted.length; i++) {
+		const last = merged[merged.length - 1];
+		const current = sorted[i];
 
-        // 当当前区间与最后合并区间重叠时，扩展合并区间的结束位置
-        if (current.start <= last.end) {
-            last.end = Math.max(last.end, current.end);
-        } else {
-            // 非重叠区间直接添加到结果集
-            merged.push(current);
-        }
-    }
+		// 当当前区间与最后合并区间重叠时，扩展合并区间的结束位置
+		if (current.start <= last.end) {
+			last.end = Math.max(last.end, current.end);
+		} else {
+			// 非重叠区间直接添加到结果集
+			merged.push(current);
+		}
+	}
 
-    return merged;
+	return merged;
 }
 
 /**
@@ -366,16 +351,16 @@ function mergeRanges(ranges: MatchRange[]): MatchRange[] {
  * @returns 返回一个带有高亮样式的span元素
  */
 function createSpanElement(): HTMLElement {
-    //return document.createElement("span");
-    const span = document.createElement("span");
-    span.className = "highlight";
-    // span.textContent = textContent;
-    // span.style.border = "2px solid rgb(255, 153, 0)";
-    span.style.boxSizing = "border-box";
-    span.style.backgroundColor = "rgba(255, 153, 0, 0.5)";
-    span.style.display = "inline";
-    span.style.lineHeight = "inherit"; // 继承行高
-    span.style.verticalAlign = "baseline";
+	//return document.createElement("span");
+	const span = document.createElement("span");
+	span.className = "highlight";
+	// span.textContent = textContent;
+	// span.style.border = "2px solid rgb(255, 153, 0)";
+	span.style.boxSizing = "border-box";
+	span.style.backgroundColor = "rgba(255, 153, 0, 0.5)";
+	span.style.display = "inline";
+	span.style.lineHeight = "inherit"; // 继承行高
+	span.style.verticalAlign = "baseline";
 
-    return span;
+	return span;
 }
