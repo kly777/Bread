@@ -1,6 +1,6 @@
 import { highlightTextInNode, removeHighlights } from "./highlight/highlightNodeV3";
-import { stopBionic, bionicTextNodes } from "./bionicNode";
-import { highlightSelectedText } from "./highlight/highlight";
+import { stopBionic, bionicTextNodesInNode } from "./bionic/bionicNode";
+import { highlightSelectedTextInNode } from "./highlight/highlight";
 class Observer {
   observer: MutationObserver;
   highlight: boolean = false;
@@ -13,10 +13,10 @@ class Observer {
         mutation.addedNodes.forEach((node) => {
           if (this.highlight) {
             console.log("highlight", this.highlight);
-            highlightSelectedText(node);
+            highlightSelectedTextInNode(node);
           }
           if (this.bionic) {
-            bionicTextNodes(node);
+            bionicTextNodesInNode(node);
           }
         });
       });
@@ -51,7 +51,7 @@ class Observer {
 
   private switchHighlight(highlight: boolean) {
     this.observer.disconnect();
-    highlightSelectedText();
+    highlightSelectedTextInNode();
     this.observer.observe(document.body, {
       childList: true,
       subtree: true,
@@ -87,13 +87,13 @@ class Observer {
       console.log("bionic is null");
       storage.setItem("local:bionic", true);
       this.bionic = true;
-      bionicTextNodes();
+      bionicTextNodesInNode();
     } else {
       this.bionic = newValue;
       if (newValue) {
         console.log("bionic enabled");
         stopBionic();
-        bionicTextNodes();
+        bionicTextNodesInNode();
       } else {
         stopBionic();
       }

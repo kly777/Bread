@@ -1,6 +1,7 @@
 
-import { initStripe } from "./content/stripe";
-import observer from "./content/watcher";
+import { initStripe } from "./stripe/stripe";
+import observer from "./watcher";
+import "./style.css";
 
 export default defineContentScript({
     matches: ["<all_urls>"],

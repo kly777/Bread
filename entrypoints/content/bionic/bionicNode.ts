@@ -1,4 +1,11 @@
-import { getTextNodes } from "./kit/getNodesV2";
+import { getTextNodes } from "../kit/getNodesV2";
+
+
+export function bionicTextNodesInNode(root: Node = document.body) {
+	const textNodes = getTextNodes(root);
+	bionicTextNodes(textNodes);
+}
+
 
 /**
  * 遍历并处理给定节点下的所有文本节点
@@ -7,16 +14,9 @@ import { getTextNodes } from "./kit/getNodesV2";
  *
  * @param root {Node} - 开始遍历的DOM树的根节点默认为文档的body元素
  */
-export function bionicTextNodes(root: Node = document.body) {
-	// console.log("processTextNodes");
-	// 获取指定根节点下的所有文本节点
-	const textNodes = getTextNodes(root);
-	// 在处理文本节点之前，停止观察DOM树的变化
-
-	// console.log("textNodes");
-	// 遍历所有文本节点并逐个处理   
+function bionicTextNodes(textNodes: Text[]) {
 	for (const text of textNodes) {
-		processTextNode(text);
+		bionicTextNode(text);
 	}
 }
 
@@ -35,7 +35,7 @@ export function stopBionic() {
  *
  * @param node 待处理的文本节点
  */
-function processTextNode(node: Text): void {
+function bionicTextNode(node: Text): void {
 	const text = node.textContent || "";
 	if (!text.trim()) return; // 忽略空白文本节点
 
@@ -43,26 +43,25 @@ function processTextNode(node: Text): void {
 	 * 使用正则表达式将文本分割成多个部分
 	 * 正则表达式([a-zA-Z\u4e00-\u9fa5]+)用于匹配并保留英文单词和中文字符
 	 */
-	const splitRegex = /([a-zA-Z\u3400-\u9FFF]+)/;
+	const splitRegex = /([a-zA-Z0-9'-]+|[\u3400-\u9FFF0-9]+)/;
 	const parts = text.split(splitRegex);
 
 	const fragment = document.createDocumentFragment();
-	const isEnglish = /^[a-zA-Z'-]+$/;
-	const isChinese = /^[\u3400-\u9FFF]+$/;
+	const isEnglish = /^[a-zA-Z0-9'-]+$/;
+	const isChinese = /^[\u3400-\u9FFF0-9]+$/;
 
 	parts.forEach((part) => {
 		if (isEnglish.test(part)) {
-			// 处理英文单词，调用bionicEn函数进行特殊处理
+			// 处理英文单词，调用bionicEn函数进行特殊处理（含数字）
 			fragment.appendChild(bionicEn(part));
 		} else if (isChinese.test(part)) {
-			// 处理中文字符，调用bionicCn函数进行特殊处理
+			// 处理中文字符或数字组合，调用bionicCn函数进行特殊处理（含数字）
 			fragment.appendChild(bionicCn(part));
 		} else {
-			// 对于其他字符（如标点符号等），保持原样不变
+			// 其他字符（如纯标点符号）保持原样不变
 			fragment.appendChild(document.createTextNode(part));
 		}
 	});
-	// console.log(fragment.textContent);
 
 	// 使用新生成的DOM片段替换原始文本节点
 	node.parentNode?.replaceChild(fragment, node);
@@ -118,7 +117,7 @@ function createBionicWord(word: string, boldIndex: number): DocumentFragment {
 	const secondHalf = word.slice(boldIndex); // 提取不需要加粗的部分
 
 	const fragment = document.createDocumentFragment();
-	if (firstHalf) fragment.appendChild(createUElement(firstHalf)); // 避免空文本节点
+	if (firstHalf) fragment.appendChild(createStrongElement(firstHalf)); // 避免空文本节点
 	if (secondHalf) fragment.appendChild(document.createTextNode(secondHalf)); // 避免空文本节点
 
 	return fragment;
@@ -130,9 +129,11 @@ function createBionicWord(word: string, boldIndex: number): DocumentFragment {
  * @param text - 需要加粗的文本内容。
  * @returns HTMLElement - 包含加粗样式的 HTML 元素。
  */
-function createUElement(text: string): HTMLElement {
-	const underlineElement = document.createElement("u"); // 1. 使用<u>标签实现下划线
-	underlineElement.textContent = text;
-	underlineElement.classList.add("bionic-text"); // 2. 保留原有样式类名
-	return underlineElement;
+function createStrongElement(text: string): HTMLElement {
+	// 使用 <strong> 标签实现加粗效果
+	const strongElement = document.createElement("strong");
+	// 通过类名管理所有样式，确保内外边距为 0 且文本不换行
+	strongElement.classList.add("bionic-text");
+	strongElement.textContent = text;
+	return strongElement;
 }

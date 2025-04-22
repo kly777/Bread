@@ -1,25 +1,9 @@
 // highlightNodeV3.ts
-
+import { getTextWalker, GetTextNodesOptions } from "../kit/getNodesV2";
 interface TextNodeEntry {
 	node: Text;
 	start: number;
 	end: number;
-}
-
-const EXCLUDED_TAGS = new Set([
-	"input",
-	"textarea",
-	"select",
-	"button",
-	"script",
-	"style",
-	"noscript",
-	"template",
-]);
-
-interface GetTextNodesOptions {
-	excludeHidden?: boolean; // 是否排除隐藏元素
-	minContentLength?: number; // 最小文本长度要求
 }
 
 /**
@@ -36,42 +20,15 @@ interface GetTextNodesOptions {
  * 2. 可选过滤隐藏元素（通过CSS计算样式判断）
  * 3. 过滤空白内容及满足最小长度要求的文本
  */
-function getTextNodes(
+function getTextNodes001(
 	root: Node = document.body,
 	options: GetTextNodesOptions = {}
 ): { texts: TextNodeEntry[]; mergedText: string } {
-	// 合并默认配置选项
-	const { excludeHidden = true, minContentLength = 1 } = options;
+
 
 	// 创建TreeWalker进行节点遍历，配置复合过滤条件
-	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-		acceptNode: (node: Node) => {
-			const parent = node.parentElement;
-			if (!parent) return NodeFilter.FILTER_ACCEPT;
+	const walker = getTextWalker(root, options);
 
-			/* 过滤逻辑分三个层级处理 */
-			// 1. 标签名称过滤：直接拒绝整个子树
-			if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
-				return NodeFilter.FILTER_REJECT;
-			}
-
-			// 2. 可见性过滤：根据计算样式判断元素是否隐藏
-			if (excludeHidden) {
-				const style = window.getComputedStyle(parent);
-				if (style.display === "none" || style.visibility === "hidden") {
-					return NodeFilter.FILTER_REJECT;
-				}
-			}
-
-			// 3. 内容过滤：检查文本内容长度是否达标
-			const content = node.textContent || "";
-			if (content.length < minContentLength) {
-				return NodeFilter.FILTER_SKIP;
-			}
-
-			return NodeFilter.FILTER_ACCEPT;
-		},
-	});
 	const texts: TextNodeEntry[] = [];
 	let offset = 0;
 
@@ -109,7 +66,7 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
 	// 仅当存在有效选中文本时执行高亮
 	if (text !== "") {
 		// 获取所有文本节点及其合并后的完整文本内容
-		let { texts, mergedText } = getTextNodes(root);
+		let { texts, mergedText } = getTextNodes001(root);
 
 		// 调试信息：输出文本节点结构及合并后的完整文本
 		console.table(

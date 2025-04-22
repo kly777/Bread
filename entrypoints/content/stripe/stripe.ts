@@ -1,4 +1,5 @@
 import tinycolor from "tinycolor2";
+import { getTextWalker } from "../kit/getNodesV2";
 
 export function initStripe() {
   const observe = new MutationObserver((mutations) => {
@@ -26,29 +27,7 @@ export function initStripe() {
   stripeAll();
 }
 function stripeAll() {
-  const walker = document.createTreeWalker(
-    document.body,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode: (node: Node) => {
-        if (
-          node.parentElement &&
-          [
-            "input",
-            "textarea",
-            "select",
-            "button",
-            "script",
-            "style",
-            "a",
-          ].includes(node.parentElement.tagName.toLowerCase())
-        ) {
-          return NodeFilter.FILTER_SKIP;
-        }
-        return NodeFilter.FILTER_ACCEPT;
-      },
-    }
-  );
+  const walker = getTextWalker(document.body, { excludeHidden: false });
   let node: Node | null;
   while ((node = walker.nextNode())) {
     const parentElement = node.parentElement;
@@ -66,44 +45,22 @@ function stripeAll() {
  * @param element - 需要应用条纹效果的元素
  */
 function stripeElement(element: HTMLElement) {
-  // element.style.backgroundImage =
-  //     "linear-gradient(90deg, #0000 95%, rgba(123, 123, 123, 0.28) 5%)";
-  // element.style.backgroundSize = "20px 25%";
-  // element.style.backgroundClip = "content-box";
-  // element.style.backgroundOrigin = "content-box";
-  const existingStripe = element.querySelector("striped");
-  if (existingStripe) {
+  // 移除旧的条纹类（修正选择器逻辑）
+  if (element.classList.contains("striped")) {
     element.classList.remove("striped");
   }
 
+  // 添加条纹类并设置颜色
   if (!element.classList.contains("striped")) {
     element.classList.add("striped");
-    element.style.position = "relative"; // 确保伪元素相对于父元素定位
 
-    // 获取元素的背景颜色
+    // 获取背景颜色并生成条纹颜色
     const computedStyle = window.getComputedStyle(element);
     const backgroundColor = computedStyle.backgroundColor;
-
-    // 生成条纹颜色
     const stripeColor = generateStripeColor(backgroundColor);
 
-    // 创建伪元素
-    const stripe = document.createElement("span");
-    stripe.style.position = "absolute";
-    stripe.style.bottom = "0";
-    stripe.style.left = "0";
-    stripe.style.width = "100%";
-    stripe.style.height = "100%";
-    stripe.style.pointerEvents = "none";
-    // stripe.style.backgroundImage =
-    //     "linear-gradient(90deg, #0000 35px, rgba(95, 95, 95, 0.3) 1px)";
-    stripe.style.backgroundImage = `linear-gradient(90deg, #0000 35px, ${stripeColor} 1px)`;
-    stripe.style.backgroundSize = "36px 100%";
-    stripe.style.backgroundClip = "content-box";
-    stripe.style.backgroundOrigin = "content-box";
-
-    // 将伪元素插入到元素中
-    element.insertBefore(stripe, element.firstChild);
+    // 通过 CSS 变量注入动态颜色
+    element.style.setProperty("--stripe-color", stripeColor);
   }
 }
 
