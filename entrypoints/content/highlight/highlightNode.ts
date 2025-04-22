@@ -1,5 +1,5 @@
 // highlightNodeV3.ts
-import { getTextWalker, GetTextNodesOptions } from "../kit/getNodesV2";
+import { getTextWalker, GetTextNodesOptions } from "../kit/getNodes";
 interface TextNodeEntry {
 	node: Text;
 	start: number;

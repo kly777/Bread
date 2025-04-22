@@ -1,4 +1,4 @@
-import { getTextNodes } from "../kit/getNodesV2";
+import { getTextNodes } from "../kit/getNodes";
 
 
 export function bionicTextNodesInNode(root: Node = document.body) {

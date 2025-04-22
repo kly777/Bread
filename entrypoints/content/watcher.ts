@@ -1,4 +1,4 @@
-import { highlightTextInNode, removeHighlights } from "./highlight/highlightNodeV3";
+import { highlightTextInNode, removeHighlights } from "./highlight/highlightNode";
 import { stopBionic, bionicTextNodesInNode } from "./bionic/bionicNode";
 import { highlightSelectedTextInNode } from "./highlight/highlight";
 class Observer {
