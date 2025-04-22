@@ -8,6 +8,13 @@ const EXCLUDED_TAGS = new Set([
     "style",
     "noscript",
     "template",
+    "svg",
+    "img",
+    "audio",
+    "video",
+    "option",
+    "head",
+    "iframe",
 ]);
 
 export interface GetTextNodesOptions {
@@ -51,7 +58,7 @@ export function getTextWalker(
     options: GetTextNodesOptions = {}
 ): TreeWalker {
     // 合并默认配置选项
-    const { excludeHidden = true, minContentLength = 1 } = options;
+    const { excludeHidden = true, minContentLength = 0 } = options;
 
     // 创建TreeWalker进行节点遍历，配置复合过滤条件
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {

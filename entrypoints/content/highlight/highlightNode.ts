@@ -36,6 +36,7 @@ function getTexts(
 	// 遍历收集所有符合条件的文本节点
 	while (walker.nextNode()) {
 		const node = walker.currentNode as Text;
+		// console.log('捕获节点:', JSON.stringify(node.textContent)); 
 		const text = node.textContent || "";
 		mergedTextBuilder += text.toLowerCase();
 		texts.push({
