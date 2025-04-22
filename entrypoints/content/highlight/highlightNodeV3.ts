@@ -20,7 +20,7 @@ interface TextNodeEntry {
  * 2. 可选过滤隐藏元素（通过CSS计算样式判断）
  * 3. 过滤空白内容及满足最小长度要求的文本
  */
-function getTextNodes001(
+function getTexts(
 	root: Node = document.body,
 	options: GetTextNodesOptions = {}
 ): { texts: TextNodeEntry[]; mergedText: string } {
@@ -31,11 +31,13 @@ function getTextNodes001(
 
 	const texts: TextNodeEntry[] = [];
 	let offset = 0;
+	let mergedTextBuilder = "";
 
 	// 遍历收集所有符合条件的文本节点
 	while (walker.nextNode()) {
 		const node = walker.currentNode as Text;
 		const text = node.textContent || "";
+		mergedTextBuilder += text.toLowerCase();
 		texts.push({
 			node,
 			start: offset,
@@ -46,9 +48,7 @@ function getTextNodes001(
 
 	return {
 		texts,
-		mergedText: texts
-			.map((n) => n.node.textContent?.toLowerCase())
-			.join(""),
+		mergedText: mergedTextBuilder,
 	};
 }
 
@@ -66,7 +66,7 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
 	// 仅当存在有效选中文本时执行高亮
 	if (text !== "") {
 		// 获取所有文本节点及其合并后的完整文本内容
-		let { texts, mergedText } = getTextNodes001(root);
+		let { texts, mergedText } = getTexts(root);
 
 		// 调试信息：输出文本节点结构及合并后的完整文本
 		console.table(
