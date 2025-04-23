@@ -7,6 +7,30 @@ export function bionicTextNodesInNode(root: Node = document.body) {
 }
 
 
+export function bionicDirectTextNodesInNode(root:Node){
+	// 获取直接子文本节点并过滤
+	const directTextNodes = Array.from(root.childNodes).filter(node => {
+		// 仅处理直接子文本节点
+		if (node.nodeType !== Node.TEXT_NODE) return false;
+
+		// 复用 getNodes.ts 的过滤逻辑
+		const parent = node.parentElement;
+		if (!parent) return false;
+
+		// 排除不可见元素（根据 getNodes.ts 逻辑）
+		const style = window.getComputedStyle(parent);
+		if (style.display === "none" || style.visibility === "hidden") return false;
+
+		// 排除预定义标签（根据 getNodes.ts 的 EXCLUDED_TAGS）
+		const EXCLUDED_TAGS = new Set(["input", "textarea", /* 其他排除标签 */]);
+		if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) return false;
+
+		// 排除空文本节点
+		return (node.textContent?.trim() || "").length > 0;
+	}) as Text[];
+	bionicTextNodes(directTextNodes);
+}
+
 /**
  * 遍历并处理给定节点下的所有文本节点
  * 此函数首先获取所有文本节点，然后逐个处理它们
@@ -35,7 +59,7 @@ export function stopBionic() {
  *
  * @param node 待处理的文本节点
  */
-function bionicTextNode(node: Text): void {
+export function bionicTextNode(node: Text): void {
 	const text = node.textContent || "";
 	if (!text.trim()) return; // 忽略空白文本节点
 
