@@ -1,13 +1,13 @@
 import { getTextNodes } from "../kit/getNodes";
 
 
-export function bionicTextNodesInNode(root: Node = document.body) {
+export function bionicNestedTextNodes(root: Node = document.body) {
 	const textNodes = getTextNodes(root);
 	bionicTextNodes(textNodes);
 }
 
 
-export function bionicDirectTextNodesInNode(root:Node){
+export function bionicDirectTextNodes(root: Node) {
 	// 获取直接子文本节点并过滤
 	const directTextNodes = Array.from(root.childNodes).filter(node => {
 		// 仅处理直接子文本节点
@@ -44,7 +44,7 @@ function bionicTextNodes(textNodes: Text[]) {
 	}
 }
 
-export function stopBionic() {
+export function offBionic() {
 	document.querySelectorAll(".bionic-text").forEach((el) => {
 		el.outerHTML = el.innerHTML;
 	});
@@ -68,13 +68,13 @@ export function bionicTextNode(node: Text): void {
 	 * 正则表达式([a-zA-Z\u4e00-\u9fa5]+)用于匹配并保留英文单词和中文字符
 	 */
 	const splitRegex = /([a-zA-Z0-9'-]+|[\u3400-\u9FFF0-9]+)/;
-	const parts = text.split(splitRegex);
+	const words = text.split(splitRegex);
 
 	const fragment = document.createDocumentFragment();
 	const isEnglish = /^[a-zA-Z0-9'-]+$/;
 	const isChinese = /^[\u3400-\u9FFF0-9]+$/;
 
-	parts.forEach((part) => {
+	words.forEach((part) => {
 		if (isEnglish.test(part)) {
 			// 处理英文单词，调用bionicEn函数进行特殊处理（含数字）
 			fragment.appendChild(bionicEn(part));
@@ -100,7 +100,7 @@ export function bionicTextNode(node: Text): void {
  */
 function bionicEn(word: string): DocumentFragment {
 	const halfIndex = Math.floor(word.length / 3);
-	return createBionicWord(word, halfIndex);
+	return createBionicWordFragment(word, halfIndex);
 }
 
 /**
@@ -119,7 +119,7 @@ function bionicCn(word: string): DocumentFragment {
 	} else if (word.length >= 4) {
 		boldIndex = 2;
 	}
-	return createBionicWord(word, boldIndex);
+	return createBionicWordFragment(word, boldIndex);
 }
 
 /**
@@ -129,7 +129,7 @@ function bionicCn(word: string): DocumentFragment {
  * @param boldIndex - 加粗部分的结束索引（不包括该索引）。
  * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
  */
-function createBionicWord(word: string, boldIndex: number): DocumentFragment {
+function createBionicWordFragment(word: string, boldIndex: number): DocumentFragment {
 	if (word.length === 0) return document.createDocumentFragment(); // 处理空字符串
 	if (boldIndex === 0) {
 		const fragment = document.createDocumentFragment()
