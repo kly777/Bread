@@ -1,4 +1,8 @@
-import { openBionic, stopBionic,openHighlight,stopHighlight } from "./rollObserver";
+import { openBionic, stopBionic } from "./featureManager/bionicManager";
+import {
+    openHighlight,
+    stopHighlight,
+} from "./featureManager/highlightManager";
 export function initSettingManager() {
     storage
         .getItem<boolean>("local:bionic")

@@ -1,4 +1,4 @@
-import { initStripe } from "./stripe/stripe";
+import { initStripe } from "./feature/stripe/stripe";
 import "./style.css";
 import { initSettingManager } from "./settingManager";
 

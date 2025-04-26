@@ -1,4 +1,4 @@
-import { getTextNodes } from "../kit/getNodes";
+import { getTextNodes } from "../../kit/getNodes";
 
 export function bionicNestedTextNodes(root: Node = document.body) {
     const textNodes = getTextNodes(root);
@@ -50,7 +50,7 @@ function bionicTextNodes(textNodes: Text[]) {
     }
 }
 
-export function offBionic() {
+export function removeBionicEffects() {
     document.querySelectorAll(".bionic-text").forEach((el) => {
         el.outerHTML = el.innerHTML;
     });

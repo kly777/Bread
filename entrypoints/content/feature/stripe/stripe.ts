@@ -1,5 +1,5 @@
 import tinycolor from "tinycolor2";
-import { getTextWalker } from "../kit/getNodes";
+import { getTextWalker } from "../../kit/getNodes";
 
 export function initStripe() {
   const observe = new MutationObserver((mutations) => {
