@@ -1,50 +1,70 @@
-export class SettingsManager {
-	highlight: boolean = false;
-	bionic: boolean = false;
+import { openBionic, stopBionic,openHighlight,stopHighlight } from "./rollObserver";
+export function initSettingManager() {
+    storage
+        .getItem<boolean>("local:bionic")
+        .then((newValue: boolean | null) => {
+            if (newValue) {
+                initBionic();
+            }
+        });
 
-	constructor() {
-		this.init();
-	}
+    storage.watch<boolean>("local:bionic", async (newValue: boolean | null) => {
+        updateBionic(newValue);
+    });
 
-	private async init() {
-		this.highlight =
-			(await storage.getItem<boolean>("local:highlight")) ?? false;
-		this.bionic = (await storage.getItem<boolean>("local:bionic")) ?? true;
+    storage
+        .getItem<boolean>("local:highlight")
+        .then((newValue: boolean | null) => {
+            if (newValue) {
+                updateHighlight(newValue);
+            }
+        });
 
-		storage.watch<boolean>("local:highlight", async (newValue: boolean | null) => {
-			this.updateHighlight(newValue);
-		});
-
-		storage.watch<boolean>("local:bionic", async (newValue: boolean | null) => {
-			this.updateBionic(newValue);
-		});
-	}
-
-	private updateHighlight(newValue: boolean | null) {
-		if (newValue !== null) {
-			this.highlight = newValue;
-			console.log("highlight", this.highlight);
-		}
-	}
-
-	private updateBionic(newValue: boolean | null) {
-		if (newValue === null) {
-			console.log("bionic is null");
-			storage.setItem("local:bionic", true);
-			this.bionic = true;
-		} else {
-			this.bionic = newValue;
-			console.log("bionic", this.bionic);
-		}
-	}
-
-	getHighlight(): boolean {
-		return this.highlight;
-	}
-
-	getBionic(): boolean {
-		return this.bionic;
-	}
+    storage.watch<boolean>(
+        "local:highlight",
+        async (newValue: boolean | null) => {
+            updateHighlight(newValue);
+        }
+    );
 }
 
-export const settingsManager = new SettingsManager();
+let bionic = true;
+
+function updateBionic(newValue: boolean | null) {
+    if (newValue === null) {
+        storage.setItem<boolean>("local:bionic", bionic);
+        newValue = bionic;
+    }
+    if (newValue) {
+        openBionic();
+    } else {
+        stopBionic();
+    }
+}
+
+function initBionic() {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => {
+            openBionic();
+            console.log("DOM 就绪时执行");
+        });
+    } else {
+        window.requestIdleCallback(() => {
+            openBionic();
+            console.log("延迟到窗口加载完成");
+        });
+    }
+}
+
+let highlight = true;
+function updateHighlight(newValue: boolean | null) {
+    if (newValue === null) {
+        storage.setItem<boolean>("local:highlight", highlight);
+        newValue = highlight;
+    }
+    if (newValue) {
+        openHighlight();
+    } else {
+        stopHighlight();
+    }
+}

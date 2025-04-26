@@ -1,7 +1,6 @@
-
 import { initStripe } from "./stripe/stripe";
-import observer from "./watcher";
 import "./style.css";
+import { initSettingManager } from "./settingManager";
 
 export default defineContentScript({
     matches: ["<all_urls>"],
@@ -10,9 +9,6 @@ export default defineContentScript({
         if (await storage.getItem("local:stripe")) {
             initStripe();
         }
-
-
-        observer.init();
-
+        initSettingManager();
     },
 });

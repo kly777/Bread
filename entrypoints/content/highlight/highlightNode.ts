@@ -1,4 +1,4 @@
-// highlightNodeV3.ts
+// highlightNode.ts
 import { getTextWalker, GetTextNodesOptions } from "../kit/getNodes";
 interface TextNodeEntry {
 	node: Text;

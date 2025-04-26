@@ -46,6 +46,9 @@ export function getTextNodes(
     const textNodes: Text[] = [];
     while (walker.nextNode()) {
         const node = walker.currentNode as Text;
+
+        // node.textContent = "";
+
         textNodes.push(node);
     }
 
@@ -60,42 +63,55 @@ export function getTextWalker(
     // 合并默认配置选项
     const { excludeHidden = true, minContentLength = 0 } = options;
 
+    const acceptNode = (node: Node) => {
+        const parent = node.parentElement;
+
+
+
+        if (!parent) return NodeFilter.FILTER_ACCEPT;
+
+
+        // 缓存样式以避免重复计算
+        const style = window.getComputedStyle(parent);
+
+
+        // 1. 标签名称过滤：直接拒绝整个子树
+        if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
+            return NodeFilter.FILTER_REJECT;
+        }
+
+        // 2. 可见性过滤：根据计算样式判断元素是否隐藏
+        if (excludeHidden) {
+            if (style.display === "none" || style.visibility === "hidden") {
+                return NodeFilter.FILTER_REJECT;
+            }
+        }
+
+        // 3. 检查父元素是否为 flex 容器
+        if (style.display === "flex" || style.display === "-webkit-flex") {
+            return NodeFilter.FILTER_REJECT;
+        }
+
+        // 4. 内容过滤：检查文本内容长度是否达标
+        const content = node.textContent?.trim() || "";
+        if (content.length < minContentLength) {
+            return NodeFilter.FILTER_REJECT;
+        }
+        // 新增 Shadow DOM 处理
+        if (node.parentElement?.shadowRoot === node.getRootNode()) {
+            return NodeFilter.FILTER_ACCEPT; // 允许访问 Shadow DOM 内容
+        }
+
+        return NodeFilter.FILTER_ACCEPT;
+
+    }
+
     // 创建TreeWalker进行节点遍历，配置复合过滤条件
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-        acceptNode: (node: Node) => {
-            const parent = node.parentElement;
-            if (!parent) return NodeFilter.FILTER_ACCEPT;
-
-            // 缓存样式以避免重复计算
-            const style = window.getComputedStyle(parent);
-
-
-            // 1. 标签名称过滤：直接拒绝整个子树
-            if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
-                return NodeFilter.FILTER_REJECT;
-            }
-
-            // 2. 可见性过滤：根据计算样式判断元素是否隐藏
-            if (excludeHidden) {
-                if (style.display === "none" || style.visibility === "hidden") {
-                    return NodeFilter.FILTER_REJECT;
-                }
-            }
-
-            // 3. 检查父元素是否为 flex 容器（复用已缓存的 style）
-            if (style.display === "flex" || style.display === "-webkit-flex") {
-                return NodeFilter.FILTER_REJECT;
-            }
-
-            // 4. 内容过滤：检查文本内容长度是否达标
-            const content = node.textContent?.trim() || "";
-            if (content.length < minContentLength) {
-                return NodeFilter.FILTER_REJECT;
-            }
-
-            return NodeFilter.FILTER_ACCEPT;
-        },
-    });
+    const walker = document.createTreeWalker(
+        root,
+        NodeFilter.SHOW_TEXT,
+        { acceptNode },
+    );
     return walker;
 }
 
