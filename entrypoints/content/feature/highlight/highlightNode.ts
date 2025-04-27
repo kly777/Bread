@@ -74,7 +74,7 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
                 text: t.node.textContent,
             }))
         );
-        console.info(mergedText);
+        console.info("mer",mergedText);
 
         // 存在有效文本时执行匹配逻辑
         if (texts.length > 0 && text !== "") {
@@ -255,11 +255,6 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
         console.log("处理后内容:", node.textContent);
         console.groupEnd();
     });
-
-    console.log(
-        "最终高亮元素数:",
-        document.querySelectorAll(".highlight").length
-    );
 }
 
 /**

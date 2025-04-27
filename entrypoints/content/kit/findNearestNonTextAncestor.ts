@@ -13,6 +13,7 @@ export function findNearestNonTextAncestor(element: Element): Element {
             return findNearestNonTextAncestor(parent);
         } else {
             // 父元素不含文本节点，返回当前元素
+            console.log("找到最近的非文本节点祖先元素",element.textContent);
             return element;
         }
     }

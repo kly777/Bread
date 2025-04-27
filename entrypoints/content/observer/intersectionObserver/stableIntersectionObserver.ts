@@ -9,11 +9,17 @@ const continuedObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
         if (entry.isIntersecting) {
             const element = entry.target;
+            const ans= findNearestNonTextAncestor(element)
             nonTextParentElements.add(findNearestNonTextAncestor(element));
+            // if (ans instanceof HTMLElement) {
+
+            //     ans.style.backgroundColor = "red";
+            // }
         } else {
             const element = entry.target;
             nonTextParentElements.delete(findNearestNonTextAncestor(element));
         }
+        console.log("nonTextParentElements changed",nonTextParentElements);
     });
 }, intersectionObserverOptions);
 

@@ -2,10 +2,10 @@ import { getSelectedText } from "../../kit/getSelectedText";
 import { highlightTextInNode, removeHighlights } from "./highlightNode";
 
 export function highlightSelectedTextInNode(node: Node = document.body) {
-    removeHighlights();
+    // removeHighlights();
     const text = getSelectedText();
     if (!text) return;
-    if (text.length <= 20) {
+    if (text.length <= 200) {
         highlightTextInNode(text, node);
     }
 }

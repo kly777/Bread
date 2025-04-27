@@ -1,5 +1,9 @@
 import { highlightSelectedTextInNode } from "../feature/highlight/highlight";
-import { removeHighlights } from "../feature/highlight/highlightNode";
+import {
+    highlightTextInNode,
+    removeHighlights,
+} from "../feature/highlight/highlightNode";
+import { getSelectedText } from "../kit/getSelectedText";
 import { manageMutationObserver } from "../observer/domMutationObserver";
 
 import {
@@ -18,12 +22,16 @@ export function stopHighlight() {
 }
 
 function highlightFeature() {
-    nonTextParentElements.forEach((element) => {
-        highlightWithoutObserver(element);
-    });
-}
-function highlightWithoutObserver(element: Element) {
-    manageMutationObserver(false);
-    highlightSelectedTextInNode(element);
-    manageMutationObserver(true);
+    removeHighlights();
+    const text = getSelectedText();
+    if (!text) return;
+
+    if (text.length <= 200) {
+        manageMutationObserver(false);
+
+        nonTextParentElements.forEach((element) => {
+            highlightTextInNode(text, element);
+        });
+        manageMutationObserver(true);
+    }
 }
