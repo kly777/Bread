@@ -56,7 +56,7 @@ export function registerTextElement(parent: Element, text: Text) {
 }
 
 export function initializeSingleUseObserver() {
-    observeTextNodes(getTextNodes());
+    observeElementNode(document.body);
 }
 
 function observeTextNodes(texts: Text[]) {
@@ -69,4 +69,8 @@ export function observeTextNode(text: Text) {
 
     // 更新映射关系
     registerTextElement(parent, text);
+}
+
+export function observeElementNode(ele: Element) {
+    observeTextNodes(getTextNodes(ele));
 }

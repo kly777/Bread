@@ -4,6 +4,7 @@ import {
     parentToTextNodesMap,
     observeTextNode,
     singleUseObserver,
+    observeElementNode,
 } from "./intersectionObserver/singleUseObserver";
 import { observeTextAncestor } from "./intersectionObserver/stableIntersectionObserver";
 
@@ -29,13 +30,18 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                         //     "I observed a text node",
                         //     currentNode as Text
                         // );
-                        observeTextNode(currentNode as Text);
+                        // observeTextNode(currentNode as Text);
+                        const parent = currentNode.parentElement;
+                        if (parent && parent.nodeType === Node.ELEMENT_NODE){
+                            observeElementNode(parent);
+                        }
                         observeTextAncestor(currentNode as Text);
                     } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
-                        // 递归处理子节点
-                        Array.from(
-                            (currentNode as ParentNode).childNodes
-                        ).forEach(processNode);
+                        // // 递归处理子节点
+                        // Array.from(
+                        //     (currentNode as ParentNode).childNodes
+                        // ).forEach(processNode);
+                        observeElementNode(currentNode as Element);
                     }
                 }
                 processNode(node);
