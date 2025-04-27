@@ -1,3 +1,4 @@
+import { initStripe } from "./feature/stripe/stripe";
 import { openBionic, stopBionic } from "./featureManager/bionicManager";
 import {
     openHighlight,
@@ -30,6 +31,18 @@ export function initSettingManager() {
             updateHighlight(newValue);
         }
     );
+
+    storage
+        .getItem<boolean>("local:stripe")
+        .then((newValue: boolean | null) => {
+            if (newValue) {
+                initStripe();
+            }
+        });
+
+    storage.watch<boolean>("local:stripe", async (newValue: boolean | null) => {
+        console.log("未实现");
+    });
 }
 
 let bionic = true;
