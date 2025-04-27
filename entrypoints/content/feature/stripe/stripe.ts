@@ -42,22 +42,22 @@ function stripeAll() {
  * @param element - 需要应用条纹效果的元素
  */
 function stripeElement(element: HTMLElement) {
-    // 移除旧的条纹类（修正选择器逻辑）
-    if (element.classList.contains("striped")) {
-        element.classList.remove("striped");
-    }
+    const backgroundElement = findAncestorWithBackground(element);
+    console.log(backgroundElement,element);
+    if (backgroundElement) {
 
-    // 添加条纹类并设置颜色
-    if (!element.classList.contains("striped")) {
-        element.classList.add("striped");
+        // 添加条纹类并设置颜色
+        if (!element.classList.contains("striped")) {
+            element.classList.add("striped");
 
-        // 获取背景颜色并生成条纹颜色
-        const computedStyle = window.getComputedStyle(element);
-        const backgroundColor = computedStyle.backgroundColor;
-        const stripeColor = generateStripeColor(backgroundColor);
+            // 获取背景颜色并生成条纹颜色
+            const computedStyle = window.getComputedStyle(backgroundElement);
+            const backgroundColor = computedStyle.backgroundColor;
+            const stripeColor = generateStripeColor(backgroundColor);
 
-        // 通过 CSS 变量注入动态颜色
-        element.style.setProperty("--stripe-color", stripeColor);
+            // 通过 CSS 变量注入动态颜色
+            // element.style.backgroundColor=stripeColor;
+        }
     }
 }
 /**
@@ -65,18 +65,21 @@ function stripeElement(element: HTMLElement) {
  * @param element - 起始元素
  * @returns 具有背景色的祖先元素或null
  */
-function findAncestorWithBackground(element: Element): Element | null {
-    let current: Element | null = element;
+function findAncestorWithBackground(element: HTMLElement): HTMLElement | null {
+    let current: HTMLElement | null = element;
     while (current) {
         const style = getComputedStyle(current);
-        if (style.backgroundColor !== "rgba(0, 0, 0, 0)") {
+        // 判断背景色是否为非透明或存在背景图
+        if (
+            style.backgroundColor !== "rgba(0, 0, 0, 0)" ||
+            style.backgroundImage !== "none"
+        ) {
             return current;
         }
         current = current.parentElement;
     }
     return null;
 }
-
 
 /**
  * 检查元素是否只包含文本内容
@@ -98,10 +101,7 @@ function hasOnlyTextContent(element: HTMLElement): boolean {
  */
 function generateStripeColor(backgroundColor: string): string {
     const color = tinycolor(backgroundColor);
-    const complementColor = color
-        .complement() // 获取互补色
-        .setAlpha(0.09) // 设置透明度
-        // .darken(20) // 使颜色变暗
-        .toRgbString(); // 转换为 RGB 字符串
-    return complementColor;
+    const complement = color.complement();
+    // 强制设置透明度为 0.3（与 CSS 默认值一致）
+    return complement.setAlpha(0.3).toRgbString();
 }
