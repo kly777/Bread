@@ -87,10 +87,10 @@ export function getTextWalker(
             }
         }
 
-        // 3. 检查父元素是否为 flex 容器
-        if (style.display === "flex" || style.display === "-webkit-flex") {
-            return NodeFilter.FILTER_REJECT;
-        }
+        // // 3. 检查父元素是否为 flex 容器
+        // if (style.display === "flex" || style.display === "-webkit-flex") {
+        //     return NodeFilter.FILTER_REJECT;
+        // }
 
         // 4. 内容过滤：检查文本内容长度是否达标
         const content = node.textContent?.trim() || "";
