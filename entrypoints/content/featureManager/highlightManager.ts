@@ -2,18 +2,12 @@ import {
     highlightTextInNode,
     removeHighlights,
 } from "../feature/highlight/highlightNode";
-import { GetTextNodesOptions } from "../kit/getTextNodes";
 import {
     getTextContainerElement,
-    getTextContainerWalker,
 } from "../kit/getTextContainer";
 import { getSelectedText } from "../kit/getSelectedText";
 import { manageMutationObserver } from "../observer/domMutationObserver";
 
-import {
-    nonTextParentElements,
-    initializeContinuedObserver,
-} from "../observer/intersectionObserver/stableIntersectionObserver";
 
 export function openHighlight() {
     // initializeContinuedObserver();
