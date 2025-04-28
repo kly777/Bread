@@ -1,15 +1,15 @@
 import { intersectionObserverOptions } from "./options";
 
-import { getTextNodes } from "../../kit/getNodes";
+import { getTextNodes } from "../../kit/getTextNodes";
 import { findNearestNonTextAncestor } from "../../kit/findNearestNonTextAncestor";
 
 export const nonTextParentElements = new Set<Element>();
 
 const continuedObserver = new IntersectionObserver((entries) => {
+    console.log("continuedObserver callback");
     entries.forEach((entry) => {
         if (entry.isIntersecting) {
             const element = entry.target;
-            const ans = findNearestNonTextAncestor(element);
             nonTextParentElements.add(findNearestNonTextAncestor(element));
             // if (ans instanceof HTMLElement) {
 
@@ -19,14 +19,15 @@ const continuedObserver = new IntersectionObserver((entries) => {
             const element = entry.target;
             nonTextParentElements.delete(findNearestNonTextAncestor(element));
         }
-        console.log("nonTextParentElements changed", nonTextParentElements);
+        // console.log("nonTextParentElements changed", nonTextParentElements);
     });
 }, intersectionObserverOptions);
 
 export function initializeContinuedObserver() {
     getTextNodes().forEach((text) => {
-        if (text.parentElement) {
-            continuedObserver.observe(text.parentElement);
+        const parent = text.parentElement;
+        if (parent) {
+            continuedObserver.observe(findNearestNonTextAncestor(parent));
         }
     });
 }

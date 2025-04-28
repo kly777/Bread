@@ -1,5 +1,5 @@
 import { getSelectedText } from "../../kit/getSelectedText";
-import { highlightTextInNode, removeHighlights } from "./highlightNode";
+import { highlightTextInNode } from "./highlightNode";
 
 export function highlightSelectedTextInNode(node: Node = document.body) {
     // removeHighlights();

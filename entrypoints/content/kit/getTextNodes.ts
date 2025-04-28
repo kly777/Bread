@@ -55,7 +55,6 @@ export function getTextNodes(
     return textNodes;
 }
 
-
 export function getTextWalker(
     root: Node = document.body,
     options: GetTextNodesOptions = {}
@@ -66,14 +65,10 @@ export function getTextWalker(
     const acceptNode = (node: Node) => {
         const parent = node.parentElement;
 
-
-
         if (!parent) return NodeFilter.FILTER_ACCEPT;
-
 
         // 缓存样式以避免重复计算
         const style = window.getComputedStyle(parent);
-
 
         // 1. 标签名称过滤：直接拒绝整个子树
         if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
@@ -103,16 +98,11 @@ export function getTextWalker(
         }
 
         return NodeFilter.FILTER_ACCEPT;
-
-    }
+    };
 
     // 创建TreeWalker进行节点遍历，配置复合过滤条件
-    const walker = document.createTreeWalker(
-        root,
-        NodeFilter.SHOW_TEXT,
-        { acceptNode },
-    );
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode,
+    });
     return walker;
 }
-
-

@@ -15,7 +15,8 @@ export default defineConfig({
     },
     vite: (configEnv) => ({
         build: {
-            minify: "terser",
+            // 根据模式切换 minify 行为
+            minify: configEnv.mode === "production" ? "terser" : false,
             terserOptions: {
                 compress:
                     configEnv.mode === "production"

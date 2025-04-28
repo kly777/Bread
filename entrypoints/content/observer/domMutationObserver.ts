@@ -1,8 +1,7 @@
-import { getTextNodes } from "../kit/getNodes";
+import { getTextNodes } from "../kit/getTextNodes";
 
 import {
     parentToTextNodesMap,
-    observeTextNode,
     singleUseObserver,
     observeElementNode,
 } from "./intersectionObserver/singleUseObserver";
@@ -21,7 +20,7 @@ export function manageMutationObserver(shouldObserve: boolean) {
 
 const domMutationObserver: MutationObserver = new MutationObserver(
     (mutations: MutationRecord[]) => {
-        // console.log("I observed some changes");
+        console.log("domMutationObserver observed some changes");
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node: Node) => {
                 function processNode(currentNode: Node) {
@@ -32,7 +31,7 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                         // );
                         // observeTextNode(currentNode as Text);
                         const parent = currentNode.parentElement;
-                        if (parent && parent.nodeType === Node.ELEMENT_NODE){
+                        if (parent && parent.nodeType === Node.ELEMENT_NODE) {
                             observeElementNode(parent);
                         }
                         observeTextAncestor(currentNode as Text);

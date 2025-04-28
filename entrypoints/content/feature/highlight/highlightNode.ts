@@ -1,5 +1,5 @@
 // highlightNode.ts
-import { getTextWalker, GetTextNodesOptions } from "../../kit/getNodes";
+import { getTextWalker, GetTextNodesOptions } from "../../kit/getTextNodes";
 interface TextNodeEntry {
     node: Text;
     start: number;
@@ -58,13 +58,12 @@ function getTexts(
  * @returns void 本函数不返回任何值
  */
 export function highlightTextInNode(text: string, root: Node = document.body) {
-    // console.log("highlightNode");
-    // removeHighlights();
-    // const text = getSelectedText();
+    // console.log("highlightTextInNode", root);
 
     // 仅当存在有效选中文本时执行高亮
     if (text !== "") {
         // 获取所有文本节点及其合并后的完整文本内容
+        console.log("getTexts", root);
         let { texts, mergedText } = getTexts(root);
 
         // 调试信息：输出文本节点结构及合并后的完整文本
@@ -74,7 +73,7 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
                 text: t.node.textContent,
             }))
         );
-        console.info("mer",mergedText);
+        console.info("mer", mergedText);
 
         // 存在有效文本时执行匹配逻辑
         if (texts.length > 0 && text !== "") {
@@ -87,12 +86,12 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
             );
 
             // 调试信息：输出所有匹配项详情
-            console.table(
-                matches.map((m) => ({
-                    ...m,
-                    text: mergedText.substring(m.start, m.end),
-                }))
-            );
+            // console.table(
+            //     matches.map((m) => ({
+            //         ...m,
+            //         text: mergedText.substring(m.start, m.end),
+            //     }))
+            // );
 
             // 对过滤后的匹配项应用高亮
             highlightMatches(texts, filteredMatches);
@@ -105,11 +104,11 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
 export function removeHighlights() {
     // 查找所有高亮元素
     document
-        .querySelectorAll<HTMLSpanElement>(".bread-highlight")
-        .forEach((span) => {
+        .querySelectorAll<HTMLElement>(".bread-highlight")
+        .forEach((mark) => {
             // 创建新的文本节点替代高亮元素
-            const text = document.createTextNode(span.textContent || "");
-            span.parentNode?.replaceChild(text, span);
+            const text = document.createTextNode(mark.textContent || "");
+            mark.parentNode?.replaceChild(text, mark);
         });
 }
 
@@ -196,13 +195,14 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
  * @returns void
  */
 function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
-    console.log(`开始处理 ${matches.length} 处匹配项`);
-
+    console.log("highlightMatches", texts.length);
     // 预处理：将匹配项按起始位置排序
     const sortedMatches = [...matches].sort((a, b) => a.start - b.start);
 
     texts.forEach((entry) => {
         const node = entry.node;
+
+        if (!node || !node.textContent) return;
         const nodeContent = node.textContent || "";
         const entryStart = entry.start;
         const entryEnd = entry.end;
@@ -224,20 +224,17 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
 
         if (mergedRanges.length === 0) return;
 
-        console.group(`处理节点 (长度:${nodeContent.length})`);
-        console.log("原始内容:", nodeContent);
-
         // 按起始位置降序处理，避免分割影响索引
         mergedRanges
             .sort((a, b) => b.start - a.start)
             .forEach((range) => {
                 const { start, end } = range;
-                console.log(
-                    `高亮范围: [${start}-${end}] "${nodeContent.slice(
-                        start,
-                        end
-                    )}"`
-                );
+                // console.log(
+                //     `高亮范围: [${start}-${end}] "${nodeContent.slice(
+                //         start,
+                //         end
+                //     )}"`
+                // );
 
                 // 分割
                 const pre = node.splitText(start);
@@ -253,7 +250,6 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
             });
 
         console.log("处理后内容:", node.textContent);
-        console.groupEnd();
     });
 }
 
@@ -307,13 +303,5 @@ function createMarkElement(): HTMLElement {
     //return document.createElement("span");
     const span = document.createElement("mark");
     span.className = "bread-highlight";
-    // // span.textContent = textContent;
-    // // span.style.border = "2px solid rgb(255, 153, 0)";
-    // span.style.boxSizing = "border-box";
-    // span.style.backgroundColor = "rgba(255, 153, 0, 0.5)";
-    // span.style.display = "inline";
-    // span.style.lineHeight = "inherit"; // 继承行高
-    // span.style.verticalAlign = "baseline";
-
     return span;
 }

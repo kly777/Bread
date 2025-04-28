@@ -1,8 +1,12 @@
-import { highlightSelectedTextInNode } from "../feature/highlight/highlight";
 import {
     highlightTextInNode,
     removeHighlights,
 } from "../feature/highlight/highlightNode";
+import { GetTextNodesOptions } from "../kit/getTextNodes";
+import {
+    getTextContainerElement,
+    getTextContainerWalker,
+} from "../kit/getTextContainer";
 import { getSelectedText } from "../kit/getSelectedText";
 import { manageMutationObserver } from "../observer/domMutationObserver";
 
@@ -12,7 +16,8 @@ import {
 } from "../observer/intersectionObserver/stableIntersectionObserver";
 
 export function openHighlight() {
-    initializeContinuedObserver();
+    // initializeContinuedObserver();
+
     document.addEventListener("mouseup", highlightFeature);
 }
 
@@ -22,16 +27,22 @@ export function stopHighlight() {
 }
 
 function highlightFeature() {
+    console.log("highlightFeature");
+    manageMutationObserver(false);
     removeHighlights();
     const text = getSelectedText();
-    if (!text) return;
+    if (text.trim() === "") return;
 
-    if (text.length <= 200) {
-        manageMutationObserver(false);
+    // if (text.length <= 200) {
+    //     nonTextParentElements.forEach((element) => {
+    //         highlightTextInNode(text, element);
+    //     });
+    // }
+    const elements = getTextContainerElement();
+    elements.forEach((ele) => {
+        console.log("hhh", ele);
+        highlightTextInNode(text, ele);
+    });
 
-        nonTextParentElements.forEach((element) => {
-            highlightTextInNode(text, element);
-        });
-        manageMutationObserver(true);
-    }
+    manageMutationObserver(true);
 }

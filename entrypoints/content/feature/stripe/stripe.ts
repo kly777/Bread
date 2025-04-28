@@ -1,5 +1,5 @@
 import tinycolor from "tinycolor2";
-import { getTextWalker } from "../../kit/getNodes";
+import { getTextWalker } from "../../kit/getTextNodes";
 
 export function initStripe() {
     const observe = new MutationObserver((mutations) => {
@@ -43,9 +43,8 @@ function stripeAll() {
  */
 function stripeElement(element: HTMLElement) {
     const backgroundElement = findAncestorWithBackground(element);
-    console.log(backgroundElement,element);
+    // console.log(backgroundElement, element);
     if (backgroundElement) {
-
         // 添加条纹类并设置颜色
         if (!element.classList.contains("striped")) {
             element.classList.add("striped");

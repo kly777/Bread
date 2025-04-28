@@ -1,4 +1,4 @@
-import { getTextNodes } from "../../kit/getNodes";
+import { getTextNodes } from "../../kit/getTextNodes";
 
 export function bionicNestedTextNodes(root: Node = document.body) {
     const textNodes = getTextNodes(root);
@@ -10,7 +10,7 @@ export function bionicDirectTextNodes(root: Node) {
     // if (root.parentElement) {
     // 	root.parentElement.style.backgroundColor = "red";
     // }
-    console.log(root);
+    // console.log(root);
 
     const directTextNodes = Array.from(root.childNodes).filter((node) => {
         // 仅处理直接子文本节点
@@ -66,7 +66,7 @@ export function removeBionicEffects() {
  * @param node 待处理的文本节点
  */
 export function bionicTextNode(node: Text): void {
-    console.log(node.textContent);
+    // console.log(node.textContent);
     const text = node.textContent || "";
     if (!text.trim()) return; // 忽略空白文本节点
 

@@ -2,7 +2,7 @@ import { intersectionObserverOptions } from "./options";
 
 import { bionicTextNode } from "../../feature/bionic/bionicNode";
 import { manageMutationObserver } from "../domMutationObserver";
-import { getTextNodes } from "../../kit/getNodes";
+import { getTextNodes } from "../../kit/getTextNodes";
 
 export const parentToTextNodesMap = new Map<Element, Text[]>();
 
