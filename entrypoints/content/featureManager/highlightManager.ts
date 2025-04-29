@@ -36,6 +36,7 @@ function highlightFeature() {
     elements.forEach((ele) => {
         console.log("hhh", ele);
         highlightTextInNode(text, ele);
+        // ele.style.border="1px solid red"
     });
 
     manageMutationObserver(true);

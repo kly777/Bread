@@ -50,10 +50,7 @@ export function getTextContainerWalker(
         const parent = element.parentElement;
         const style = window.getComputedStyle(element);
 
-        // 新增行内元素过滤 ---------------------------
-        if (INLINE_DISPLAY_VALUES.has(style.display)) {
-            return NodeFilter.FILTER_REJECT;
-        }
+
 
         // 排除非容器标签
         // if (EXCLUDED_TAGS.has(element.tagName.toLowerCase())) {
@@ -68,6 +65,13 @@ export function getTextContainerWalker(
 
         // 文本内容检查
         if (parent) {
+            // 新增行内元素过滤 ---------------------------
+            if (INLINE_DISPLAY_VALUES.has(style.display)) {
+                if (hasTextNodes(parent)) {
+                    return NodeFilter.FILTER_SKIP;
+                }
+            }
+
             const hasText = hasTextNodes(element);
             const parentHasText = hasTextNodes(parent);
             const isMid = hasText && !parentHasText;
