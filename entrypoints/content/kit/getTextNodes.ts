@@ -15,6 +15,7 @@ const EXCLUDED_TAGS = new Set([
     "option",
     "head",
     "iframe",
+    "i"
 ]);
 
 export interface GetTextNodesOptions {
