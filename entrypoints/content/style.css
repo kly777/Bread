@@ -29,16 +29,30 @@
 }
 
 /* *:focus { */
-    /* outline: 2px solid #7a7a7a7d;
+/* outline: 2px solid #7a7a7a7d;
     outline-offset: 2px; */
-    /* background-color: #0000; */
+/* background-color: #0000; */
 /* } */
 
 .bread-highlight mark {
-  /* 基础背景色高亮 */
+    /* 基础背景色高亮 */
 
-  color: #000; /* 确保文字颜色清晰 */
-  display: contents;
+    color: #000; /* 确保文字颜色清晰 */
+    display: contents;
     filter: brightness(0.8) contrast(1.2); /* 降低亮度、增强对比 */
-  background-color: rgba(255, 255, 0, 0.1); /* 微透明背景辅助区分 */
+    background-color: rgba(255, 255, 0, 0.1); /* 微透明背景辅助区分 */
+}
+
+.translation-result {
+    opacity: 0.78;
+    font-size: 0.88em;
+    transition: opacity 0.3s ease-in-out;
+}
+div.translation-result{
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.translation-result:hover{
+    opacity: 1;
 }

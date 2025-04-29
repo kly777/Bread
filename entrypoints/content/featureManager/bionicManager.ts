@@ -6,15 +6,14 @@ import {
     initializeSingleUseObserver,
     singleUseObserver,
 } from "../observer/intersectionObserver/singleUseObserver";
+export function openBionic() {
+    initializeSingleUseObserver();
+    manageMutationObserver(true);
+}
 
 export function stopBionic() {
     manageMutationObserver(false);
     singleUseObserver.disconnect();
     parentToTextNodesMap.clear();
     removeBionicEffects();
-}
-
-export function openBionic() {
-    initializeSingleUseObserver();
-    manageMutationObserver(true);
 }

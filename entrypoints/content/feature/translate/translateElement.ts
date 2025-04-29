@@ -29,21 +29,21 @@ export const translateElement = async (
         "I",
     ];
 
-    const walker = document.createTreeWalker(
-        element,
-        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, // 同时遍历元素和文本节点
-        {
-            acceptNode: (node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const tagName = (node as HTMLElement).tagName.toUpperCase();
-                    if (EXCLUDE_TAGS.includes(tagName)) {
-                        return NodeFilter.FILTER_REJECT; // 跳过该元素及其所有子节点
-                    }
-                }
-                return NodeFilter.FILTER_ACCEPT;
-            },
-        }
-    );
+const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT, // 只遍历文本节点
+    {
+        acceptNode: (node) => {
+            const parent = node.parentElement;
+            // 如果父元素存在并且在排除列表中，则跳过该节点
+            if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
+                return NodeFilter.FILTER_SKIP;
+            }
+            // 所有传入此函数的节点都已是文本节点（由 SHOW_TEXT 控制）
+            return NodeFilter.FILTER_ACCEPT;
+        },
+    }
+);
 
     const textFragments: string[] = [];
     while (walker.nextNode()) {
@@ -99,7 +99,8 @@ export const translateElement = async (
 };
 
 function isInlineElement(element: HTMLElement): boolean {
-    return window.getComputedStyle(element).display === "inline";
+    const display = window.getComputedStyle(element).display;
+    return display === "inline" || display === "inline-block";
 }
 //function isInlineElement(el: HTMLElement): boolean {
 //     const inlineTags = ["SPAN", "A", "STRONG", "EM", "B", "I"];
@@ -115,6 +116,9 @@ function createTranslationContainer(
 ): HTMLElement {
     const shouldWrap = !isInline && translatedText.length >= 10;
     const container = document.createElement(shouldWrap ? "div" : "span");
+    // if (!shouldWrap) {
+    //     container.style.display = "contents"; // 仅对块级容器生效
+    // }
     container.classList.add("translation-result");
 
     const fragment = document.createDocumentFragment();

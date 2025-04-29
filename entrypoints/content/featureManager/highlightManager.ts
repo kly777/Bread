@@ -25,7 +25,10 @@ function highlightFeature() {
     manageMutationObserver(false);
     removeHighlights();
     const text = getSelectedText();
-    if (text.trim() === "") return;
+    if (text.trim() === "") {
+        manageMutationObserver(true);
+        return;
+    }
 
     // if (text.length <= 200) {
     //     nonTextParentElements.forEach((element) => {

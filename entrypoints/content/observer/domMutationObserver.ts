@@ -6,6 +6,7 @@ import {
     observeElementNode,
 } from "./intersectionObserver/singleUseObserver";
 import { observeTextAncestor } from "./intersectionObserver/stableIntersectionObserver";
+import { observeTranslateElements } from "./intersectionObserver/translateObserver";
 
 export function manageMutationObserver(shouldObserve: boolean) {
     if (shouldObserve) {
@@ -22,28 +23,29 @@ const domMutationObserver: MutationObserver = new MutationObserver(
     (mutations: MutationRecord[]) => {
         console.log("domMutationObserver observed some changes");
         mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node: Node) => {
-                function processNode(currentNode: Node) {
+            mutation.addedNodes.forEach((node) => {
+                const walker = document.createTreeWalker(
+                    node,
+                    NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+                    {
+                        acceptNode: () => {
+                            // 仅接受文本节点和元素节点
+                            return NodeFilter.FILTER_ACCEPT;
+                        },
+                    }
+                );
+
+                while (walker.nextNode()) {
+                    const currentNode = walker.currentNode;
                     if (currentNode.nodeType === Node.TEXT_NODE) {
-                        // console.log(
-                        //     "I observed a text node",
-                        //     currentNode as Text
-                        // );
-                        // observeTextNode(currentNode as Text);
                         const parent = currentNode.parentElement;
-                        if (parent && parent.nodeType === Node.ELEMENT_NODE) {
-                            observeElementNode(parent);
-                        }
+                        if (parent) observeElementNode(parent);
                         observeTextAncestor(currentNode as Text);
                     } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
-                        // // 递归处理子节点
-                        // Array.from(
-                        //     (currentNode as ParentNode).childNodes
-                        // ).forEach(processNode);
                         observeElementNode(currentNode as Element);
                     }
                 }
-                processNode(node);
+                observeTranslateElements(node as Element);
             });
 
             mutation.removedNodes.forEach((node) => {
@@ -92,3 +94,4 @@ function handleRemovedNode(node: Node) {
         }
     }
 }
+

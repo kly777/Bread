@@ -1,6 +1,5 @@
-import { defineConfig } from "wxt";
-
 // See https://wxt.dev/api/config.html
+import { defineConfig } from "wxt";
 export default defineConfig({
     modules: ["@wxt-dev/module-vue"],
     browser: "chrome",
@@ -17,7 +16,7 @@ export default defineConfig({
             //...
         ],
     },
-    vite: (configEnv) => ({
+    vite: (configEnv: { mode: string }) => ({
         build: {
             // 根据模式切换 minify 行为
             minify: configEnv.mode === "production" ? "terser" : false,
