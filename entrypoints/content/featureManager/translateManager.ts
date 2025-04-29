@@ -25,4 +25,10 @@ export async function openTranslate() {
     await Promise.all(translatePromises.map((p) => p.catch(() => {})));
 }
 
-function closeTranslate() {}
+export function stopTranslate() {
+    document
+        .querySelectorAll<HTMLElement>(".translation-result")
+        .forEach((tr) => {
+            tr.remove();
+        });
+}

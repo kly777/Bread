@@ -4,6 +4,10 @@ import {
     openHighlight,
     stopHighlight,
 } from "./featureManager/highlightManager";
+import {
+    openTranslate,
+    stopTranslate,
+} from "./featureManager/translateManager";
 export function initSettingManager() {
     storage
         .getItem<boolean>("local:bionic")
@@ -43,6 +47,21 @@ export function initSettingManager() {
     storage.watch<boolean>("local:stripe", async (newValue: boolean | null) => {
         console.log("未实现");
     });
+
+    storage
+        .getItem<boolean>("local:translate")
+        .then((newValue: boolean | null) => {
+            if (newValue) {
+                openTranslate();
+            }
+        });
+
+    storage.watch<boolean>(
+        "local:translate",
+        async (newValue: boolean | null) => {
+            updateTranslate(newValue);
+        }
+    );
 }
 
 let bionic = true;
@@ -83,5 +102,18 @@ function updateHighlight(newValue: boolean | null) {
         openHighlight();
     } else {
         stopHighlight();
+    }
+}
+let translate = true;
+
+function updateTranslate(newValue: boolean | null) {
+    if (newValue === null) {
+        storage.setItem<boolean>("local:translate", translate);
+        newValue = translate;
+    }
+    if (newValue) {
+        openTranslate();
+    } else {
+        stopTranslate();
     }
 }

@@ -9,6 +9,7 @@ import featureSwitch from "./featureSwitch.vue";
     <featureSwitch feature-name="highlight" />
     <featureSwitch feature-name="stripe" />
     <featureSwitch feature-name="bionic" />
+    <featureSwitch feature-name="translate" />
   </div>
 </template>
 
