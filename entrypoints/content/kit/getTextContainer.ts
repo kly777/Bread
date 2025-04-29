@@ -1,6 +1,21 @@
 import { GetTextNodesOptions } from "./getTextNodes";
 import { hasTextNodes } from "./hasTextNodes";
 
+const EXCLUDE_TAGS = new Set([
+    "SCRIPT",
+    "STYLE",
+    "NOSCRIPT",
+    "SVG",
+    "MATH",
+    "VAR",
+    "SAMP",
+    "KBD",
+    "PRE",
+    "TEXTAREA",
+    "INPUT",
+    "CODE",
+]);
+
 const INLINE_DISPLAY_VALUES = new Set([
     "inline",
     "inline-block",
@@ -47,21 +62,27 @@ export function getTextContainerWalker(
         if (node.nodeType !== Node.ELEMENT_NODE) return NodeFilter.FILTER_SKIP;
 
         const element = node as Element;
-        const parent = element.parentElement;
-        const style = window.getComputedStyle(element);
 
+        const tagName = element.tagName.toUpperCase();
 
+        // 新增：直接跳过指定标签
+        if (EXCLUDE_TAGS.has(tagName)) {
+            return NodeFilter.FILTER_REJECT; // 跳过该元素及其所有子节点
+        }
 
         // 排除非容器标签
         // if (EXCLUDED_TAGS.has(element.tagName.toLowerCase())) {
         //     return NodeFilter.FILTER_REJECT;
         // }
+        const style = window.getComputedStyle(element);
+
         if (
             excludeHidden &&
             (style.display === "none" || style.visibility === "hidden")
         ) {
             return NodeFilter.FILTER_REJECT;
         }
+        const parent = element.parentElement;
 
         // 文本内容检查
         if (parent) {

@@ -45,7 +45,25 @@ function cleanupElementMapping(element: Element) {
     singleUseObserver.unobserve(element);
 }
 
-export function registerTextElement(parent: Element, text: Text) {
+export function initializeSingleUseObserver() {
+    observeElementNode(document.body);
+}
+
+export function observeElementNode(ele: Element) {
+    observeTextNodes(getTextNodes(ele));
+}
+function observeTextNodes(texts: Text[]) {
+    texts.forEach(observeTextNode);
+}
+
+function observeTextNode(text: Text) {
+    const parent = text.parentElement;
+    if (!parent || !document.contains(parent)) return; // 新增存在性校验
+
+    // 更新映射关系
+    registerTextElement(parent, text);
+}
+function registerTextElement(parent: Element, text: Text) {
     if (parentToTextNodesMap.has(parent)) {
         const texts = parentToTextNodesMap.get(parent)!;
         if (!texts.includes(text)) texts.push(text);
@@ -53,24 +71,4 @@ export function registerTextElement(parent: Element, text: Text) {
         parentToTextNodesMap.set(parent, [text]);
         singleUseObserver.observe(parent);
     }
-}
-
-export function initializeSingleUseObserver() {
-    observeElementNode(document.body);
-}
-
-function observeTextNodes(texts: Text[]) {
-    texts.forEach(observeTextNode);
-}
-
-export function observeTextNode(text: Text) {
-    const parent = text.parentElement;
-    if (!parent || !document.contains(parent)) return; // 新增存在性校验
-
-    // 更新映射关系
-    registerTextElement(parent, text);
-}
-
-export function observeElementNode(ele: Element) {
-    observeTextNodes(getTextNodes(ele));
 }

@@ -46,6 +46,7 @@ export function initSettingManager() {
 }
 
 let bionic = true;
+let highlight = true;
 
 function updateBionic(newValue: boolean | null) {
     if (newValue === null) {
@@ -73,7 +74,6 @@ function initBionic() {
     }
 }
 
-let highlight = true;
 function updateHighlight(newValue: boolean | null) {
     if (newValue === null) {
         storage.setItem<boolean>("local:highlight", highlight);

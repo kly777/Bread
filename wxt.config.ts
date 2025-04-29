@@ -5,7 +5,11 @@ export default defineConfig({
     modules: ["@wxt-dev/module-vue"],
     browser: "chrome",
     manifest: {
-        permissions: ["storage"],
+        permissions: [
+            "storage",
+            "https://edge.microsoft.com/",
+            "https://api-edge.cognitive.microsofttranslator.com/",
+        ],
     },
     zip: {
         downloadPackages: [
