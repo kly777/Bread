@@ -99,7 +99,7 @@ export function initSettingManager() {
         initFeature(key).catch((err) => console.error(`初始化${key}失败`, err));
 
         // 监听存储变化
-        storage.watch<boolean>(featureConfigs[key].key, async (newValue) => {
+        storage.watch<boolean>(featureConfigs[key].key, async (newValue: boolean | null) => {
             try {
                 updateFeature(key, newValue);
             } catch (err) {
@@ -111,14 +111,14 @@ export function initSettingManager() {
     // 初始化bionic的特殊逻辑
     storage
         .getItem<boolean>("local:bionic")
-        .then((newValue) => {
+        .then((newValue: any) => {
             if (newValue) {
                 initBionic();
             }
         })
-        .catch((err) => console.error("初始化bionic失败", err));
+        .catch((err: any) => console.error("初始化bionic失败", err));
 
-    storage.watch<boolean>("local:bionic", async (newValue) => {
+    storage.watch<boolean>("local:bionic", async (newValue: boolean | null) => {
         try {
             updateFeature("bionic", newValue);
         } catch (err) {
@@ -148,12 +148,12 @@ function syncSettings() {
         if (Object.prototype.hasOwnProperty.call(featureConfigs, key)) {
             const config = featureConfigs[key];
             storage.getItem<boolean>(config.key)
-                .then((value) => {
+                .then((value: boolean | null) => {
                     if (value !== null) {
                         setting[key] = value;
                     }
                 })
-                .catch((err) => console.error(`同步${key}设置失败`, err));
+                .catch((err: any) => console.error(`同步${key}设置失败`, err));
         }
     }
 }

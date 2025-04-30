@@ -2,7 +2,7 @@
   "name": "bread",
   "description": "a extension for reading",
   "private": true,
-  "version": "0.1.7",
+  "version": "0.1.8",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -25,7 +25,7 @@
     "@types/chrome": "^0.0.280",
     "@wxt-dev/module-vue": "^1.0.2",
     "typescript": "5.6.3",
-    "vue-tsc": "^2.2.8",
-    "wxt": "^0.20.5"
+    "vue-tsc": "^2.2.10",
+    "wxt": "^0.20.6"
   }
 }
