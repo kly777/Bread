@@ -1,5 +1,6 @@
-import { translateContent } from "../../kit/translate";
-
+import { translateContent as translateG } from "../../kit/translateG";
+import { translateContent as translateMS } from "../../kit/translateMS";
+import { translator } from "../../featureManager/translateManager";
 /**
  * 翻译指定元素内容并展示
  * @param element 需要翻译的DOM元素
@@ -70,11 +71,21 @@ export const translateElement = async (
          * 步骤二：执行翻译操作
          * 使用现有翻译服务进行内容转换
          */
-        const translatedText = await translateContent(
-            originalText,
-            undefined,
-            targetLang
-        );
+        let atranslatedText;
+        if (translator === "MS") {
+            atranslatedText = await translateMS(
+                originalText,
+                undefined,
+                targetLang
+            );
+        } else if (translator === "G") {
+            atranslatedText = await translateG(
+                originalText,
+                undefined,
+                targetLang
+            );
+        }
+        const translatedText = atranslatedText;
         if (translatedText === originalText) return;
         const isInline = isInlineElement(element);
         const shouldWrap = !isInline && translatedText.length >= 10;
