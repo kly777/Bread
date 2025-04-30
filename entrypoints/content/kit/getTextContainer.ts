@@ -93,20 +93,31 @@ export function getTextContainerWalker(
     });
 }
 
+/**
+ * 判断给定的DOM元素是否符合特定条件（包含文本且父元素不包含文本，排除特定行内元素情况）。
+ * @param element 需要检查的DOM元素
+ * @returns 如果元素符合条件返回true，否则返回false
+ */
 function isEligibleElement(element: Element): boolean {
     const parent = element.parentElement;
     if (!parent) return false;
 
     const style = window.getComputedStyle(element);
 
-    // 行内元素过滤逻辑
+    /**
+     * 过滤行内元素且父元素包含文本的情况
+     * 避免将包含纯文本的容器元素中的行内元素误判为目标元素
+     */
     if (INLINE_DISPLAY_VALUES.has(style.display) && hasTextNodes(parent)) {
-        return false; // 跳过行内元素且父元素含文本的情况
+        return false;
     }
 
     const hasText = hasTextNodes(element);
     const parentHasText = hasTextNodes(parent);
 
-    // 核心判定条件
+    /**
+     * 核心判定逻辑：元素自身必须包含文本节点
+     * 且其父元素不能直接包含文本节点
+     */
     return hasText && !parentHasText;
 }
