@@ -28,13 +28,10 @@
     filter: invert(100%);
 }
 
-.bread-highlight mark {
-    /* 基础背景色高亮 */
-
-    color: #000; /* 确保文字颜色清晰 */
-    display: contents;
-    filter: brightness(0.8) contrast(1.2); /* 降低亮度、增强对比 */
-    background-color: rgba(255, 255, 0, 0.1); /* 微透明背景辅助区分 */
+mark.bread-highlight {
+    background-color: rgba(255, 255, 0, 0.8); /* 半透明亮黄 */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* 文字阴影 */
+    filter: brightness(1.2); /* 提升亮度 */
 }
 
 .translation-result {
