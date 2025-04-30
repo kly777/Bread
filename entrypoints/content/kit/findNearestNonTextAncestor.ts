@@ -10,7 +10,6 @@ export function findNearestNonTextAncestor(element: Element): Element {
     if (parent) {
         // 检查父元素是否包含文本节点
         if (hasTextNodes(parent)) {
-            console.log("runnnnn");
             return findNearestNonTextAncestor(parent);
         } else {
             // 父元素不含文本节点，返回当前元素

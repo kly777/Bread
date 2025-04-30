@@ -1,17 +1,14 @@
 import { intersectionObserverOptions } from "./options";
-
 import { bionicTextNode } from "../../feature/bionic/bionicNode";
 import { manageMutationObserver } from "../domMutationObserver";
 import { getTextNodes } from "../../kit/getTextNodes";
 
-export const parentToTextNodesMap = new Map<Element, Text[]>();
+// 使用 Set 存储文本节点，避免重复并提升查找效率
+export const parentToTextNodesMap = new Map<Element, Set<Text>>();
 
-export const singleUseObserver = new IntersectionObserver((entries) => {
-    // 1. 断开 MutationObserver（避免回调冲突）
+export const bionicTextObserver = new IntersectionObserver((entries) => {
     manageMutationObserver(false);
-    // 2. 处理所有条目
-    entries.forEach(handleIntersectionEntry);
-    // 3. 重新连接 MutationObserver
+    entries.forEach(processVisibleTextElement);
     manageMutationObserver(true);
 }, intersectionObserverOptions);
 /**
@@ -19,30 +16,27 @@ export const singleUseObserver = new IntersectionObserver((entries) => {
  * @param entry - IntersectionObserver回调接收的条目对象，包含目标元素和相交状态
  * @returns {void}
  */
-function handleIntersectionEntry(entry: IntersectionObserverEntry) {
+function processVisibleTextElement(entry: IntersectionObserverEntry): void {
     const element = entry.target as Element;
+    const setTexts = parentToTextNodesMap.get(element);
 
-    // console.log("elementWithoutText", elementWithoutText);
-    const textNodes = parentToTextNodesMap.get(element);
-
-    // 如果没有文本节点或元素不在视口中，则提前退出
-    if (!textNodes || !entry.isIntersecting) return;
+    // 增加 document.contains 检查，确保元素仍在 DOM 中
+    if (!setTexts || !entry.isIntersecting || !document.contains(element))
+        return;
 
     // 应用仿生效果到文本节点（例如高亮、动画等）
-    applyBionicToTextNodes(textNodes);
+    applyBionicEffect(Array.from(setTexts));
 
     // 清理元素与文本节点的映射关系，避免内存泄漏
-    cleanupElementMapping(element);
-
-    // console.log("Current elementToTextNodesMap:", elementToTextNodesMap);
+    cleanupAndUnobserve(element);
 }
 
-function applyBionicToTextNodes(textNodes: Text[]) {
+function applyBionicEffect(textNodes: Text[]) {
     textNodes.forEach((text) => bionicTextNode(text));
 }
-function cleanupElementMapping(element: Element) {
+function cleanupAndUnobserve(element: Element) {
     parentToTextNodesMap.delete(element);
-    singleUseObserver.unobserve(element);
+    bionicTextObserver.unobserve(element);
 }
 
 export function initializeSingleUseObserver() {
@@ -50,10 +44,7 @@ export function initializeSingleUseObserver() {
 }
 
 export function observeElementNode(ele: Element) {
-    observeTextNodes(getTextNodes(ele));
-}
-function observeTextNodes(texts: Text[]) {
-    texts.forEach(observeTextNode);
+    getTextNodes(ele).forEach(observeTextNode);
 }
 
 function observeTextNode(text: Text) {
@@ -61,14 +52,17 @@ function observeTextNode(text: Text) {
     if (!parent || !document.contains(parent)) return; // 新增存在性校验
 
     // 更新映射关系
-    registerTextElement(parent, text);
+    linkTextToElement(parent, text);
 }
-function registerTextElement(parent: Element, text: Text) {
+function linkTextToElement(parent: Element, text: Text) {
     if (parentToTextNodesMap.has(parent)) {
-        const texts = parentToTextNodesMap.get(parent)!;
-        if (!texts.includes(text)) texts.push(text);
+        const setTexts = parentToTextNodesMap.get(parent)!;
+        if (!setTexts.has(text)) {
+            setTexts.add(text);
+        }
     } else {
-        parentToTextNodesMap.set(parent, [text]);
-        singleUseObserver.observe(parent);
+        const setTexts = new Set<Text>([text]);
+        parentToTextNodesMap.set(parent, setTexts);
+        bionicTextObserver.observe(parent);
     }
 }

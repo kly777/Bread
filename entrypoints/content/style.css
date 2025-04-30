@@ -28,12 +28,6 @@
     filter: invert(100%);
 }
 
-/* *:focus { */
-/* outline: 2px solid #7a7a7a7d;
-    outline-offset: 2px; */
-/* background-color: #0000; */
-/* } */
-
 .bread-highlight mark {
     /* 基础背景色高亮 */
 
@@ -44,8 +38,8 @@
 }
 
 .translation-result {
-    opacity: 0.78;
-    font-size: 0.88em;
+    opacity: 0.72;
+    font-size: 0.78em;
     transition: opacity 0.3s ease-in-out;
 }
 div.translation-result{

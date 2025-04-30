@@ -8,6 +8,14 @@ import {
     openTranslate,
     stopTranslate,
 } from "./featureManager/translateManager";
+
+export let setting = {
+    highlight: true,
+    stripe: true,
+    translate: true,
+    bionic: true,
+};
+
 export function initSettingManager() {
     storage
         .getItem<boolean>("local:bionic")

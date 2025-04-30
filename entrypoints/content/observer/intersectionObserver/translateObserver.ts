@@ -4,7 +4,7 @@ import { manageMutationObserver } from "../domMutationObserver";
 import { getTextContainerElement } from "../../kit/getTextContainer";
 import { translateElement } from "../../feature/translate/translateElement";
 
-export const translateObserver = new IntersectionObserver((entries) => {
+const translateObserver = new IntersectionObserver((entries) => {
     manageMutationObserver(false);
     //  处理所有条目
     entries.filter((e) => e.isIntersecting).forEach(processElement);

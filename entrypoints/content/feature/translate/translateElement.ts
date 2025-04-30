@@ -29,21 +29,21 @@ export const translateElement = async (
         "I",
     ];
 
-const walker = document.createTreeWalker(
-    element,
-    NodeFilter.SHOW_TEXT, // 只遍历文本节点
-    {
-        acceptNode: (node) => {
-            const parent = node.parentElement;
-            // 如果父元素存在并且在排除列表中，则跳过该节点
-            if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
-                return NodeFilter.FILTER_SKIP;
-            }
-            // 所有传入此函数的节点都已是文本节点（由 SHOW_TEXT 控制）
-            return NodeFilter.FILTER_ACCEPT;
-        },
-    }
-);
+    const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT, // 只遍历文本节点
+        {
+            acceptNode: (node) => {
+                const parent = node.parentElement;
+                // 如果父元素存在并且在排除列表中，则跳过该节点
+                if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
+                    return NodeFilter.FILTER_SKIP;
+                }
+                // 所有传入此函数的节点都已是文本节点（由 SHOW_TEXT 控制）
+                return NodeFilter.FILTER_ACCEPT;
+            },
+        }
+    );
 
     const textFragments: string[] = [];
     while (walker.nextNode()) {
@@ -76,19 +76,25 @@ const walker = document.createTreeWalker(
             targetLang
         );
         if (translatedText === originalText) return;
+        const isInline = isInlineElement(element);
+        const shouldWrap = !isInline && translatedText.length >= 10;
 
-        // 清理旧翻译容器
+        const resultContent = shouldWrap
+            ? translatedText
+            : " | " + translatedText;
+
         const existing = element.querySelector(".translation-result");
-        if (existing) existing.remove();
-
-        // 创建新翻译容器
-        const resultContainer = createTranslationContainer(
-            translatedText,
-            isInlineElement(element)
-        );
-
-        // 更新DOM
-        element.appendChild(resultContainer);
+        if (existing) {
+            // 存在则直接替换内容（更高效的更新方式）
+            existing.textContent = resultContent;
+        } else {
+            // 不存在则创建并添加新容器
+            const resultContainer = createTranslationContainer(
+                resultContent,
+                shouldWrap
+            );
+            element.appendChild(resultContainer);
+        }
     } catch (error) {
         console.error("Element translation failed:", {
             error,
@@ -102,19 +108,10 @@ function isInlineElement(element: HTMLElement): boolean {
     const display = window.getComputedStyle(element).display;
     return display === "inline" || display === "inline-block";
 }
-//function isInlineElement(el: HTMLElement): boolean {
-//     const inlineTags = ["SPAN", "A", "STRONG", "EM", "B", "I"];
-//     return (
-//         inlineTags.includes(el.tagName) ||
-//         getComputedStyle(el).display === "inline"
-//     );
-// }
-
 function createTranslationContainer(
     translatedText: string,
-    isInline: boolean
+    shouldWrap: boolean
 ): HTMLElement {
-    const shouldWrap = !isInline && translatedText.length >= 10;
     const container = document.createElement(shouldWrap ? "div" : "span");
     // if (!shouldWrap) {
     //     container.style.display = "contents"; // 仅对块级容器生效
@@ -122,7 +119,7 @@ function createTranslationContainer(
     container.classList.add("translation-result");
 
     const fragment = document.createDocumentFragment();
-    fragment.textContent = shouldWrap ? translatedText : " | " + translatedText;
+    fragment.textContent = translatedText;
     container.appendChild(fragment);
 
     return container;

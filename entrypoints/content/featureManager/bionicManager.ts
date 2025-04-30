@@ -4,7 +4,7 @@ import { manageMutationObserver } from "../observer/domMutationObserver";
 import {
     parentToTextNodesMap,
     initializeSingleUseObserver,
-    singleUseObserver,
+    bionicTextObserver,
 } from "../observer/intersectionObserver/singleUseObserver";
 export function openBionic() {
     initializeSingleUseObserver();
@@ -13,7 +13,7 @@ export function openBionic() {
 
 export function stopBionic() {
     manageMutationObserver(false);
-    singleUseObserver.disconnect();
+    bionicTextObserver.disconnect();
     parentToTextNodesMap.clear();
     removeBionicEffects();
 }

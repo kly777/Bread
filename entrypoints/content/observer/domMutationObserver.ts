@@ -1,12 +1,12 @@
 import { getTextNodes } from "../kit/getTextNodes";
+import { setting } from "../settingManager";
 
 import {
     parentToTextNodesMap,
-    singleUseObserver,
+    bionicTextObserver,
     observeElementNode,
 } from "./intersectionObserver/singleUseObserver";
-import { observeTextAncestor } from "./intersectionObserver/stableIntersectionObserver";
-import { observeTranslateElements } from "./intersectionObserver/translateObserver";
+import { observeTranslateElements as translateAddedElement } from "./intersectionObserver/translateObserver";
 
 export function manageMutationObserver(shouldObserve: boolean) {
     if (shouldObserve) {
@@ -24,28 +24,14 @@ const domMutationObserver: MutationObserver = new MutationObserver(
         console.log("domMutationObserver observed some changes");
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
-                const walker = document.createTreeWalker(
-                    node,
-                    NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
-                    {
-                        acceptNode: () => {
-                            // 仅接受文本节点和元素节点
-                            return NodeFilter.FILTER_ACCEPT;
-                        },
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (setting.translate) {
+                        translateAddedElement(node as Element);
                     }
-                );
-
-                while (walker.nextNode()) {
-                    const currentNode = walker.currentNode;
-                    if (currentNode.nodeType === Node.TEXT_NODE) {
-                        const parent = currentNode.parentElement;
-                        if (parent) observeElementNode(parent);
-                        observeTextAncestor(currentNode as Text);
-                    } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
-                        observeElementNode(currentNode as Element);
+                    if (setting.bionic) {
+                        observeElementNode(node as Element);
                     }
                 }
-                observeTranslateElements(node as Element);
             });
 
             mutation.removedNodes.forEach((node) => {
@@ -61,8 +47,9 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                         if (parentToTextNodesMap.has(element)) {
                             // 重新获取该元素的所有文本节点并更新映射
                             const texts = getTextNodes(element);
+                            const textsSet = new Set(texts);
 
-                            parentToTextNodesMap.set(element, texts);
+                            parentToTextNodesMap.set(element, textsSet);
                         }
                     }
                 });
@@ -75,23 +62,19 @@ function handleRemovedNode(node: Node) {
     if (node.nodeType === Node.ELEMENT_NODE) {
         const element = node as Element;
         parentToTextNodesMap.delete(element);
-        singleUseObserver.unobserve(element);
+        bionicTextObserver.unobserve(element);
     } else if (node.nodeType === Node.TEXT_NODE) {
         const textNode = node as Text;
         const parent = textNode.parentElement;
         if (parent) {
             const texts = parentToTextNodesMap.get(parent);
             if (texts) {
-                const index = texts.indexOf(textNode);
-                if (index !== -1) {
-                    texts.splice(index, 1);
-                    if (texts.length === 0) {
-                        parentToTextNodesMap.delete(parent);
-                        singleUseObserver.unobserve(parent);
-                    }
+                // 直接尝试删除文本节点
+                if (texts.delete(textNode) && texts.size === 0) {
+                    parentToTextNodesMap.delete(parent);
+                    bionicTextObserver.unobserve(parent);
                 }
             }
         }
     }
 }
-

@@ -82,27 +82,31 @@ export function getTextContainerWalker(
         ) {
             return NodeFilter.FILTER_REJECT;
         }
-        const parent = element.parentElement;
-
         // 文本内容检查
-        if (parent) {
-            // 新增行内元素过滤 ---------------------------
-            if (INLINE_DISPLAY_VALUES.has(style.display)) {
-                if (hasTextNodes(parent)) {
-                    return NodeFilter.FILTER_SKIP;
-                }
-            }
-
-            const hasText = hasTextNodes(element);
-            const parentHasText = hasTextNodes(parent);
-            const isMid = hasText && !parentHasText;
-            console.log("isMid");
-            return isMid ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-        }
-        return NodeFilter.FILTER_SKIP;
+        return isEligibleElement(element)
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP;
     };
 
     return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
         acceptNode,
     });
+}
+
+function isEligibleElement(element: Element): boolean {
+    const parent = element.parentElement;
+    if (!parent) return false;
+
+    const style = window.getComputedStyle(element);
+
+    // 行内元素过滤逻辑
+    if (INLINE_DISPLAY_VALUES.has(style.display) && hasTextNodes(parent)) {
+        return false; // 跳过行内元素且父元素含文本的情况
+    }
+
+    const hasText = hasTextNodes(element);
+    const parentHasText = hasTextNodes(parent);
+
+    // 核心判定条件
+    return hasText && !parentHasText;
 }
