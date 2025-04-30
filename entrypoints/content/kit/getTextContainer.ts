@@ -55,7 +55,7 @@ export function getTextContainerWalker(
     root: Node = document.body,
     options: GetTextNodesOptions = {}
 ): TreeWalker {
-    const { excludeHidden = true, minContentLength = 0 } = options;
+    const { excludeHidden = true } = options;
 
     const acceptNode = (node: Node): number => {
         // 仅处理元素节点
