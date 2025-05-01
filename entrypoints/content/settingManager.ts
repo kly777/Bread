@@ -99,13 +99,16 @@ export function initSettingManager() {
         initFeature(key).catch((err) => console.error(`初始化${key}失败`, err));
 
         // 监听存储变化
-        storage.watch<boolean>(featureConfigs[key].key, async (newValue: boolean | null) => {
-            try {
-                updateFeature(key, newValue);
-            } catch (err) {
-                console.error(`更新${key}失败`, err);
+        storage.watch<boolean>(
+            featureConfigs[key].key,
+            async (newValue: boolean | null) => {
+                try {
+                    updateFeature(key, newValue);
+                } catch (err) {
+                    console.error(`更新${key}失败`, err);
+                }
             }
-        });
+        );
     });
 
     // 初始化bionic的特殊逻辑
@@ -147,7 +150,8 @@ function syncSettings() {
     for (const key in featureConfigs) {
         if (Object.prototype.hasOwnProperty.call(featureConfigs, key)) {
             const config = featureConfigs[key];
-            storage.getItem<boolean>(config.key)
+            storage
+                .getItem<boolean>(config.key)
                 .then((value: boolean | null) => {
                     if (value !== null) {
                         setting[key] = value;

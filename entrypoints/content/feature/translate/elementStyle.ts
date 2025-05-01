@@ -5,7 +5,7 @@
  */
 export function isInlineElement(element: HTMLElement): boolean {
     // 定义内联显示模式的合法枚举值
-    const INLINE_DISPLAYS = ["inline", "inline-block"];
+    const INLINE_DISPLAYS = ["inline", "inline-block", "inline-flex"];
 
     /*
      * 获取并标准化元素的 display 样式值

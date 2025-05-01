@@ -34,13 +34,12 @@ export const translateElement = async (
         "SVG",
         "VAR",
         "KBD",
-        "I",
         "INPUT",
     ];
 
     const walker = document.createTreeWalker(
         element,
-        NodeFilter.SHOW_TEXT || NodeFilter.SHOW_ELEMENT, // 只遍历文本节点
+        NodeFilter.SHOW_ALL, // 只遍历文本节点
         {
             acceptNode: (node) => {
                 const parent = node.parentElement;
@@ -48,8 +47,22 @@ export const translateElement = async (
                 if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
                     return NodeFilter.FILTER_REJECT;
                 }
-                // 所有传入此函数的节点都已是文本节点（由 SHOW_TEXT 控制）
-                return NodeFilter.FILTER_ACCEPT;
+
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const display = window
+                        .getComputedStyle(node as HTMLElement)
+                        .display.trim()
+                        .toLowerCase();
+                    console.log("display:", display)
+                    if (display === "none") {
+                        return NodeFilter.FILTER_REJECT;
+                    }
+                }
+                if(node.nodeType === Node.TEXT_NODE) {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+
+                return NodeFilter.FILTER_SKIP;
             },
         }
     );
