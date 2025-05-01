@@ -47,7 +47,7 @@ const featureConfigs: { [key: string]: FeatureConfig } = {
     },
     stripe: {
         key: "local:stripe",
-        defaultValue: true,
+        defaultValue: false,
         on: initStripe,
         off: () => {}, // stripe无明确关闭函数，留空
     },

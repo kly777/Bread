@@ -39,6 +39,10 @@ mark.bread-highlight {
     font-size: 0.78em;
     transition: opacity 0.3s ease-in-out;
 }
+span.translation-result{
+    display: inline;
+}
+
 div.translation-result{
     margin-top: 0;
     padding-top: 0;

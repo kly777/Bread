@@ -1,6 +1,15 @@
 import { translateContent as translateG } from "../../kit/translateG";
 import { translateContent as translateMS } from "../../kit/translateMS";
 import { translator } from "../../featureManager/translateManager";
+import {
+    hasMixedContent,
+    hasSizeConstraints,
+    hasVerticalAlign,
+    isInFlexContext,
+    isInlineElement,
+    isPositionedElement,
+    shouldWrapElement,
+} from "./elementStyle";
 /**
  * 翻译指定元素内容并展示
  * @param element 需要翻译的DOM元素
@@ -28,17 +37,18 @@ export const translateElement = async (
         "VAR",
         "KBD",
         "I",
+        "INPUT",
     ];
 
     const walker = document.createTreeWalker(
         element,
-        NodeFilter.SHOW_TEXT, // 只遍历文本节点
+        NodeFilter.SHOW_TEXT || NodeFilter.SHOW_ELEMENT, // 只遍历文本节点
         {
             acceptNode: (node) => {
                 const parent = node.parentElement;
                 // 如果父元素存在并且在排除列表中，则跳过该节点
                 if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
-                    return NodeFilter.FILTER_SKIP;
+                    return NodeFilter.FILTER_REJECT;
                 }
                 // 所有传入此函数的节点都已是文本节点（由 SHOW_TEXT 控制）
                 return NodeFilter.FILTER_ACCEPT;
@@ -71,27 +81,27 @@ export const translateElement = async (
          * 步骤二：执行翻译操作
          * 使用现有翻译服务进行内容转换
          */
-        let atranslatedText;
-        if (translator === "MS") {
-            atranslatedText = await translateMS(
-                originalText,
-                undefined,
-                targetLang
-            );
-        } else if (translator === "G") {
-            atranslatedText = await translateG(
-                originalText,
-                undefined,
-                targetLang
-            );
-        }
-        const translatedText = atranslatedText;
+
+        // 替换原有逻辑为函数调用
+        const translatedText = await performTranslation(
+            translator,
+            originalText,
+            targetLang
+        );
+
         if (translatedText === originalText) return;
-        const isInline = isInlineElement(element);
-        const shouldWrap = !isInline && translatedText.length >= 10;
+        // 在翻译逻辑中增加多维判断
+        const shouldUseInline =
+            isInlineElement(element) ||
+            isPositionedElement(element) ||
+            isInFlexContext(element) ||
+            hasVerticalAlign(element) ||
+            hasMixedContent(element);
+
+        const shouldWrap = !shouldUseInline && shouldWrapElement(element);
 
         const resultContent = shouldWrap
-            ? translatedText
+            ? "- " + translatedText
             : " | " + translatedText;
 
         const existing = element.querySelector(".translation-result");
@@ -115,10 +125,6 @@ export const translateElement = async (
     }
 };
 
-function isInlineElement(element: HTMLElement): boolean {
-    const display = window.getComputedStyle(element).display;
-    return display === "inline" || display === "inline-block";
-}
 function createTranslationContainer(
     translatedText: string,
     shouldWrap: boolean
@@ -134,4 +140,24 @@ function createTranslationContainer(
     container.appendChild(fragment);
 
     return container;
+}
+
+/**
+ * 封装翻译服务调用逻辑
+ * @param translator 使用的翻译引擎（MS/G）
+ * @param originalText 原始文本
+ * @param targetLang 目标语言
+ * @returns 翻译后的文本
+ */
+async function performTranslation(
+    translator: string,
+    originalText: string,
+    targetLang: string
+): Promise<string> {
+    if (translator === "MS") {
+        return await translateMS(originalText, undefined, targetLang);
+    } else if (translator === "G") {
+        return await translateG(originalText, undefined, targetLang);
+    }
+    throw new Error("Unsupported translator");
 }
