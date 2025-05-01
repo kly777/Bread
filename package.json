@@ -2,7 +2,7 @@
   "name": "bread",
   "description": "a extension for reading",
   "private": true,
-  "version": "0.1.10",
+  "version": "0.1.11",
   "type": "module",
   "scripts": {
     "dev": "wxt",

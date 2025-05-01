@@ -47,14 +47,14 @@ export function hasVerticalAlign(element: HTMLElement): boolean {
     const align = window.getComputedStyle(element).verticalAlign;
     return align !== "auto" && align !== "baseline";
 }
-//包含其他DOM元素的混合内容更适合使用行内容器包裹
-export function hasMixedContent(element: HTMLElement): boolean {
-    return Array.from(element.childNodes).some(
-        (node) =>
-            node.nodeType === Node.ELEMENT_NODE &&
-            node !== element.querySelector(".translation-result")
-    );
-}
+// //包含其他DOM元素的混合内容更适合使用行内容器包裹
+// export function hasMixedContent(element: HTMLElement): boolean {
+//     return Array.from(element.childNodes).some(
+//         (node) =>
+//             node.nodeType === Node.ELEMENT_NODE &&
+//             node !== element.querySelector(".translation-result")
+//     );
+// }
 /**
  * 判断元素是否设置了文本自动换行样式
  * @param element - 需要检测的HTML元素
@@ -62,7 +62,8 @@ export function hasMixedContent(element: HTMLElement): boolean {
  */
 export function shouldWrapElement(element: HTMLElement): boolean {
     // 获取元素当前计算后的文本换行模式
-    const textWrapMode = window.getComputedStyle(element).textWrapMode;
+    const textWrapMode = window.getComputedStyle(element).textWrapMode.trim();
     // 判断是否为强制换行模式
-    return textWrapMode === "wrap";
+    console.log(textWrapMode);
+    return textWrapMode === "wrap" || textWrapMode === "";
 }

@@ -2,8 +2,6 @@ import { translateContent as translateG } from "../../kit/translateG";
 import { translateContent as translateMS } from "../../kit/translateMS";
 import { translator } from "../../featureManager/translateManager";
 import {
-    hasMixedContent,
-    hasSizeConstraints,
     hasVerticalAlign,
     isInFlexContext,
     isInlineElement,
@@ -95,23 +93,18 @@ export const translateElement = async (
             isInlineElement(element) ||
             isPositionedElement(element) ||
             isInFlexContext(element) ||
-            hasVerticalAlign(element) ||
-            hasMixedContent(element);
+            hasVerticalAlign(element);
 
         const shouldWrap = !shouldUseInline && shouldWrapElement(element);
-
-        const resultContent = shouldWrap
-            ? "- " + translatedText
-            : " | " + translatedText;
 
         const existing = element.querySelector(".translation-result");
         if (existing) {
             // 存在则直接替换内容（更高效的更新方式）
-            existing.textContent = resultContent;
+            existing.textContent = desString(translatedText, shouldWrap);
         } else {
             // 不存在则创建并添加新容器
             const resultContainer = createTranslationContainer(
-                resultContent,
+                translatedText,
                 shouldWrap
             );
             element.appendChild(resultContainer);
@@ -124,19 +117,27 @@ export const translateElement = async (
         });
     }
 };
+function desString(content: string, shouldWrap: boolean): string {
+    const resultContent = shouldWrap ? "- " + content : " | " + content;
+    return resultContent;
+}
 
 function createTranslationContainer(
     translatedText: string,
     shouldWrap: boolean
 ): HTMLElement {
     const container = document.createElement(shouldWrap ? "div" : "span");
+
     // if (!shouldWrap) {
     //     container.style.display = "contents"; // 仅对块级容器生效
     // }
     container.classList.add("translation-result");
+    if (!shouldWrap) {
+        container.title = translatedText;
+    }
 
     const fragment = document.createDocumentFragment();
-    fragment.textContent = translatedText;
+    fragment.textContent = desString(translatedText, shouldWrap);
     container.appendChild(fragment);
 
     return container;
