@@ -44,21 +44,21 @@ export const translateElement = async (
             acceptNode: (node) => {
                 const parent = node.parentElement;
                 // 如果父元素存在并且在排除列表中，则跳过该节点
-                if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
-                    return NodeFilter.FILTER_REJECT;
-                }
 
                 if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
+                        return NodeFilter.FILTER_REJECT;
+                    }
                     const display = window
                         .getComputedStyle(node as HTMLElement)
                         .display.trim()
                         .toLowerCase();
-                    console.log("display:", display)
+                    console.log("display:", display);
                     if (display === "none") {
                         return NodeFilter.FILTER_REJECT;
                     }
                 }
-                if(node.nodeType === Node.TEXT_NODE) {
+                if (node.nodeType === Node.TEXT_NODE) {
                     return NodeFilter.FILTER_ACCEPT;
                 }
 
@@ -110,7 +110,9 @@ export const translateElement = async (
 
         const shouldWrap = !shouldUseInline && shouldWrapElement(element);
 
-        const existing = element.querySelector(".translation-result");
+        const existing = Array.from(element.children).find((child) =>
+            child.classList.contains("translation-result")
+        );
         if (existing) {
             // 存在则直接替换内容（更高效的更新方式）
             existing.textContent = desString(translatedText, shouldWrap);
