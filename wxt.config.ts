@@ -10,6 +10,7 @@ export default defineConfig({
             "https://api-edge.cognitive.microsofttranslator.com/",
             "https://translate.googleapis.com/translate_a/single",
         ],
+        summary: "A browser extension for reading enhancement",
     },
     zip: {
         downloadPackages: [
