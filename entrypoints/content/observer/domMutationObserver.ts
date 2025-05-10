@@ -1,3 +1,4 @@
+import { pin } from "../feature/anchor/pin";
 import { getTextNodes } from "../kit/getTextNodes";
 import { setting } from "../settingManager";
 
@@ -21,6 +22,7 @@ export function manageMutationObserver(shouldObserve: boolean) {
 
 const domMutationObserver: MutationObserver = new MutationObserver(
     (mutations: MutationRecord[]) => {
+        // pin()
         console.log("domMutationObserver observed some changes");
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {

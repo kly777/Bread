@@ -21,17 +21,24 @@ onMounted(async () => {
     try {
 
         console.log('featureName:', props.featureName);
+
         const result = await storage.getItem<boolean>(key);
+
         console.log('feature value fetched:', result);
+
         if (result === undefined || result === null) {
             feature.value = true;
         }
         else {
             feature.value = result;
         }
+
         console.log('feature value fetched:', result);
+
     } catch (error) {
+
         console.error('Error fetching storage:', error);
+
         feature.value = true;
     }
 });

@@ -13,6 +13,12 @@ import {
  * @param element 需要翻译的DOM元素
  * @param targetLang 目标语言代码，默认为简体中文('zh-CN')
  */
+
+
+const translationCache = new Map<string, string>();
+
+
+
 export const translateElement = async (
     element: HTMLElement,
     targetLang = "zh-CN"
@@ -49,14 +55,14 @@ export const translateElement = async (
                     if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
                         return NodeFilter.FILTER_REJECT;
                     }
-                    const display = window
-                        .getComputedStyle(node as HTMLElement)
-                        .display.trim()
-                        .toLowerCase();
-                    console.log("display:", display);
-                    if (display === "none") {
-                        return NodeFilter.FILTER_REJECT;
-                    }
+                    // const display = window
+                    //     .getComputedStyle(node as HTMLElement)
+                    //     .display.trim()
+                    //     .toLowerCase();
+                    // console.log("display:", display);
+                    // if (display === "none") {
+                    //     return NodeFilter.FILTER_REJECT;
+                    // }
                 }
                 if (node.nodeType === Node.TEXT_NODE) {
                     return NodeFilter.FILTER_ACCEPT;
@@ -170,10 +176,20 @@ async function performTranslation(
     originalText: string,
     targetLang: string
 ): Promise<string> {
-    if (translator === "MS") {
-        return await translateMS(originalText, undefined, targetLang);
-    } else if (translator === "G") {
-        return await translateG(originalText, undefined, targetLang);
+    const cacheKey = `${originalText}:${targetLang}:${translator}`;
+    if (translationCache.has(cacheKey)) {
+        return translationCache.get(cacheKey)!;
     }
+
+
+    let result: string = ""
+    if (translator === "MS") {
+        result = await translateMS(originalText, undefined, targetLang);
+    } else if (translator === "G") {
+        result = await translateG(originalText, undefined, targetLang);
+    }
+
+    translationCache.set(cacheKey, result);
+    return result;
     throw new Error("Unsupported translator");
 }
