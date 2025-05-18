@@ -1,76 +1,85 @@
 <script setup lang="ts">
-const props = defineProps(
+import { ref, watch, onMounted } from "vue";
+import FeatureSetting from "./FeatureSetting.vue";
+const props = defineProps<{
+    featureName: string
+    settings?: Record<string, "string" | "number" | "boolean">;
+}>()
+
+
+interface FeatureConfig {
+    enabled: boolean;
+    settings: Record<string, number | string | boolean>;
+}
+
+const featureConfig = ref<FeatureConfig>(
     {
-        featureName: {
-            type: String,
-            required: true
-        }
+        enabled: false,
+        settings: {}
     }
 )
 
-import { ref, watch } from "vue"
+type StorageKey =
+    | `local:${string}`
+    | `session:${string}`
+    | `sync:${string}`
+    | `managed:${string}`;
 
-
-const feature = ref(false)
-
-type StorageKey = `local:${string}` | `session:${string}` | `sync:${string}` | `managed:${string}`;
-
-const key: StorageKey = `local:${props.featureName}`;
+const key: StorageKey = `local:{props.featureName}`;
 // 从 browser.storage.local 获取初始值
+// 初始化 feature 
 onMounted(async () => {
     try {
+        // 从storage读取持久化配置
+        const storedConfig = await storage.getItem(key) as boolean | null;
 
-        console.log('featureName:', props.featureName);
-
-        const result = await storage.getItem<boolean>(key);
-
-        console.log('feature value fetched:', result);
-
-        if (result === undefined || result === null) {
-            feature.value = true;
+        if (storedConfig) {
+            featureConfig.value.enabled = storedConfig
         }
-        else {
-            feature.value = result;
-        }
-
-        console.log('feature value fetched:', result);
-
     } catch (error) {
-
-        console.error('Error fetching storage:', error);
-
-        feature.value = true;
+        console.warn(`读取${props.featureName}存储配置失败`, error);
     }
 });
 
-
-
-watch(feature, async (newVal) => {
-    try {
-        console.log('feature value changed:', newVal);
-        await storage.setItem(key, newVal);
-        console.log('feature value saved:', newVal);
-    } catch (error) {
-        console.error('Error saving storage:', error);
-    }
-});
+// 监听 config 变化
+watch(
+    () => featureConfig.value.enabled,
+    (newValue) => {
+        if (newValue) {
+            storage.setItem(key, newValue);
+        }
+    },
+    { deep: true }
+)
 
 </script>
 
-
 <template>
     <div class="feature-switch">
-        {{ featureName }}
-        <input type="checkbox" v-model="feature">
+        <div>
+             {{ props.featureName }}
+            <input type="checkbox" v-model="featureConfig.enabled" />
+        </div>
 
+        <template v-if="featureConfig.settings">
+            <div v-for="(type, settingName) in props.settings" :key="settingName" class="setting-item">
+                <FeatureSetting :settingName="settingName" :type="type" :featureName="props.featureName" />
+            </div>
+        </template>
     </div>
 </template>
 
 <style scoped>
 .feature-switch {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     margin-bottom: 5px;
 }
+
+
+/* 新增：确保子元素容器可扩展 */
+.feature-switch>div {
+    flex-grow: 1;
+    display: flex;
+    justify-content: space-between;
+}
 </style>
+

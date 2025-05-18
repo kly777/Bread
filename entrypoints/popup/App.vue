@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import featureSwitch from "./featureSwitch.vue";
+import FeatureSwitch from "./FeatureSwitch.vue";
 
 </script>
 
 <template>
   <div class="popup">
 
-    <featureSwitch feature-name="highlight" />
-    <featureSwitch feature-name="stripe" />
-    <featureSwitch feature-name="bionic" />
-    <featureSwitch feature-name="translate" />
+    <featureSwitch feature-name="highlight" :settings="{ color: 'string' ,size: 'number' }" />
+    <FeatureSwitch feature-name="stripe" />
+    <FeatureSwitch feature-name="bionic" />
+    <FeatureSwitch feature-name="translate" />
   </div>
 </template>
 
