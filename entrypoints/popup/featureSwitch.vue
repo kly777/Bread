@@ -25,7 +25,7 @@ type StorageKey =
     | `sync:${string}`
     | `managed:${string}`;
 
-const key: StorageKey = `local:{props.featureName}`;
+const key: StorageKey = `local:${props.featureName}`;
 // 从 browser.storage.local 获取初始值
 // 初始化 feature 
 onMounted(async () => {

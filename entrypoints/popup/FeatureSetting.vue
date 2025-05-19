@@ -13,7 +13,7 @@ type StorageKey =
   | `session:${string}`
   | `sync:${string}`
   | `managed:${string}`;
-const key: StorageKey = `local:{props.featureName+props.settingName}`;
+const key: StorageKey = `local:${props.featureName+props.settingName}`;
 const setting = ref<FeatureSettingConfig>()
 
 onMounted(async () => {
