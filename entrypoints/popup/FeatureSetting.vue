@@ -13,7 +13,7 @@ type StorageKey =
   | `session:${string}`
   | `sync:${string}`
   | `managed:${string}`;
-const key: StorageKey = `local:${props.featureName+props.settingName}`;
+const key: StorageKey = `local:${props.featureName + props.settingName}`;
 const setting = ref<FeatureSettingConfig>()
 
 onMounted(async () => {
@@ -23,6 +23,8 @@ onMounted(async () => {
 
     if (storedConfig) {
       setting.value = storedConfig
+    } else {
+      // storage.setItem(key, setting.value);
     }
   } catch (error) {
     console.warn(`读取${key}存储配置失败`, error);
@@ -36,7 +38,8 @@ watch(
     if (newValue !== null) {
       storage.setItem(key, newValue).catch(error => {
         console.error(`保存${key}配置失败:`, error);
-      });
+      }
+      );
     }
   }
 );

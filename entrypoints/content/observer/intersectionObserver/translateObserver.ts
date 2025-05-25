@@ -30,3 +30,12 @@ export function observeTranslateElements(root: Element) {
         translateObserver.observe(el)
     );
 }
+
+export function stopTranslatorObserver(){
+    translateObserver.disconnect();
+    document
+        .querySelectorAll<HTMLElement>(".translation-result")
+        .forEach((tr) => {
+            tr.remove();
+        });
+}

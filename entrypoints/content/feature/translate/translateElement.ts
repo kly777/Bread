@@ -8,6 +8,7 @@ import {
     isPositionedElement,
     shouldWrapElement,
 } from "./elementStyle";
+import { setting } from "../../settingManager";
 /**
  * 翻译指定元素内容并展示
  * @param element 需要翻译的DOM元素
@@ -105,6 +106,10 @@ export const translateElement = async (
             originalText,
             targetLang
         );
+        if(setting.translate === false) {
+            console.warn("Translation is disabled in settings.");
+            return;
+        }
 
         if (translatedText === originalText) return;
         // 在翻译逻辑中增加多维判断

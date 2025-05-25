@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import FeatureSwitch from "./FeatureSwitch.vue";
-
+import ApplyWebsites from "./ApplyWebsites.vue";
 </script>
 
 <template>
   <div class="popup">
 
-    <featureSwitch feature-name="highlight" :settings="{ color: 'string' ,size: 'number' }" />
+    <FeatureSwitch feature-name="highlight" :settings="{ color: 'string' ,size: 'number' }" />
+    <ApplyWebsites/>
     <FeatureSwitch feature-name="stripe" />
     <FeatureSwitch feature-name="bionic" />
     <FeatureSwitch feature-name="translate" />

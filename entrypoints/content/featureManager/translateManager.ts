@@ -1,4 +1,4 @@
-import { initializeTranslateObserver } from "../observer/intersectionObserver/translateObserver";
+import { initializeTranslateObserver,stopTranslatorObserver } from "../observer/intersectionObserver/translateObserver";
 
 type Translator = "MS" | "G";
 export let translator: Translator = "MS";
@@ -8,9 +8,5 @@ export async function openTranslate() {
 }
 
 export function stopTranslate() {
-    document
-        .querySelectorAll<HTMLElement>(".translation-result")
-        .forEach((tr) => {
-            tr.remove();
-        });
+    stopTranslatorObserver();
 }

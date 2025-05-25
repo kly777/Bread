@@ -27,7 +27,7 @@ type StorageKey =
 
 const key: StorageKey = `local:${props.featureName}`;
 // 从 browser.storage.local 获取初始值
-// 初始化 feature 
+// 初始化 feature
 onMounted(async () => {
     try {
         // 从storage读取持久化配置
@@ -35,6 +35,9 @@ onMounted(async () => {
 
         if (storedConfig) {
             featureConfig.value.enabled = storedConfig
+        } else {
+            // 如果没有存储的配置，初始化为默认值
+            // storage.setItem(key, featureConfig.value.enabled);
         }
     } catch (error) {
         console.warn(`读取${props.featureName}存储配置失败`, error);
@@ -45,9 +48,7 @@ onMounted(async () => {
 watch(
     () => featureConfig.value.enabled,
     (newValue) => {
-        if (newValue) {
             storage.setItem(key, newValue);
-        }
     },
     { deep: true }
 )
@@ -57,7 +58,7 @@ watch(
 <template>
     <div class="feature-switch">
         <div>
-             {{ props.featureName }}
+            {{ props.featureName }}
             <input type="checkbox" v-model="featureConfig.enabled" />
         </div>
 
@@ -82,4 +83,3 @@ watch(
     justify-content: space-between;
 }
 </style>
-
