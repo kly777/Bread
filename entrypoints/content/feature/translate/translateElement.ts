@@ -106,7 +106,7 @@ export const translateElement = async (
             originalText,
             targetLang
         );
-        if(setting.translate === false) {
+        if (setting.translate === false) {
             console.warn("Translation is disabled in settings.");
             return;
         }
