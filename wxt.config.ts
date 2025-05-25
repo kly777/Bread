@@ -6,10 +6,15 @@ export default defineConfig({
   manifest: {
     permissions: [
       "storage",
+      "nativeMessaging",
+      "tabs",
+      "<all_urls>",
+      "activeTab",
       "https://edge.microsoft.com/",
       "https://api-edge.cognitive.microsofttranslator.com/",
       "https://translate.googleapis.com/translate_a/single",
     ],
+    host_permissions: ["<all_urls>"],
     summary: "A browser extension for reading enhancement",
   },
   zip: {

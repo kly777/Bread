@@ -3,14 +3,18 @@ type StorageKey = `local:${string}`;
 
 
 
-export async function getKeyWithDomainPop(key: string): Promise<StorageKey> {
-  const url = await getCurrentUrl()
-  return `local:${url}:${key}`;
+export function getKeyWithDomainPop(key: string): StorageKey {
+  let domain = "default";
+  browser.runtime.sendMessage({ action: "getDomain" }, (response) => {
+    domain = response.domain
+
+  });
+  return `local:${domain}:${key}`;
 }
 
 export function getKeyWithDomain(key: string): StorageKey {
   const domain = getCurrentDomain();
-  console.log("当前域名：", domain);
+  console.log("当前域名Domain：", domain);
   return `local:${domain}:${key}`;
 }
 // 根据运行环境获取当前域名（示例：content script 或 popup）
@@ -32,9 +36,9 @@ function getCurrentDomain() {
 }
 async function getCurrentUrl() {
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-    if (tab.url) {
-      return formatDomain(tab.url)
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
+    if (tabs && tabs.length > 0 && tabs[0].url) {
+      return formatDomain(tabs[0].url);
     }
     return null;
   } catch (error) {

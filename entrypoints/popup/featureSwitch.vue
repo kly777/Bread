@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import FeatureSetting from "./FeatureSetting.vue";
-import { getKeyWithDomainPop } from "../kit/storage";
+
 const props = defineProps<{
     featureName: string
     settings?: Record<string, "string" | "number" | "boolean">;
@@ -19,29 +19,47 @@ const featureConfig = ref<FeatureConfig>(
         settings: {}
     }
 )
-
+let domain = 'default'; // 默认域名
 const key = props.featureName;
-// 从 browser.storage.local 获取初始值
-// 初始化 feature
 onMounted(async () => {
+
+    await new Promise<void>(resolve => {
+        browser.runtime.sendMessage({ action: "getDomain" }, (response) => {
+            domain = response.domain || 'default'; // 添加兜底值
+            resolve();
+        });
+    });
+
     try {
         // 从storage读取持久化配置
-        const storedConfig = await storage.getItem(await getKeyWithDomainPop(key)) as boolean | null;
-
+        console.log('读取存储配置', getKeyWithDomainPop(key))
+        const storedConfig = await storage.getItem(getKeyWithDomainPop(key)) as boolean | null;
+        console.log('读取到存储配置', storedConfig)
         if (storedConfig !== null) {
+            console.log(getKeyWithDomainPop(key))
             featureConfig.value.enabled = storedConfig
         }
     } catch (error) {
         console.warn(`读取${props.featureName}存储配置失败`, error);
     }
-});
+})
+function getKeyWithDomainPop(key: string): StorageKey {
+    // 如果域名是默认值，则不添加域名前缀
+    if (domain === 'default') {
+        return `local:${key}`;
+    }
+    // 否则，添加域名前缀
+    return `local:${domain}:${key}`;
+}
+type StorageKey = `local:${string}`;
+
 
 // 监听 开关 变化
 watch(
     () => featureConfig.value.enabled,
     async (newValue) => {
         console.log(getKeyWithDomainPop(key))
-        storage.setItem(await getKeyWithDomainPop(key), newValue);
+        storage.setItem(getKeyWithDomainPop(key), newValue);
     },
     { deep: true }
 )
