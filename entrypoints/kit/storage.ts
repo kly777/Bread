@@ -34,23 +34,23 @@ function getCurrentDomain() {
 
   return "default";
 }
-async function getCurrentUrl() {
-  try {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
-    if (tabs && tabs.length > 0 && tabs[0].url) {
-      return formatDomain(tabs[0].url);
-    }
-    return null;
-  } catch (error) {
-    console.error('获取标签页失败:', error)
-    return null;
-  }
-}
-function formatDomain(hostname: string) {
+// async function getCurrentUrl() {
+//   try {
+//     const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
+//     if (tabs && tabs.length > 0 && tabs[0].url) {
+//       return formatDomain(tabs[0].url);
+//     }
+//     return null;
+//   } catch (error) {
+//     console.error('获取标签页失败:', error)
+//     return null;
+//   }
+// }
+// function formatDomain(hostname: string) {
 
-  const rexExp = /(https?:\/\/(.+?)\/)/ig
-  const matchResult = hostname.trim().match(rexExp);
+//   const rexExp = /(https?:\/\/(.+?)\/)/ig
+//   const matchResult = hostname.trim().match(rexExp);
 
-  // 返回完整域名或原始值
-  return matchResult ? matchResult[0].split(/\/+/)[1] : hostname;
-}
+//   // 返回完整域名或原始值
+//   return matchResult ? matchResult[0].split(/\/+/)[1] : hostname;
+// }
