@@ -1,4 +1,3 @@
-import { pin } from "../feature/anchor/pin";
 import { getTextNodes } from "../kit/getTextNodes";
 import { getSetting } from "../settingManager";
 
