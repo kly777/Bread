@@ -17,15 +17,19 @@ interface FeatureConfig {
   default: boolean;
   init?: () => void | Promise<void>; // 可选的初始化函数
   on: () => void | Promise<void>;
-  off: () => void;
+  off: () => void | Promise<void>;
 }
 
-export let setting: { [key: string]: boolean } = {
+let setting: { [key: string]: boolean } = {
   highlight: false,
   stripe: false,
   translate: false,
   bionic: false,
 };
+// 导出只读的 setting 副本
+export function getSetting(): { [key: string]: boolean } {
+  return { ...setting };
+}
 
 const featureConfigs: { [key: string]: FeatureConfig } = {
   bionic: {
@@ -65,35 +69,68 @@ async function initFeature(key: string) {
   }
 }
 
-function switchFeature(key: string, newValue: boolean | null) {
+/**
+ * 切换指定功能键的特性状态。
+ * @param key - 功能键标识符，用于查找对应的配置
+ * @param newValue - 新的布尔值或null，若为null则使用默认值
+ * @returns void
+ */
+async function switchFeature(key: string, newValue: boolean | null) {
   const config = featureConfigs[key];
   if (!config) return;
+
+  // 处理默认值逻辑
   if (newValue === null) {
     newValue = config.default;
   }
+
+  // 执行特性开关回调
   if (newValue) {
-    config.on();
+    await config.on();
   } else {
-    config.off();
+    await config.off();
   }
+
+  // 持久化存储当前状态
   setting[key] = newValue;
 }
 
-// 初始化所有功能
+/**
+ * 初始化设置管理器，负责同步配置并监听功能开关变化
+ * @remarks
+ * 该函数会执行以下操作：
+ * 1. 同步全局设置
+ * 2. 初始化所有功能模块
+ * 3. 建立功能配置项的实时监听机制
+ */
 export function initSettingManager() {
-  // 同步setting
+  /**
+   * 同步全局设置到本地存储
+   * @internal
+   * 此方法会从远程服务获取最新设置并持久化存储
+   */
   syncSettings();
+  /**
+   * 并行初始化所有功能模块
+   * 使用 Promise.all 提高初始化效率
+   */
+  Object.keys(featureConfigs).map((key) =>
+    initFeature(key).catch((err) => console.error(`初始化${key}失败`, err))
+  );
 
+  /**
+   * 为每个功能项建立存储变更监听器
+   * @param key - 功能配置项唯一标识
+   * @returns void
+   * @internal
+   * 使用带域名前缀的存储键进行监听，变化时调用switchFeature处理
+   */
   Object.keys(featureConfigs).forEach((key) => {
-    // 初始化
-    initFeature(key).catch((err) => console.error(`初始化${key}失败`, err));
-
-    // 监听存储变化
     storage.watch<boolean>(
       getKeyWithDomain(key),
       async (newValue: boolean | null) => {
         try {
-          switchFeature(key, newValue);
+          await switchFeature(key, newValue);
         } catch (err) {
           console.error(`更新${key}失败`, err);
         }
@@ -104,16 +141,20 @@ export function initSettingManager() {
 
 
 
-// 从storage同步setting
-async function syncSettings() {
-  for (const key in featureConfigs) {
+/**
+ * 从存储中同步功能配置设置到全局setting对象
+ * 优先读取域名专属配置，降级使用全局配置，最终回退到默认值
+ *
+ * @returns {Promise<void>} 无返回值，但会修改全局setting对象
+ */
+async function syncSettings(): Promise<void> {
+  const keys = Object.keys(featureConfigs);
+  for (const key of keys) {
     const config = featureConfigs[key];
     const domainKey = getKeyWithDomain(key);
 
-    // 优先读取网站专属配置
     let value = await storage.getItem<boolean>(domainKey);
     if (value === null) {
-      // 降级读取全局配置
       value = await storage.getItem<boolean>(`local:${key}`);
     }
 

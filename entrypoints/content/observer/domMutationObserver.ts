@@ -1,6 +1,6 @@
 import { pin } from "../feature/anchor/pin";
 import { getTextNodes } from "../kit/getTextNodes";
-import { setting } from "../settingManager";
+import { getSetting } from "../settingManager";
 
 import {
     parentToTextNodesMap,
@@ -27,10 +27,10 @@ const domMutationObserver: MutationObserver = new MutationObserver(
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                    if (setting.translate) {
+                    if (getSetting().translate) {
                         translateAddedElement(node as Element);
                     }
-                    if (setting.bionic) {
+                    if (getSetting().bionic) {
                         observeElementNode(node as Element);
                     }
                 }
