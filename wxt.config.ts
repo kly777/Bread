@@ -25,17 +25,19 @@ export default defineConfig({
   },
   vite: (configEnv: { mode: string }) => ({
     build: {
-      // 根据模式切换 minify 行为
-      minify: configEnv.mode === "production" ? "terser" : false,
+      minify: "terser",
       terserOptions: {
-        compress:
-          configEnv.mode === "production"
-            ? {
-              drop_console: true,
-              drop_debugger: true,
-            }
-            : false,
+        compress: {
+          defaults: true, // 启用所有默认压缩规则
+          drop_console: true, // 移除 console.*
+          drop_debugger: true, // 移除 debugger
+          pure_funcs: ["console.assert"], // 移除断言
+          unused: true, // 移除未使用代码
+        },
+        mangle: true, // 混淆变量名（如 `myVar` → `a`）
+        format: { comments: false }, // 移除注释
       },
     },
-  }),
+    optimizeDeps: { include: ["vue"] },
+  })
 });

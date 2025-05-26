@@ -42,6 +42,9 @@ export const translateElement = async (
         "VAR",
         "KBD",
         "INPUT",
+        "PRE",
+        "TEXTAREA",
+        "CODE",
     ];
 
     const walker = document.createTreeWalker(
