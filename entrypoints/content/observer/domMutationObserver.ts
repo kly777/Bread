@@ -5,7 +5,7 @@ import {
     parentToTextNodesMap,
     bionicTextObserver,
     observeElementNode,
-} from "./intersectionObserver/singleUseObserver";
+} from "./intersectionObserver/bionicObserver";
 import { observeTranslateElements as translateAddedElement } from "./intersectionObserver/translateObserver";
 
 export function manageMutationObserver(shouldObserve: boolean) {

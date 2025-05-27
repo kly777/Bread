@@ -27,7 +27,7 @@ function processVisibleTextElement(entry: IntersectionObserverEntry): void {
     // 应用仿生效果到文本节点（例如高亮、动画等）
     applyBionicEffect(Array.from(setTexts));
 
-    // 清理元素与文本节点的映射关系，避免内存泄漏
+    // 清理元素与文本节点的映射关系
     cleanupAndUnobserve(element);
 }
 

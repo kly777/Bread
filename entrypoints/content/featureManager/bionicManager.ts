@@ -5,7 +5,7 @@ import {
     parentToTextNodesMap,
     initializeSingleUseObserver,
     bionicTextObserver,
-} from "../observer/intersectionObserver/singleUseObserver";
+} from "../observer/intersectionObserver/bionicObserver";
 
 // 特殊处理：bionic的DOM加载逻辑
 export function initBionic() {
