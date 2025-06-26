@@ -7,6 +7,6 @@ export default defineContentScript({
 
     async main() {
         await initFunctions();
-        // pin()
+        pin()
     },
 });

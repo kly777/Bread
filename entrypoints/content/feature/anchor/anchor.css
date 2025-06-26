@@ -1,0 +1,11 @@
+.anchor-container {
+    position: fixed;
+    border: 1px solid rgb(0, 0, 0);
+    right: 0;
+    bottom: 0;
+    min-width: 10px;
+    z-index: 1000;
+    width: auto;
+    height: 20px;
+    padding: 2px;
+}
