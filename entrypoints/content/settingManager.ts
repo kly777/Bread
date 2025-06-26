@@ -31,7 +31,7 @@ export function getSetting(): { [key: string]: boolean } {
   return { ...setting };
 }
 
-const featureConfigs: { [key: string]: FeatureConfig } = {
+const features: { [key: string]: FeatureConfig } = {
   bionic: {
     default: false,
     init: initBionic, // 特殊处理：bionic的初始化
@@ -57,7 +57,7 @@ const featureConfigs: { [key: string]: FeatureConfig } = {
 
 // 通用初始化函数
 async function initFeature(key: string) {
-  const config = featureConfigs[key];
+  const config = features[key];
   if (config) {
     try {
       const domainKey = getKeyWithDomain(key); // 生成域名键
@@ -76,7 +76,7 @@ async function initFeature(key: string) {
  * @returns void
  */
 async function switchFeature(key: string, newValue: boolean | null) {
-  const config = featureConfigs[key];
+  const config = features[key];
   if (!config) return;
 
   // 处理默认值逻辑
@@ -94,6 +94,7 @@ async function switchFeature(key: string, newValue: boolean | null) {
   // 持久化存储当前状态
   setting[key] = newValue;
 }
+
 
 /**
  * 初始化设置管理器，负责同步配置并监听功能开关变化
@@ -114,7 +115,7 @@ export function initSettingManager() {
    * 并行初始化所有功能模块
    * 使用 Promise.all 提高初始化效率
    */
-  Object.keys(featureConfigs).map((key) =>
+  Object.keys(features).map((key) =>
     initFeature(key).catch((err) => console.error(`初始化${key}失败`, err))
   );
 
@@ -125,7 +126,7 @@ export function initSettingManager() {
    * @internal
    * 使用带域名前缀的存储键进行监听，变化时调用switchFeature处理
    */
-  Object.keys(featureConfigs).forEach((key) => {
+  Object.keys(features).forEach((key) => {
     storage.watch<boolean>(
       getKeyWithDomain(key),
       async (newValue: boolean | null) => {
@@ -137,8 +138,17 @@ export function initSettingManager() {
       }
     );
   });
+
+  initShortcuts();
 }
 
+function initShortcuts() {
+  document.addEventListener("keydown", (event) => {
+    if (event.ctrlKey && event.key === "q") {
+      switchFeature("translate", !getSetting()["translate"]);
+    }
+  })
+}
 
 
 /**
@@ -148,9 +158,9 @@ export function initSettingManager() {
  * @returns {Promise<void>} 无返回值，但会修改全局setting对象
  */
 async function syncSettings(): Promise<void> {
-  const keys = Object.keys(featureConfigs);
+  const keys = Object.keys(features);
   for (const key of keys) {
-    const config = featureConfigs[key];
+    const config = features[key];
     const domainKey = getKeyWithDomain(key);
 
     let value = await storage.getItem<boolean>(domainKey);
