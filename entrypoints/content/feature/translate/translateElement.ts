@@ -51,6 +51,9 @@ async function extractTextFragments(element: HTMLElement): Promise<string> {
         if (parent && EXCLUDE_TAGS.includes(parent.tagName)) {
           return NodeFilter.FILTER_REJECT;
         }
+        if (EXCLUDE_TAGS.includes((node as Element).tagName)) {
+          return NodeFilter.FILTER_REJECT;
+        }
       }
       return node.nodeType === Node.TEXT_NODE
         ? NodeFilter.FILTER_ACCEPT
@@ -94,6 +97,7 @@ export const translateElement = async (
   targetLang = "zh-CN"
 ): Promise<void> => {
 
+
   // 验证参数有效性
   if (!(element instanceof HTMLElement)) {
     console.warn("Invalid element provided");
@@ -102,13 +106,17 @@ export const translateElement = async (
 
   // 提取元素文本内容进行翻译处理
   const originalText = await extractTextFragments(element);
-  if (shouldSkipTranslation(originalText)) return;
+  if (shouldSkipTranslation(originalText)) {
+
+    return;
+  }
 
   try {
     // 执行文本翻译操作
     const translatedText = await performTranslation(
       translator, originalText, targetLang
     );
+
 
     // 检查全局翻译设置状态
     if (getSetting().translate === false) {
@@ -117,7 +125,7 @@ export const translateElement = async (
     }
 
     // 如果翻译结果与原文本相同则跳过更新
-    if (translatedText === originalText) return;
+    if (translatedText === originalText) { console.log(originalText); return; }
 
     // 判断元素布局特性以确定渲染方式
     // 检查是否为内联元素或特殊定位元素
@@ -172,7 +180,7 @@ function updateOrCreateTranslationContainer(
 }
 
 function desString(content: string, shouldWrap: boolean): string {
-  const resultContent = shouldWrap ? "- " + content : " | " + content;
+  const resultContent = shouldWrap ? "- " + content : " <" + content + "> ";
   return resultContent;
 }
 
@@ -230,6 +238,9 @@ async function performTranslation(
   const cacheKey = `${originalText}:${targetLang}:${translator}`;
   if (translationCache.has(cacheKey)) {
     return translationCache.get(cacheKey)!;
+  }
+  if (originalText.length > 50000) {
+    return originalText;
   }
 
   let result: string = ""

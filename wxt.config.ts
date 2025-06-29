@@ -28,8 +28,8 @@ export default defineConfig({
       minify: "terser",
       terserOptions: {
         compress: {
-          defaults: true, // 启用所有默认压缩规则
-          drop_console: true, // 移除 console.*
+          defaults: false, // 启用所有默认压缩规则
+          drop_console: false, // 移除 console.*
           drop_debugger: true, // 移除 debugger
           pure_funcs: ["console.assert"], // 移除断言
           unused: true, // 移除未使用代码
