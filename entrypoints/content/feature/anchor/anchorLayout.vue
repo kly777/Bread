@@ -12,6 +12,47 @@
 // })
 import { ref, computed, onMounted } from 'vue'
 
+const pageWordCount = ref(0)
+const pageCharCount = ref(0)
+const headingCount = ref(0)
+const mediaCount = ref(0)
+
+
+// 计算页面内容统计
+const calculatePageStats = () => {
+  try {
+    // 计算总字数
+    const textContent = document.body.textContent || ''
+    pageWordCount.value = textContent.split(/\s+/).filter(Boolean).length
+    pageCharCount.value = textContent.length
+
+    // 计算标题数量
+    headingCount.value = document.querySelectorAll('h1, h2, h3, h4, h5, h6').length
+
+    // 计算媒体元素数量
+    mediaCount.value = document.querySelectorAll('img, video, audio').length
+  } catch (e) {
+    console.error('Error calculating page stats:', e)
+  }
+}
+// 在组件挂载时计算页面统计
+onMounted(() => {
+  // 初始计算
+  calculatePageStats()
+
+  // 监听DOM变化（当页面动态加载内容时）
+  const observer = new MutationObserver(calculatePageStats)
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  })
+
+  // 清理
+  onUnmounted(() => {
+    observer.disconnect()
+  })
+})
 // 存储选中的文本
 const selectedText = ref('')
 
@@ -67,23 +108,50 @@ onUnmounted(() => {
 
 <template>
   <div class="bread">
-    <inline v-if="selectedText" class="selection-stats">
+    <span v-if="pageWordCount > 0">
+      pw: {{ (pageWordCount / 1000).toFixed(1) }}k |
+      pc: {{ (pageCharCount / 1000).toFixed(1) }}k |
+    </span>
+    <span v-if="headingCount > 0">
+      h: {{ headingCount }} |
+    </span>
+    <span v-if="mediaCount > 0">
+      m: {{ mediaCount }} |
+    </span>
+    <span v-if="selectedText">
       p: {{ selectedLines }} |
       w: {{ selectedWords }} |
       c: {{ selectedChars }} |
-    </inline>
-    <inline>
+    </span>
+    <span>
       {{ scrollProgress.toFixed(0) }}%
-    </inline>
+    </span>
   </div>
 </template>
 
 <style scoped>
 .bread {
+  box-sizing: border-box;
+  border: #000 1px solid;
   color: #000;
+  background-color: rgba(240, 248, 255, 0.92);
+  cursor: default;
+  height: 100%;
+  font-size: 12px;
+  user-select: none;
   padding: 0;
+
+  display: flex;
+  align-items: center;
 }
-p{
-  margin: 0;
+
+span {
+  box-sizing: border-box;
+  display: inline-block;
+  margin: 0 2px;
+  padding: 0 1px;
+  height: 90%;
+  line-height: 1.2;
+  font-size: 0.85rem;
 }
 </style>
