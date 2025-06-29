@@ -1,4 +1,4 @@
-import tinycolor from "tinycolor2";
+
 import { getTextWalker } from "../../kit/getTextNodes";
 
 export function initStripe() {
@@ -50,9 +50,9 @@ function stripeElement(element: HTMLElement) {
             element.classList.add("striped");
 
             // 获取背景颜色并生成条纹颜色
-            const computedStyle = window.getComputedStyle(backgroundElement);
-            const backgroundColor = computedStyle.backgroundColor;
-            const stripeColor = generateStripeColor(backgroundColor);
+            // const computedStyle = window.getComputedStyle(backgroundElement);
+            // const backgroundColor = computedStyle.backgroundColor;
+            // const stripeColor = generateStripeColor(backgroundColor);
 
             // 通过 CSS 变量注入动态颜色
             // element.style.backgroundColor=stripeColor;
@@ -93,14 +93,14 @@ function hasOnlyTextContent(element: HTMLElement): boolean {
     }
     return true;
 }
-/**
- * 根据背景颜色生成条纹颜色
- * @param backgroundColor - 背景颜色字符串
- * @returns 生成的条纹颜色字符串
- */
-function generateStripeColor(backgroundColor: string): string {
-    const color = tinycolor(backgroundColor);
-    const complement = color.complement();
-    // 强制设置透明度为 0.3（与 CSS 默认值一致）
-    return complement.setAlpha(0.3).toRgbString();
-}
+// /**
+//  * 根据背景颜色生成条纹颜色
+//  * @param backgroundColor - 背景颜色字符串
+//  * @returns 生成的条纹颜色字符串
+//  */
+// function generateStripeColor(backgroundColor: string): string {
+//     const color = tinycolor(backgroundColor);
+//     const complement = color.complement();
+//     // 强制设置透明度为 0.3（与 CSS 默认值一致）
+//     return complement.setAlpha(0.3).toRgbString();
+// }

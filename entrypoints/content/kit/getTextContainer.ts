@@ -1,4 +1,4 @@
-import { GetTextNodesOptions } from "./getTextNodes";
+// import { GetTextNodesOptions } from "./getTextNodes";
 import { hasTextNodes } from "./hasTextNodes";
 
 const EXCLUDE_TAGS = new Set([
@@ -26,9 +26,9 @@ const INLINE_DISPLAY_VALUES = new Set([
 
 export function getTextContainerElement(
     root: Node = document.body,
-    options: GetTextNodesOptions = {}
+    // options: GetTextNodesOptions = {}
 ): HTMLElement[] {
-    const walker = getTextContainerWalker(root, options);
+    const walker = getTextContainerWalker(root);
 
     // 遍历收集所有符合条件的文本节点
     const textNodes: HTMLElement[] = [];
@@ -53,9 +53,9 @@ export function getTextContainerElement(
 
 export function getTextContainerWalker(
     root: Node = document.body,
-    options: GetTextNodesOptions = {}
+    // options: GetTextNodesOptions = {}
 ): TreeWalker {
-    const { excludeHidden = true } = options;
+    // const { excludeHidden = true } = options;
 
     const acceptNode = (node: Node): number => {
         // 仅处理元素节点
@@ -74,7 +74,7 @@ export function getTextContainerWalker(
         // if (EXCLUDED_TAGS.has(element.tagName.toLowerCase())) {
         //     return NodeFilter.FILTER_REJECT;
         // }
-        const style = window.getComputedStyle(element);
+        // const style = window.getComputedStyle(element);
 
         // if (
         //     excludeHidden &&

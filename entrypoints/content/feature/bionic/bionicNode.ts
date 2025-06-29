@@ -80,7 +80,7 @@ export function bionicTextNode(node: Text): void {
     const fragment = document.createDocumentFragment();
     const isEnglish = /^[a-zA-Z0-9'-]+$/;
     const isChinese = /^[\u3400-\u9FFF0-9]+$/;
-    const isNumber = /^[0-9]+$/;
+    // const isNumber = /^[0-9]+$/;
 
     words.forEach((part) => {
         if (isEnglish.test(part)) {
@@ -130,10 +130,10 @@ function bionicCn(word: string): DocumentFragment {
     return createBionicWordFragment(word, boldIndex);
 }
 
-function bionicNumber(word: string): DocumentFragment {
-    const halfIndex = Math.max(Math.floor(word.length / 3), 1);
-    return createBionicWordFragment(word, halfIndex);
-}
+// function bionicNumber(word: string): DocumentFragment {
+//     const halfIndex = Math.max(Math.floor(word.length / 3), 1);
+//     return createBionicWordFragment(word, halfIndex);
+// }
 
 /**
  * 根据指定的分割索引，将单词分为加粗部分和普通部分，并生成对应的文档片段。

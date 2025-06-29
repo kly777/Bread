@@ -23,7 +23,7 @@ export default defineConfig({
       //...
     ],
   },
-  vite: (configEnv: { mode: string }) => ({
+  vite: () => ({
     build: {
       minify: "terser",
       terserOptions: {

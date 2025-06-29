@@ -3,7 +3,7 @@ import { ref, watch, onMounted } from "vue";
 import FeatureSetting from "./FeatureSetting.vue";
 
 const props = defineProps<{
-    featureName: string
+    featureName: string,
     settings?: Record<string, "string" | "number" | "boolean">;
 }>()
 
