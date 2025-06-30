@@ -3,5 +3,15 @@
     "compilerOptions": {
         "noUnusedLocals": true,
         "noUnusedParameters": true
-    }
+    },
+    "include": [
+        "src/**/*",
+        "entrypoints/**/*.vue",
+        "entrypoints\\**\\*.vue",
+        ".wxt/**/*.d.ts",
+        ".wxt\\**\\*.d.ts",
+        "entrypoints/**/*.ts",
+        "entrypoints\\**\\*.ts",
+        "*.ts"
+    ]
 }

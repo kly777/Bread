@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storage } from "@wxt-dev/storage";
 import { ref, watch, onMounted } from "vue";
 
 const props = defineProps<{
