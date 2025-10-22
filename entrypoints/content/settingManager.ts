@@ -31,8 +31,11 @@ export function getSetting(): { [key: string]: boolean } {
   return { ...setting };
 }
 
-const pageLang = document.body.lang || "en";
-const isEnglishPage = pageLang.startsWith("en");
+function isEnglishPage(): boolean {
+  const lang = document.documentElement.lang || 'en';
+  console.log('lang:', lang);
+  return lang.startsWith('en');
+}
 
 const features: { [key: string]: FeatureConfig } = {
   bionic: {
@@ -47,7 +50,7 @@ const features: { [key: string]: FeatureConfig } = {
     off: stopHighlight,
   },
   translate: {
-    default: isEnglishPage,
+    default: isEnglishPage(),
     on: openTranslate,
     off: stopTranslate,
   },
@@ -110,10 +113,10 @@ async function switchFeature(key: string, newValue: boolean | null) {
 export function initSettingManager() {
   /**
    * 同步全局设置到本地存储
-   * @internal
-   * 此方法会从远程服务获取最新设置并持久化存储
    */
   syncSettings();
+
+
   /**
    * 并行初始化所有功能模块
    * 使用 Promise.all 提高初始化效率
