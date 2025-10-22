@@ -31,6 +31,9 @@ export function getSetting(): { [key: string]: boolean } {
   return { ...setting };
 }
 
+const pageLang = document.body.lang || "en";
+const isEnglishPage = pageLang.startsWith("en");
+
 const features: { [key: string]: FeatureConfig } = {
   bionic: {
     default: false,
@@ -44,7 +47,7 @@ const features: { [key: string]: FeatureConfig } = {
     off: stopHighlight,
   },
   translate: {
-    default: false,
+    default: isEnglishPage,
     on: openTranslate,
     off: stopTranslate,
   },

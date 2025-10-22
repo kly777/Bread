@@ -3,6 +3,7 @@ import { intersectionObserverOptions } from "./options";
 import { manageMutationObserver } from "../domMutationObserver";
 import { getTextContainerElement } from "../../kit/getTextContainer";
 import { translateElement } from "../../feature/translate/translateElement";
+import { preprocessExcludedElements } from "../../feature/translate/textExtractor";
 
 const translateObserver = new IntersectionObserver((entries) => {
     manageMutationObserver(false);
@@ -21,6 +22,8 @@ function processElement(entry: IntersectionObserverEntry) {
 
 // 初始化入口
 export function initializeTranslateObserver() {
+    // 预处理排除元素，确保翻译行为与DOM结构顺序无关
+    preprocessExcludedElements(document.body);
     observeTranslateElements(document.body);
 }
 

@@ -16,7 +16,7 @@ function initAnchorApp() {
   const target = document.querySelector('body');
   if (target) {
     const container = document.createElement('div');
-    container.classList.add("anchor-container");
+    container.classList.add("anchor-container","no-translate");
     manageMutationObserver(false);
     target.appendChild(container);
     createApp(anchorLay, {
