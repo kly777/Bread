@@ -7,6 +7,7 @@ import {
 } from './featureManager/bionicManager'
 import { openHighlight, stopHighlight } from './featureManager/highlightManager'
 import { openTranslate, stopTranslate } from './featureManager/translateManager'
+import { pageLang } from './kit/pageInfo'
 
 // 状态配置：定义各功能的键名、默认值、启用/停用函数
 interface FeatureConfig {
@@ -28,9 +29,7 @@ export function getSetting(): { [key: string]: boolean } {
 }
 
 function isEnglishPage(): boolean {
-        const lang = document.documentElement.lang || 'en'
-        console.log('lang:', lang)
-        return lang.startsWith('en')
+        return pageLang().startsWith('en')
 }
 
 const features: { [key: string]: FeatureConfig } = {
@@ -53,7 +52,7 @@ const features: { [key: string]: FeatureConfig } = {
         stripe: {
                 default: false,
                 on: initStripe,
-                off: () => {}, // stripe无明确关闭函数，留空
+                off: () => { }, // stripe无明确关闭函数，留空
         },
 }
 

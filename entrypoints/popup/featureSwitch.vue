@@ -96,7 +96,7 @@ watch(
         margin-bottom: 5px;
 }
 
-/* 新增：确保子元素容器可扩展 */
+
 .feature-switch > div {
         flex-grow: 1;
         display: flex;

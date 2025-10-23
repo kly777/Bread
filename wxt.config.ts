@@ -1,4 +1,3 @@
-// See https://wxt.dev/api/config.html
 import { defineConfig } from 'wxt'
 export default defineConfig({
         modules: ['@wxt-dev/module-vue'],
