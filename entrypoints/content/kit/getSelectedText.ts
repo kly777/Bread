@@ -7,9 +7,9 @@
  * @returns 返回选中的文本，如果无文本被选中则返回空字符串
  */
 export function getSelectedText(): string {
-  // 获取当前用户选中的内容
-  const selection = window.getSelection();
-  // 检查是否有选中的文本，如果没有则直接返回
-  if (!selection) return "";
-  return selection.toString().trim().toLowerCase() || "";
+        // 获取当前用户选中的内容
+        const selection = window.getSelection()
+        // 检查是否有选中的文本，如果没有则直接返回
+        if (!selection) return ''
+        return selection.toString().trim().toLowerCase() || ''
 }

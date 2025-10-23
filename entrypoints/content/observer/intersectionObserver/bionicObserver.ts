@@ -1,7 +1,7 @@
-import { intersectionObserverOptions } from "./options";
-import { bionicTextNode } from "../../feature/bionic/bionicNode";
-import { manageMutationObserver } from "../domMutationObserver";
-import { getTextNodes } from "../../kit/getTextNodes";
+import { intersectionObserverOptions } from './options'
+import { bionicTextNode } from '../../feature/bionic/bionicNode'
+import { manageMutationObserver } from '../domMutationObserver'
+import { getTextNodes } from '../../kit/getTextNodes'
 
 /**
  * 仿生文本观察器模块
@@ -13,17 +13,17 @@ import { getTextNodes } from "../../kit/getTextNodes";
  * 4. 清理已处理或移除的节点资源
  */
 // 使用 Set 存储文本节点，避免重复并提升查找效率
-export const parentToTextNodesMap = new Map<Element, Set<Text>>();
+export const parentToTextNodesMap = new Map<Element, Set<Text>>()
 
 /**
  * IntersectionObserver配置选项
  * 获取具体配置参数（阈值0，根边距100px）
  */
 export const bionicTextObserver = new IntersectionObserver((entries) => {
-    manageMutationObserver(false);
-    entries.forEach(processVisibleTextElement);
-    manageMutationObserver(true);
-}, intersectionObserverOptions);
+        manageMutationObserver(false)
+        entries.forEach(processVisibleTextElement)
+        manageMutationObserver(true)
+}, intersectionObserverOptions)
 
 /**
  * 处理IntersectionObserverEntry，当元素进入视口时应用文本节点的仿生效果并清理映射。
@@ -37,18 +37,18 @@ export const bionicTextObserver = new IntersectionObserver((entries) => {
  * 4. 停止对当前元素的观察以避免重复处理
  */
 function processVisibleTextElement(entry: IntersectionObserverEntry): void {
-    const element = entry.target as Element;
-    const setTexts = parentToTextNodesMap.get(element);
+        const element = entry.target as Element
+        const setTexts = parentToTextNodesMap.get(element)
 
-    // 增加 document.contains 检查，确保元素仍在 DOM 中
-    if (!setTexts || !entry.isIntersecting || !document.contains(element))
-        return;
+        // 增加 document.contains 检查，确保元素仍在 DOM 中
+        if (!setTexts || !entry.isIntersecting || !document.contains(element))
+                return
 
-    // 应用仿生效果到文本节点（例如高亮、动画等）
-    applyBionicEffect(Array.from(setTexts));
+        // 应用仿生效果到文本节点（例如高亮、动画等）
+        applyBionicEffect(Array.from(setTexts))
 
-    // 清理元素与文本节点的映射关系
-    cleanupAndUnobserve(element);
+        // 清理元素与文本节点的映射关系
+        cleanupAndUnobserve(element)
 }
 
 /**
@@ -60,7 +60,7 @@ function processVisibleTextElement(entry: IntersectionObserverEntry): void {
  * 实现细节：遍历每个文本节点并调用bionicTextNode进行处理
  */
 function applyBionicEffect(textNodes: Text[]) {
-    textNodes.forEach((text) => bionicTextNode(text));
+        textNodes.forEach((text) => bionicTextNode(text))
 }
 
 /**
@@ -70,8 +70,8 @@ function applyBionicEffect(textNodes: Text[]) {
  * 实现细节：删除元素映射并调用unobserve停止观察
  */
 function cleanupAndUnobserve(element: Element) {
-    parentToTextNodesMap.delete(element);
-    bionicTextObserver.unobserve(element);
+        parentToTextNodesMap.delete(element)
+        bionicTextObserver.unobserve(element)
 }
 
 /**
@@ -82,7 +82,7 @@ function cleanupAndUnobserve(element: Element) {
  * 实现细节：调用observeElementNode方法观察document.body
  */
 export function initializeSingleUseObserver() {
-    observeElementNode(document.body);
+        observeElementNode(document.body)
 }
 
 /**
@@ -94,7 +94,7 @@ export function initializeSingleUseObserver() {
  * 实现细节：获取元素下所有符合条件的文本节点并逐个观察
  */
 export function observeElementNode(ele: Element) {
-    getTextNodes(ele).forEach(observeTextNode);
+        getTextNodes(ele).forEach(observeTextNode)
 }
 
 /**
@@ -107,11 +107,11 @@ export function observeElementNode(ele: Element) {
  * 实现细节：获取文本节点的父元素并调用linkTextToElement建立映射
  */
 function observeTextNode(text: Text) {
-    const parent = text.parentElement;
-    if (!parent || !document.contains(parent)) return; // 新增存在性校验
+        const parent = text.parentElement
+        if (!parent || !document.contains(parent)) return // 新增存在性校验
 
-    // 更新映射关系
-    linkTextToElement(parent, text);
+        // 更新映射关系
+        linkTextToElement(parent, text)
 }
 
 /**
@@ -125,14 +125,14 @@ function observeTextNode(text: Text) {
  * 实现细节：使用Map存储元素到文本节点集合的映射关系
  */
 function linkTextToElement(parent: Element, text: Text) {
-    if (parentToTextNodesMap.has(parent)) {
-        const setTexts = parentToTextNodesMap.get(parent)!;
-        if (!setTexts.has(text)) {
-            setTexts.add(text);
+        if (parentToTextNodesMap.has(parent)) {
+                const setTexts = parentToTextNodesMap.get(parent)!
+                if (!setTexts.has(text)) {
+                        setTexts.add(text)
+                }
+        } else {
+                const setTexts = new Set<Text>([text])
+                parentToTextNodesMap.set(parent, setTexts)
+                bionicTextObserver.observe(parent)
         }
-    } else {
-        const setTexts = new Set<Text>([text]);
-        parentToTextNodesMap.set(parent, setTexts);
-        bionicTextObserver.observe(parent);
-    }
 }

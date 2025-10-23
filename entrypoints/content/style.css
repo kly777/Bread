@@ -1,53 +1,53 @@
 .bionic-text {
-    margin: 0;
-    padding: 0;
-    display: contents !important;
+        margin: 0;
+        padding: 0;
+        display: contents !important;
 }
 
 .striped {
-    position: relative;
+        position: relative;
 }
 
 .striped::before {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background-size: 36px 100%;
-    background-clip: content-box;
-    background-origin: content-box;
-    /* 通过 CSS 变量动态设置条纹颜色 */
-    background-image: linear-gradient(
-        90deg,
-        #0000 35px,
-        var(--stripe-color, rgba(118, 118, 118, 0.187)) 1px
-    );
-    filter: invert(100%);
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background-size: 36px 100%;
+        background-clip: content-box;
+        background-origin: content-box;
+        /* 通过 CSS 变量动态设置条纹颜色 */
+        background-image: linear-gradient(
+                90deg,
+                #0000 35px,
+                var(--stripe-color, rgba(118, 118, 118, 0.187)) 1px
+        );
+        filter: invert(100%);
 }
 
 mark.bread-highlight {
-    background-color: rgba(255, 255, 0, 0.8); /* 半透明亮黄 */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* 文字阴影 */
-    filter: brightness(1.2); /* 提升亮度 */
+        background-color: rgba(255, 255, 0, 0.8); /* 半透明亮黄 */
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* 文字阴影 */
+        filter: brightness(1.2); /* 提升亮度 */
 }
 
 .translation-result {
-    opacity: 0.8;
-    font-size: 0.81em;
-    transition: opacity 0.3s ease-in-out;
+        opacity: 0.8;
+        font-size: 0.81em;
+        transition: opacity 0.3s ease-in-out;
 }
 span.translation-result {
-    display: inline;
+        display: inline;
 }
 
 div.translation-result {
-    margin-top: 0;
-    padding-top: 0;
+        margin-top: 0;
+        padding-top: 0;
 }
 
 .translation-result:hover {
-    opacity: 1;
+        opacity: 1;
 }

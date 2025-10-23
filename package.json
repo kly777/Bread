@@ -1,39 +1,40 @@
 {
-  "name": "bread",
-  "description": "a extension for reading",
-  "private": true,
-  "version": "0.1.20",
-  "type": "module",
-  "scripts": {
-    "dev": "wxt",
-    "dev:firefox": "wxt -b firefox",
-    "build": "wxt build",
-    "build:firefox": "wxt build -b firefox",
-    "zip": "wxt zip",
-    "zip:firefox": "wxt zip -b firefox",
-    "compile": "vue-tsc --noEmit",
-    "postinstall": "wxt prepare",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  },
-  "dependencies": {
-    "@types/tinycolor2": "^1.4.6",
-    "@wxt-dev/storage": "^1.1.1",
-    "terser": "^5.43.1",
-    "tinycolor2": "^1.6.0",
-    "vue": "^3.5.22"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.30.0",
-    "@types/chrome": "^0.0.280",
-    "@typescript-eslint/eslint-plugin": "^8.35.0",
-    "@typescript-eslint/parser": "^8.35.0",
-    "@wxt-dev/module-vue": "^1.0.2",
-    "eslint": "^9.30.0",
-    "eslint-plugin-vue": "^10.2.0",
-    "typescript": "5.6.3",
-    "vue-eslint-parser": "^10.1.4",
-    "vue-tsc": "^2.2.10",
-    "wxt": "^0.20.7"
-  }
+        "name": "bread",
+        "description": "a extension for reading",
+        "private": true,
+        "version": "0.1.20",
+        "type": "module",
+        "scripts": {
+                "dev": "wxt",
+                "dev:firefox": "wxt -b firefox",
+                "build": "wxt build",
+                "build:firefox": "wxt build -b firefox",
+                "zip": "wxt zip",
+                "zip:firefox": "wxt zip -b firefox",
+                "compile": "vue-tsc --noEmit",
+                "postinstall": "wxt prepare",
+                "fmt": "prettier --write .",
+                "lint": "eslint .",
+                "lint:fix": "eslint . --fix"
+        },
+        "dependencies": {
+                "@wxt-dev/storage": "^1.1.1",
+                "terser": "^5.43.1",
+                "tinycolor2": "^1.6.0",
+                "vue": "^3.5.22"
+        },
+        "devDependencies": {
+                "@types/tinycolor2": "^1.4.6",
+                "@eslint/js": "^9.30.0",
+                "@types/chrome": "^0.0.280",
+                "@typescript-eslint/eslint-plugin": "^8.35.0",
+                "@typescript-eslint/parser": "^8.35.0",
+                "@wxt-dev/module-vue": "^1.0.2",
+                "eslint": "^9.30.0",
+                "eslint-plugin-vue": "^10.2.0",
+                "typescript": "5.6.3",
+                "vue-eslint-parser": "^10.1.4",
+                "vue-tsc": "^2.2.10",
+                "wxt": "^0.20.7"
+        }
 }

@@ -1,17 +1,22 @@
 import {
-  hasVerticalAlign,
-  isInFlexContext,
-  isInlineElement,
-  isPositionedElement,
-  shouldWrapElement,
-} from "./elementStyle";
+        hasVerticalAlign,
+        isInFlexContext,
+        isInlineElement,
+        isPositionedElement,
+        shouldWrapElement,
+} from './elementStyle'
 
 // 缓存样式检测结果，避免重复计算
-const styleCache = new WeakMap<HTMLElement, { shouldUseInline: boolean; shouldWrap: boolean }>();
+const styleCache = new WeakMap<
+        HTMLElement,
+        { shouldUseInline: boolean; shouldWrap: boolean }
+>()
 
 function desString(content: string, shouldWrap: boolean): string {
-  const resultContent = shouldWrap ? "- " + content : " <" + content + "> ";
-  return resultContent;
+        const resultContent = shouldWrap
+                ? '- ' + content
+                : ' <' + content + '> '
+        return resultContent
 }
 
 /**
@@ -21,36 +26,36 @@ function desString(content: string, shouldWrap: boolean): string {
  * @returns 创建的HTML元素容器
  */
 function createTranslationContainer(
-  translatedText: string,
-  shouldWrap: boolean
+        translatedText: string,
+        shouldWrap: boolean
 ): HTMLElement {
-  const container = document.createElement(shouldWrap ? "div" : "span");
+        const container = document.createElement(shouldWrap ? 'div' : 'span')
 
-  // 创建基础容器元素：
-  // 1. 根据shouldWrap参数决定创建div或span元素
-  // 2. 块级元素(div)用于需要独立布局的场景
-  // 3. 行内元素(span)用于内联显示场景
+        // 创建基础容器元素：
+        // 1. 根据shouldWrap参数决定创建div或span元素
+        // 2. 块级元素(div)用于需要独立布局的场景
+        // 3. 行内元素(span)用于内联显示场景
 
-  container.classList.add("translation-result");
+        container.classList.add('translation-result')
 
-  // 为行内元素添加title属性：
-  // 在非包裹模式下，通过title属性展示完整翻译文本
-  // 这可以确保当内容被截断时仍能通过悬停查看完整文本
-  if (!shouldWrap) {
-    container.title = translatedText;
-  }
+        // 为行内元素添加title属性：
+        // 在非包裹模式下，通过title属性展示完整翻译文本
+        // 这可以确保当内容被截断时仍能通过悬停查看完整文本
+        if (!shouldWrap) {
+                container.title = translatedText
+        }
 
-  const fragment = document.createDocumentFragment();
+        const fragment = document.createDocumentFragment()
 
-  // 使用文档片段进行内容填充：
-  // 1. 通过desString处理文本内容（具体处理逻辑未展示）
-  // 2. 文档片段操作可减少DOM重排次数，提升性能
-  // 3. 最终将处理后的内容添加到容器中
-  fragment.textContent = desString(translatedText, shouldWrap);
+        // 使用文档片段进行内容填充：
+        // 1. 通过desString处理文本内容（具体处理逻辑未展示）
+        // 2. 文档片段操作可减少DOM重排次数，提升性能
+        // 3. 最终将处理后的内容添加到容器中
+        fragment.textContent = desString(translatedText, shouldWrap)
 
-  container.appendChild(fragment);
+        container.appendChild(fragment)
 
-  return container;
+        return container
 }
 
 /**
@@ -64,40 +69,46 @@ function createTranslationContainer(
  * @returns void
  */
 export function updateOrCreateTranslationContainer(
-  element: HTMLElement,
-  translatedText: string,
-  shouldWrap: boolean
+        element: HTMLElement,
+        translatedText: string,
+        shouldWrap: boolean
 ): void {
+        // 查找已存在的翻译容器元素
+        const existing = Array.from(element.children).find((child) =>
+                child.classList.contains('translation-result')
+        )
 
-  // 查找已存在的翻译容器元素
-  const existing = Array.from(element.children).find(child =>
-    child.classList.contains("translation-result")
-  );
-
-  if (existing) {
-    return
-  } else {
-    const resultContainer = createTranslationContainer(translatedText, shouldWrap);
-    element.appendChild(resultContainer);
-  }
+        if (existing) {
+                return
+        } else {
+                const resultContainer = createTranslationContainer(
+                        translatedText,
+                        shouldWrap
+                )
+                element.appendChild(resultContainer)
+        }
 }
 
 /**
  * 获取元素的样式信息
  */
-export function getElementStyleInfo(element: HTMLElement): { shouldUseInline: boolean; shouldWrap: boolean } {
-  let styleInfo = styleCache.get(element);
-  if (!styleInfo) {
-    const shouldUseInline =
-      isInlineElement(element) ||
-      isPositionedElement(element) ||
-      isInFlexContext(element) ||
-      hasVerticalAlign(element);
+export function getElementStyleInfo(element: HTMLElement): {
+        shouldUseInline: boolean
+        shouldWrap: boolean
+} {
+        let styleInfo = styleCache.get(element)
+        if (!styleInfo) {
+                const shouldUseInline =
+                        isInlineElement(element) ||
+                        isPositionedElement(element) ||
+                        isInFlexContext(element) ||
+                        hasVerticalAlign(element)
 
-    const shouldWrap = !shouldUseInline && shouldWrapElement(element);
+                const shouldWrap =
+                        !shouldUseInline && shouldWrapElement(element)
 
-    styleInfo = { shouldUseInline, shouldWrap };
-    styleCache.set(element, styleInfo);
-  }
-  return styleInfo;
+                styleInfo = { shouldUseInline, shouldWrap }
+                styleCache.set(element, styleInfo)
+        }
+        return styleInfo
 }

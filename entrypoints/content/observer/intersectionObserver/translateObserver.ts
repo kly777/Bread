@@ -1,44 +1,44 @@
-import { intersectionObserverOptions } from "./options";
+import { intersectionObserverOptions } from './options'
 
-import { manageMutationObserver } from "../domMutationObserver";
-import { getTextContainerElement } from "../../kit/getTextContainer";
-import { translateElement } from "../../feature/translate/translateElement";
-import { preprocessExcludedElements } from "../../feature/translate/textExtractor";
+import { manageMutationObserver } from '../domMutationObserver'
+import { getTextContainerElement } from '../../kit/getTextContainer'
+import { translateElement } from '../../feature/translate/translateElement'
+import { preprocessExcludedElements } from '../../feature/translate/textExtractor'
 
 const translateObserver = new IntersectionObserver((entries) => {
-    manageMutationObserver(false);
-    //  处理所有条目
-    entries.filter((e) => e.isIntersecting).forEach(processElement);
+        manageMutationObserver(false)
+        //  处理所有条目
+        entries.filter((e) => e.isIntersecting).forEach(processElement)
 
-    manageMutationObserver(true);
-}, intersectionObserverOptions);
+        manageMutationObserver(true)
+}, intersectionObserverOptions)
 
 // 主处理逻辑
 function processElement(entry: IntersectionObserverEntry) {
-    const element = entry.target as HTMLElement;
-    translateElement(element);
-    translateObserver.unobserve(element); // 立即清理
+        const element = entry.target as HTMLElement
+        translateElement(element)
+        translateObserver.unobserve(element) // 立即清理
 }
 
 // 初始化入口
 export function initializeTranslateObserver() {
-    // 预处理排除元素，确保翻译行为与DOM结构顺序无关
-    preprocessExcludedElements(document.body);
-    observeTranslateElements(document.body);
+        // 预处理排除元素，确保翻译行为与DOM结构顺序无关
+        preprocessExcludedElements(document.body)
+        observeTranslateElements(document.body)
 }
 
 // 统一观察方法
 export function observeTranslateElements(root: Element) {
-    getTextContainerElement(root).forEach((el) =>
-        translateObserver.observe(el)
-    );
+        getTextContainerElement(root).forEach((el) =>
+                translateObserver.observe(el)
+        )
 }
 
-export function stopTranslatorObserver(){
-    translateObserver.disconnect();
-    document
-        .querySelectorAll<HTMLElement>(".translation-result")
-        .forEach((tr) => {
-            tr.remove();
-        });
+export function stopTranslatorObserver() {
+        translateObserver.disconnect()
+        document.querySelectorAll<HTMLElement>('.translation-result').forEach(
+                (tr) => {
+                        tr.remove()
+                }
+        )
 }

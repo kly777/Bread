@@ -1,40 +1,40 @@
-import { getTextNodes } from "../../kit/getTextNodes";
+import { getTextNodes } from '../../kit/getTextNodes'
 
 export function bionicNestedTextNodes(root: Node = document.body) {
-    const textNodes = getTextNodes(root);
-    bionicTextNodes(textNodes);
+        const textNodes = getTextNodes(root)
+        bionicTextNodes(textNodes)
 }
 
 export function bionicDirectTextNodes(root: Node) {
-    // 获取直接子文本节点并过滤
-    // if (root.parentElement) {
-    // 	root.parentElement.style.backgroundColor = "red";
-    // }
-    // console.log(root);
+        // 获取直接子文本节点并过滤
+        // if (root.parentElement) {
+        // 	root.parentElement.style.backgroundColor = "red";
+        // }
+        // console.log(root);
 
-    const directTextNodes = Array.from(root.childNodes).filter((node) => {
-        // 仅处理直接子文本节点
-        if (node.nodeType !== Node.TEXT_NODE) return false;
+        const directTextNodes = Array.from(root.childNodes).filter((node) => {
+                // 仅处理直接子文本节点
+                if (node.nodeType !== Node.TEXT_NODE) return false
 
-        // // 复用 getNodes.ts 的过滤逻辑
-        // const parent = node.parentElement;
-        // if (!parent) return false;
+                // // 复用 getNodes.ts 的过滤逻辑
+                // const parent = node.parentElement;
+                // if (!parent) return false;
 
-        // // 排除不可见元素（根据 getNodes.ts 逻辑）
-        // const style = window.getComputedStyle(parent);
-        // if (style.display === "none" || style.visibility === "hidden") return false;
+                // // 排除不可见元素（根据 getNodes.ts 逻辑）
+                // const style = window.getComputedStyle(parent);
+                // if (style.display === "none" || style.visibility === "hidden") return false;
 
-        // // 排除预定义标签（根据 getNodes.ts 的 EXCLUDED_TAGS）
-        // const EXCLUDED_TAGS = new Set(["input", "textarea", /* 其他排除标签 */]);
-        // if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) return false;
+                // // 排除预定义标签（根据 getNodes.ts 的 EXCLUDED_TAGS）
+                // const EXCLUDED_TAGS = new Set(["input", "textarea", /* 其他排除标签 */]);
+                // if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) return false;
 
-        // 排除空文本节点
-        return (node.textContent?.trim() || "").length > 0;
-    }) as Text[];
-    // if (directTextNodes[0].parentElement){
-    // 	directTextNodes[0].parentElement.style.backgroundColor = "black";
-    // }
-    bionicTextNodes(directTextNodes);
+                // 排除空文本节点
+                return (node.textContent?.trim() || '').length > 0
+        }) as Text[]
+        // if (directTextNodes[0].parentElement){
+        // 	directTextNodes[0].parentElement.style.backgroundColor = "black";
+        // }
+        bionicTextNodes(directTextNodes)
 }
 
 /**
@@ -45,15 +45,15 @@ export function bionicDirectTextNodes(root: Node) {
  * @param root {Node} - 开始遍历的DOM树的根节点默认为文档的body元素
  */
 function bionicTextNodes(textNodes: Text[]) {
-    for (const text of textNodes) {
-        bionicTextNode(text);
-    }
+        for (const text of textNodes) {
+                bionicTextNode(text)
+        }
 }
 
 export function removeBionicEffects() {
-    document.querySelectorAll(".bionic-text").forEach((el) => {
-        el.outerHTML = el.innerHTML;
-    });
+        document.querySelectorAll('.bionic-text').forEach((el) => {
+                el.outerHTML = el.innerHTML
+        })
 }
 
 /**
@@ -66,37 +66,37 @@ export function removeBionicEffects() {
  * @param node 待处理的文本节点
  */
 export function bionicTextNode(node: Text): void {
-    // console.log(node.textContent);
-    const text = node.textContent || "";
-    if (!text.trim()) return; // 忽略空白文本节点
+        // console.log(node.textContent);
+        const text = node.textContent || ''
+        if (!text.trim()) return // 忽略空白文本节点
 
-    /**
-     * 使用正则表达式将文本分割成多个部分
-     * 正则表达式([a-zA-Z\u4e00-\u9fa5]+)用于匹配并保留英文单词和中文字符
-     */
-    const splitRegex = /([a-zA-Z0-9'-]+|[\u3400-\u9FFF0-9]+)/;
-    const words = text.split(splitRegex);
+        /**
+         * 使用正则表达式将文本分割成多个部分
+         * 正则表达式([a-zA-Z\u4e00-\u9fa5]+)用于匹配并保留英文单词和中文字符
+         */
+        const splitRegex = /([a-zA-Z0-9'-]+|[\u3400-\u9FFF0-9]+)/
+        const words = text.split(splitRegex)
 
-    const fragment = document.createDocumentFragment();
-    const isEnglish = /^[a-zA-Z0-9'-]+$/;
-    const isChinese = /^[\u3400-\u9FFF0-9]+$/;
-    // const isNumber = /^[0-9]+$/;
+        const fragment = document.createDocumentFragment()
+        const isEnglish = /^[a-zA-Z0-9'-]+$/
+        const isChinese = /^[\u3400-\u9FFF0-9]+$/
+        // const isNumber = /^[0-9]+$/;
 
-    words.forEach((part) => {
-        if (isEnglish.test(part)) {
-            // 处理英文单词，调用bionicEn函数进行特殊处理（含数字）
-            fragment.appendChild(bionicEn(part));
-        } else if (isChinese.test(part)) {
-            // 处理中文字符或数字组合，调用bionicCn函数进行特殊处理（含数字）
-            fragment.appendChild(bionicCn(part));
-        } else {
-            // 其他字符（如纯标点符号）保持原样不变
-            fragment.appendChild(document.createTextNode(part));
-        }
-    });
+        words.forEach((part) => {
+                if (isEnglish.test(part)) {
+                        // 处理英文单词，调用bionicEn函数进行特殊处理（含数字）
+                        fragment.appendChild(bionicEn(part))
+                } else if (isChinese.test(part)) {
+                        // 处理中文字符或数字组合，调用bionicCn函数进行特殊处理（含数字）
+                        fragment.appendChild(bionicCn(part))
+                } else {
+                        // 其他字符（如纯标点符号）保持原样不变
+                        fragment.appendChild(document.createTextNode(part))
+                }
+        })
 
-    // 使用新生成的DOM片段替换原始文本节点
-    node.parentNode?.replaceChild(fragment, node);
+        // 使用新生成的DOM片段替换原始文本节点
+        node.parentNode?.replaceChild(fragment, node)
 }
 
 /**
@@ -107,8 +107,8 @@ export function bionicTextNode(node: Text): void {
  * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
  */
 function bionicEn(word: string): DocumentFragment {
-    const halfIndex = Math.min(4, Math.floor(word.length / 3));
-    return createBionicWordFragment(word, halfIndex);
+        const halfIndex = Math.min(4, Math.floor(word.length / 3))
+        return createBionicWordFragment(word, halfIndex)
 }
 
 /**
@@ -118,16 +118,16 @@ function bionicEn(word: string): DocumentFragment {
  * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
  */
 function bionicCn(word: string): DocumentFragment {
-    // 根据单词长度确定需要加粗的字符数量
-    let boldIndex = 1;
-    if (word.length <= 2) {
-        boldIndex = 0;
-    } else if (word.length === 3) {
-        boldIndex = 1;
-    } else if (word.length >= 4) {
-        boldIndex = 2;
-    }
-    return createBionicWordFragment(word, boldIndex);
+        // 根据单词长度确定需要加粗的字符数量
+        let boldIndex = 1
+        if (word.length <= 2) {
+                boldIndex = 0
+        } else if (word.length === 3) {
+                boldIndex = 1
+        } else if (word.length >= 4) {
+                boldIndex = 2
+        }
+        return createBionicWordFragment(word, boldIndex)
 }
 
 // function bionicNumber(word: string): DocumentFragment {
@@ -143,24 +143,25 @@ function bionicCn(word: string): DocumentFragment {
  * @returns DocumentFragment - 包含加粗和未加粗部分的文档片段。
  */
 function createBionicWordFragment(
-    word: string,
-    boldIndex: number
+        word: string,
+        boldIndex: number
 ): DocumentFragment {
-    if (word.length === 0) return document.createDocumentFragment(); // 处理空字符串
-    if (boldIndex === 0) {
-        const fragment = document.createDocumentFragment();
-        fragment.appendChild(document.createTextNode(word));
-        return fragment;
-    }
+        if (word.length === 0) return document.createDocumentFragment() // 处理空字符串
+        if (boldIndex === 0) {
+                const fragment = document.createDocumentFragment()
+                fragment.appendChild(document.createTextNode(word))
+                return fragment
+        }
 
-    const firstHalf = word.slice(0, boldIndex); // 提取需要加粗的部分
-    const secondHalf = word.slice(boldIndex); // 提取不需要加粗的部分
+        const firstHalf = word.slice(0, boldIndex) // 提取需要加粗的部分
+        const secondHalf = word.slice(boldIndex) // 提取不需要加粗的部分
 
-    const fragment = document.createDocumentFragment();
-    if (firstHalf) fragment.appendChild(createStrongElement(firstHalf)); // 避免空文本节点
-    if (secondHalf) fragment.appendChild(document.createTextNode(secondHalf)); // 避免空文本节点
+        const fragment = document.createDocumentFragment()
+        if (firstHalf) fragment.appendChild(createStrongElement(firstHalf)) // 避免空文本节点
+        if (secondHalf)
+                fragment.appendChild(document.createTextNode(secondHalf)) // 避免空文本节点
 
-    return fragment;
+        return fragment
 }
 
 /**
@@ -170,10 +171,10 @@ function createBionicWordFragment(
  * @returns HTMLElement - 包含加粗样式的 HTML 元素。
  */
 function createStrongElement(text: string): HTMLElement {
-    // 使用 <strong> 标签实现加粗效果
-    const strongElement = document.createElement("strong");
-    // 通过类名管理所有样式，确保内外边距为 0 且文本不换行
-    strongElement.classList.add("bionic-text");
-    strongElement.textContent = text;
-    return strongElement;
+        // 使用 <strong> 标签实现加粗效果
+        const strongElement = document.createElement('strong')
+        // 通过类名管理所有样式，确保内外边距为 0 且文本不换行
+        strongElement.classList.add('bionic-text')
+        strongElement.textContent = text
+        return strongElement
 }
