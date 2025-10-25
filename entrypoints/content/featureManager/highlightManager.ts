@@ -1,8 +1,25 @@
 import { getHighlightManager, destroyHighlightManager } from '../feature/highlight/highlightManager'
-import { HighlightPanel } from '../feature/highlight/highlightPanel'
 
-let highlightPanel: HighlightPanel | null = null
 let isHighlightActive = false
+
+/**
+ * 判断当前页面是否为搜索引擎
+ */
+function isSearchEngine(): boolean {
+        const hostname = window.location.hostname
+        const searchEngines = [
+                'google.com',
+                'bing.com',
+                'baidu.com',
+                'yahoo.com',
+                'duckduckgo.com',
+                'yandex.com',
+                'ask.com',
+                'aol.com'
+        ]
+
+        return searchEngines.some(engine => hostname.includes(engine))
+}
 
 /**
  * 开启文本高亮功能
@@ -20,16 +37,12 @@ export async function openHighlight() {
         // 启动高亮
         manager.start()
 
-        // 创建控制面板
-        highlightPanel = new HighlightPanel(manager)
-        highlightPanel.show()
-
         isHighlightActive = true
 }
 
 /**
  * 停止文本高亮功能
- * 移除高亮并销毁面板
+ * 移除高亮
  */
 export function stopHighlight() {
         if (!isHighlightActive) return
@@ -37,21 +50,22 @@ export function stopHighlight() {
         const manager = getHighlightManager()
         manager.stop()
 
-        if (highlightPanel) {
-                highlightPanel.destroy()
-                highlightPanel = null
-        }
-
         isHighlightActive = false
 }
 
 /**
  * 初始化高亮功能
- * 在页面加载时自动提取关键词但不立即高亮
+ * 在页面加载时自动提取关键词，如果是搜索引擎则自动开启高亮
  */
 export async function initHighlight() {
         const manager = getHighlightManager()
         await manager.autoExtractAndHighlight()
+
+        // 如果是搜索引擎，自动开启高亮
+        if (isSearchEngine()) {
+                console.log('检测到搜索引擎页面，自动开启高亮功能')
+                await openHighlight()
+        }
 }
 
 /**
@@ -59,18 +73,6 @@ export async function initHighlight() {
  */
 export function isHighlightEnabled(): boolean {
         return isHighlightActive
-}
-
-/**
- * 切换高亮面板显示状态
- */
-export function toggleHighlightPanel() {
-        if (!highlightPanel) {
-                const manager = getHighlightManager()
-                highlightPanel = new HighlightPanel(manager)
-        }
-
-        highlightPanel.toggle()
 }
 
 /**

@@ -292,11 +292,11 @@ export class HighlightPanel {
         `
 
         prevBtn.addEventListener('click', () => {
-            this.manager.navigateToWord(word.text, 'prev')
+            this.manager.navigateToWord(word.text)
         })
 
         nextBtn.addEventListener('click', () => {
-            this.manager.navigateToWord(word.text, 'next')
+            this.manager.navigateToWord(word.text)
         })
 
         navContainer.appendChild(prevBtn)
@@ -383,32 +383,69 @@ export class HighlightPanel {
         let startX: number, startY: number
         let startLeft: number, startTop: number
 
-        handle.addEventListener('mousedown', (e) => {
+        // 确保元素存在
+        if (!element || !handle) {
+            console.warn('拖拽元素或句柄未定义')
+            return
+        }
+
+        const onMouseDown = (e: MouseEvent) => {
+            // 确保元素仍然存在
+            if (!element || !handle) return
+            
             isDragging = true
             startX = e.clientX
             startY = e.clientY
 
+            // 获取当前元素的位置
             const rect = element.getBoundingClientRect()
             startLeft = rect.left
             startTop = rect.top
 
-            e.preventDefault()
-        })
+            // 添加拖动时的样式
+            element.style.cursor = 'grabbing'
+            handle.style.cursor = 'grabbing'
 
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return
+            // 添加全局事件监听器
+            document.addEventListener('mousemove', onMouseMove)
+            document.addEventListener('mouseup', onMouseUp)
+
+            e.preventDefault()
+        }
+
+        const onMouseMove = (e: MouseEvent) => {
+            if (!isDragging || !element) return
 
             const deltaX = e.clientX - startX
             const deltaY = e.clientY - startY
 
-            element.style.left = (startLeft + deltaX) + 'px'
-            element.style.top = (startTop + deltaY) + 'px'
-            element.style.right = 'auto'
-        })
+            const newLeft = startLeft + deltaX
+            const newTop = startTop + deltaY
 
-        document.addEventListener('mouseup', () => {
+            // 确保元素不会拖出视口
+            const maxX = window.innerWidth - element.offsetWidth
+            const maxY = window.innerHeight - element.offsetHeight
+
+            element.style.left = Math.max(0, Math.min(newLeft, maxX)) + 'px'
+            element.style.top = Math.max(0, Math.min(newTop, maxY)) + 'px'
+            element.style.right = 'auto'
+        }
+
+        const onMouseUp = () => {
             isDragging = false
-        })
+            if (element) {
+                element.style.cursor = ''
+            }
+            if (handle) {
+                handle.style.cursor = 'move'
+            }
+            
+            // 移除全局事件监听器
+            document.removeEventListener('mousemove', onMouseMove)
+            document.removeEventListener('mouseup', onMouseUp)
+        }
+
+        handle.addEventListener('mousedown', onMouseDown)
     }
 
     private setupEventListeners() {

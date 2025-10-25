@@ -57,9 +57,10 @@ function getTexts(
  * @param text - 要高亮的文本
  * @param root - 需要遍历的DOM根节点，默认为document.body。函数会在此节点的子树中查找匹配
  * @param excludeSelection - 是否排除当前选中文本，默认为true
+ * @param colorIndex - 颜色索引，默认为0
  * @returns void 本函数不返回任何值
  */
-export function highlightTextInNode(text: string, root: Node = document.body, excludeSelection: boolean = true) {
+export function highlightTextInNode(text: string, root: Node = document.body, excludeSelection: boolean = true, colorIndex: number = 0) {
         // console.log("highlightTextInNode", root);
 
         // 仅当存在有效文本时执行高亮
@@ -104,7 +105,7 @@ export function highlightTextInNode(text: string, root: Node = document.body, ex
                         // );
 
                         // 对过滤后的匹配项应用高亮
-                        highlightMatches(texts, filteredMatches)
+                        highlightMatches(texts, filteredMatches, colorIndex)
                 } else {
                         return
                 }
@@ -114,18 +115,29 @@ export function highlightTextInNode(text: string, root: Node = document.body, ex
 /**
  * 高亮显示文档中多个关键词
  *
- * @param words - 要高亮的关键词数组
+ * @param words - 要高亮的关键词数组（字符串数组或带颜色索引的对象数组）
  * @param root - 需要遍历的DOM根节点，默认为document.body
  * @returns void
  */
-export function highlightWordsInDocument(words: string[], root: Node = document.body) {
+export function highlightWordsInDocument(words: (string | { text: string, colorIndex: number })[], root: Node = document.body) {
         // 先移除所有现有高亮
         removeHighlights()
 
-        // 对每个关键词进行高亮（不排除选中文本）
-        words.forEach(word => {
-                if (word && word.trim() !== '') {
-                        highlightTextInNode(word, root, false)
+        // 对每个关键词进行高亮（不排除选中文本），使用不同的颜色索引
+        words.forEach((word, index) => {
+                let text: string
+                let colorIndex: number
+
+                if (typeof word === 'string') {
+                        text = word
+                        colorIndex = index % 10 // 使用10种颜色循环
+                } else {
+                        text = word.text
+                        colorIndex = word.colorIndex
+                }
+
+                if (text && text.trim() !== '') {
+                        highlightTextInNode(text, root, false, colorIndex)
                 }
         })
 }
@@ -225,7 +237,7 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
  * @param matches 需要高亮的匹配范围数组，包含原始文档中的绝对位置信息
  * @returns void
  */
-function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
+function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[], colorIndex: number = 0): void {
         console.log('highlightMatches', texts.length)
         // 预处理：将匹配项按起始位置排序
         const sortedMatches = [...matches].sort((a, b) => a.start - b.start)
@@ -271,7 +283,7 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
                                 // 分割
                                 const pre = node.splitText(start)
                                 const highlighted = pre.splitText(end - start)
-                                const span = createMarkElement(0)  // 使用默认颜色索引0
+                                const span = createMarkElement(colorIndex)
 
                                 span.appendChild(pre.cloneNode(true))
                                 node.parentNode?.replaceChild(span, pre)

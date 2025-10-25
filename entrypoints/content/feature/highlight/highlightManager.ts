@@ -89,6 +89,11 @@ export class HighlightManager {
                 }
 
                 this.saveConfig()
+                
+                // 如果高亮功能已激活，立即应用高亮
+                if (this.isActive) {
+                        this.highlightAll()
+                }
         }
 
         removeWord(text: string) {
