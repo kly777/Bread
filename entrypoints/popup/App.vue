@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import FeatureSwitch from './FeatureSwitch.vue'
 import ApplyWebsites from './ApplyWebsites.vue'
+import HighlightKeywords from './HighlightKeywords.vue'
 </script>
 
 <template>
         <div class="popup">
+                <HighlightKeywords />
                 <FeatureSwitch
                         feature-name="highlight"
                         :settings="{ color: 'string', size: 'number' }"
