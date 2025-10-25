@@ -96,7 +96,6 @@ watch(
         margin-bottom: 5px;
 }
 
-
 .feature-switch > div {
         flex-grow: 1;
         display: flex;

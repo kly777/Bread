@@ -5,7 +5,11 @@ import {
         openBionic,
         stopBionic,
 } from './featureManager/bionicManager'
-import { openHighlight, stopHighlight, initHighlight } from './featureManager/highlightManager'
+import {
+        openHighlight,
+        stopHighlight,
+        initHighlight,
+} from './featureManager/highlightManager'
 import { openTranslate, stopTranslate } from './featureManager/translateManager'
 import { pageLang } from './kit/pageInfo'
 
@@ -53,7 +57,7 @@ const features: { [key: string]: FeatureConfig } = {
         stripe: {
                 default: false,
                 on: initStripe,
-                off: () => { }, // stripe无明确关闭函数，留空
+                off: () => {}, // stripe无明确关闭函数，留空
         },
 }
 

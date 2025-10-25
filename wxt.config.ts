@@ -23,8 +23,6 @@ export default defineConfig({
                 ],
         },
 
-
-
         vite: (env) => {
                 if (env.mode === 'development') {
                         return {
@@ -32,22 +30,23 @@ export default defineConfig({
                                         sourcemap: true,
                                         rollupOptions: {
                                                 output: {
-                                                        inlineDynamicImports: false, //禁止合并为单文件
+                                                        inlineDynamicImports:
+                                                                false, //禁止合并为单文件
                                                 },
                                         },
                                 },
                                 optimizeDeps: {
-                                        include: ['vue']
+                                        include: ['vue'],
                                 },
                                 server: {
                                         hmr: { overlay: false }, // 避免错误遮罩层干扰
                                 },
-                        };
+                        }
                 }
 
                 return {
                         build: {
-                                minify: "terser",
+                                minify: 'terser',
                                 terserOptions: {
                                         compress: {
                                                 defaults: true, // 启用所有默认压缩规则

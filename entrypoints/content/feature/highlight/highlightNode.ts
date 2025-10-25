@@ -60,7 +60,12 @@ function getTexts(
  * @param colorIndex - 颜色索引，默认为0
  * @returns void 本函数不返回任何值
  */
-export function highlightTextInNode(text: string, root: Node = document.body, excludeSelection: boolean = true, colorIndex: number = 0) {
+export function highlightTextInNode(
+        text: string,
+        root: Node = document.body,
+        excludeSelection: boolean = true,
+        colorIndex: number = 0
+) {
         // console.log("highlightTextInNode", root);
 
         // 仅当存在有效文本时执行高亮
@@ -109,7 +114,10 @@ export function highlightTextInNode(text: string, root: Node = document.body, ex
  * @param root - 需要遍历的DOM根节点，默认为document.body
  * @returns void
  */
-export function highlightWordsInDocument(words: (string | { text: string, colorIndex: number })[], root: Node = document.body) {
+export function highlightWordsInDocument(
+        words: (string | { text: string; colorIndex: number })[],
+        root: Node = document.body
+) {
         // 先移除所有现有高亮
         removeHighlights()
 
@@ -227,7 +235,11 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
  * @param matches 需要高亮的匹配范围数组，包含原始文档中的绝对位置信息
  * @returns void
  */
-function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[], colorIndex: number = 0): void {
+function highlightMatches(
+        texts: TextNodeEntry[],
+        matches: MatchRange[],
+        colorIndex: number = 0
+): void {
         // 预处理：将匹配项按起始位置排序
         const sortedMatches = [...matches].sort((a, b) => a.start - b.start)
 
@@ -281,8 +293,7 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[], colorIn
                                         span.after(highlighted)
                                 }
                         })
-
-            })
+        })
 }
 
 /**

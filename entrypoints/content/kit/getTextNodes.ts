@@ -73,7 +73,6 @@ export function getTextWalker(
 
                 // 1. 标签名称过滤：直接拒绝整个子树
                 if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
-
                         return NodeFilter.FILTER_REJECT
                 }
 

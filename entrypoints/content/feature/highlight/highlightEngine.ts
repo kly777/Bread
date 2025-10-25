@@ -1,12 +1,16 @@
-import { HighlightWord, HighlightConfig, getHighlightStyle } from './highlightConfig'
+import {
+        HighlightWord,
+        HighlightConfig,
+        getHighlightStyle,
+} from './highlightConfig'
 import { getTextWalker } from '../../kit/getTextNodes'
 
 /**
  * 高亮匹配结果接口
  */
 interface HighlightMatch {
-        word: HighlightWord  // 匹配到的高亮词
-        matches: Node[]      // 匹配到的DOM节点列表
+        word: HighlightWord // 匹配到的高亮词
+        matches: Node[] // 匹配到的DOM节点列表
 }
 
 /**
@@ -14,8 +18,8 @@ interface HighlightMatch {
  * 负责执行文本高亮操作，包括样式注入、文本匹配、DOM操作等
  */
 export class HighlightEngine {
-        private config: HighlightConfig               // 高亮配置
-        private styleElement: HTMLStyleElement | null = null  // 样式元素引用
+        private config: HighlightConfig // 高亮配置
+        private styleElement: HTMLStyleElement | null = null // 样式元素引用
 
         /**
          * 构造函数
@@ -23,7 +27,7 @@ export class HighlightEngine {
          */
         constructor(config: HighlightConfig) {
                 this.config = config
-                this.injectStyles()  // 初始化时注入样式
+                this.injectStyles() // 初始化时注入样式
         }
 
         /**
@@ -32,7 +36,7 @@ export class HighlightEngine {
          */
         updateConfig(config: HighlightConfig) {
                 this.config = config
-                this.injectStyles()  // 配置更新时重新注入样式
+                this.injectStyles() // 配置更新时重新注入样式
         }
 
         /**
@@ -48,7 +52,9 @@ export class HighlightEngine {
                 // 创建新的样式元素
                 this.styleElement = document.createElement('style')
                 this.styleElement.id = 'bread-highlight-styles'
-                this.styleElement.textContent = getHighlightStyle(this.config.colorScheme) + `
+                this.styleElement.textContent =
+                        getHighlightStyle(this.config.colorScheme) +
+                        `
             .bread-highlight {
                 display: inline !important;        // 确保内联显示
                 margin: 0 !important;              // 无外边距
@@ -77,11 +83,16 @@ export class HighlightEngine {
                                 document.head.appendChild(this.styleElement)
                         } else {
                                 // 如果head不存在，尝试添加到body
-                                document.documentElement.appendChild(this.styleElement)
+                                document.documentElement.appendChild(
+                                        this.styleElement
+                                )
                         }
                         console.log('Highlighter styles injected successfully')
                 } catch (error) {
-                        console.error('Failed to inject highlighter styles:', error)
+                        console.error(
+                                'Failed to inject highlighter styles:',
+                                error
+                        )
                 }
         }
 
@@ -92,12 +103,16 @@ export class HighlightEngine {
          */
         highlightDocument(): HighlightMatch[] {
                 // 过滤出启用的高亮词
-                const enabledWords = this.config.words.filter(word => word.enabled)
+                const enabledWords = this.config.words.filter(
+                        (word) => word.enabled
+                )
                 console.log('Enabled words:', enabledWords)
 
                 // 如果配置了按长度排序，则从长到短排序（避免短词覆盖长词）
                 if (this.config.sortByLength) {
-                        enabledWords.sort((a, b) => b.text.length - a.text.length)
+                        enabledWords.sort(
+                                (a, b) => b.text.length - a.text.length
+                        )
                 }
 
                 const results: HighlightMatch[] = []
@@ -105,9 +120,11 @@ export class HighlightEngine {
                 // 遍历每个高亮词进行匹配
                 for (const word of enabledWords) {
                         const matches = this.highlightWord(word)
-                        console.log(`Highlighted ${matches.length} occurrences of "${word.text}"`)
+                        console.log(
+                                `Highlighted ${matches.length} occurrences of "${word.text}"`
+                        )
                         if (matches.length > 0) {
-                                results.push({ word, matches })  // 记录匹配结果
+                                results.push({ word, matches }) // 记录匹配结果
                         }
                 }
                 console.log('Highlighted', results.length, 'words')
@@ -123,12 +140,12 @@ export class HighlightEngine {
         private highlightWord(word: HighlightWord): Node[] {
                 // 创建文本节点遍历器
                 const walker = getTextWalker(document.body, {
-                        excludeHidden: true,    // 排除隐藏元素
-                        minContentLength: 1     // 最小内容长度
+                        excludeHidden: true, // 排除隐藏元素
+                        minContentLength: 1, // 最小内容长度
                 })
 
                 const matches: Node[] = []
-                const regex = this.createRegex(word)  // 创建匹配正则
+                const regex = this.createRegex(word) // 创建匹配正则
 
                 // 遍历所有文本节点
                 while (walker.nextNode()) {
@@ -138,8 +155,12 @@ export class HighlightEngine {
 
                         // 测试文本是否匹配正则
                         if (regex.test(text)) {
-                                const highlightedNodes = this.highlightTextNode(node, word, regex)
-                                matches.push(...highlightedNodes)  // 收集高亮节点
+                                const highlightedNodes = this.highlightTextNode(
+                                        node,
+                                        word,
+                                        regex
+                                )
+                                matches.push(...highlightedNodes) // 收集高亮节点
                         }
                 }
 
@@ -153,9 +174,11 @@ export class HighlightEngine {
          * @returns 正则表达式对象
          */
         private createRegex(word: HighlightWord): RegExp {
-                let pattern = word.regex ? word.text : this.escapeRegex(word.text)  // 正则模式直接使用，普通模式转义
+                let pattern = word.regex
+                        ? word.text
+                        : this.escapeRegex(word.text) // 正则模式直接使用，普通模式转义
 
-                const flags = 'g' + (word.caseSensitive ? '' : 'i')  // 全局匹配，可选忽略大小写
+                const flags = 'g' + (word.caseSensitive ? '' : 'i') // 全局匹配，可选忽略大小写
                 return new RegExp(pattern, flags)
         }
 
@@ -166,7 +189,7 @@ export class HighlightEngine {
          * @returns 转义后的正则安全文本
          */
         private escapeRegex(text: string): string {
-            return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // 转义所有正则特殊字符
+                return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // 转义所有正则特殊字符
         }
 
         /**
@@ -177,22 +200,28 @@ export class HighlightEngine {
          * @param regex 匹配正则
          * @returns 创建的高亮元素数组
          */
-        private highlightTextNode(node: Text, word: HighlightWord, regex: RegExp): Node[] {
+        private highlightTextNode(
+                node: Text,
+                word: HighlightWord,
+                regex: RegExp
+        ): Node[] {
                 const text = node.textContent || ''
                 const parent = node.parentNode
-                if (!parent) return []  // 如果没有父节点，无法操作
+                if (!parent) return [] // 如果没有父节点，无法操作
 
                 const matches: Node[] = []
-                let lastIndex = 0       // 上次匹配结束位置
+                let lastIndex = 0 // 上次匹配结束位置
                 let match: RegExpExecArray | null
 
-                const fragment = document.createDocumentFragment()  // 创建文档片段
+                const fragment = document.createDocumentFragment() // 创建文档片段
 
                 // 遍历所有匹配项
                 while ((match = regex.exec(text)) !== null) {
-                        const before = text.substring(lastIndex, match.index)  // 匹配前的文本
+                        const before = text.substring(lastIndex, match.index) // 匹配前的文本
                         if (before) {
-                                fragment.appendChild(document.createTextNode(before))  // 添加普通文本节点
+                                fragment.appendChild(
+                                        document.createTextNode(before)
+                                ) // 添加普通文本节点
                         }
 
                         // 创建高亮mark元素
@@ -200,33 +229,38 @@ export class HighlightEngine {
                         mark.className = `bread-highlight bread-highlight-color-${word.colorIndex}`
                         mark.textContent = match[0]
                         fragment.appendChild(mark)
-                        matches.push(mark)  // 记录高亮元素
+                        matches.push(mark) // 记录高亮元素
 
-                        lastIndex = match.index + match[0].length  // 更新最后匹配位置
+                        lastIndex = match.index + match[0].length // 更新最后匹配位置
                 }
 
-                const after = text.substring(lastIndex)  // 剩余文本
+                const after = text.substring(lastIndex) // 剩余文本
                 if (after) {
-                        fragment.appendChild(document.createTextNode(after))  // 添加剩余文本
+                        fragment.appendChild(document.createTextNode(after)) // 添加剩余文本
                 }
 
-                parent.replaceChild(fragment, node)  // 用片段替换原始节点
+                parent.replaceChild(fragment, node) // 用片段替换原始节点
                 return matches
         }
 
         removeHighlights() {
                 const highlights = document.querySelectorAll('.bread-highlight')
-                highlights.forEach(highlight => {
+                highlights.forEach((highlight) => {
                         const parent = highlight.parentNode
                         if (parent) {
-                                const text = document.createTextNode(highlight.textContent || '')
+                                const text = document.createTextNode(
+                                        highlight.textContent || ''
+                                )
                                 parent.replaceChild(text, highlight)
                                 parent.normalize()
                         }
                 })
         }
 
-        navigateToHighlight(matches: Node[], direction: 'next' | 'prev' = 'next') {
+        navigateToHighlight(
+                matches: Node[],
+                direction: 'next' | 'prev' = 'next'
+        ) {
                 if (matches.length === 0) return null
 
                 const viewport = this.getViewportRect()
@@ -239,7 +273,11 @@ export class HighlightEngine {
                         const rect = match.getBoundingClientRect()
                         if (rect.width === 0 || rect.height === 0) continue
 
-                        const distance = this.calculateDistance(rect, viewport, direction)
+                        const distance = this.calculateDistance(
+                                rect,
+                                viewport,
+                                direction
+                        )
 
                         if (distance < minDistance) {
                                 minDistance = distance
@@ -265,7 +303,11 @@ export class HighlightEngine {
                 )
         }
 
-        private calculateDistance(rect: DOMRect, viewport: DOMRect, direction: 'next' | 'prev'): number {
+        private calculateDistance(
+                rect: DOMRect,
+                viewport: DOMRect,
+                direction: 'next' | 'prev'
+        ): number {
                 const elementCenterY = rect.top + rect.height / 2
                 const viewportCenterY = viewport.top + viewport.height / 2
 
@@ -275,7 +317,9 @@ export class HighlightEngine {
                         } else if (rect.bottom < viewport.top) {
                                 return viewport.top - rect.bottom
                         } else {
-                                return Math.abs(elementCenterY - viewportCenterY)
+                                return Math.abs(
+                                        elementCenterY - viewportCenterY
+                                )
                         }
                 } else {
                         if (rect.bottom < viewport.top) {
@@ -283,14 +327,17 @@ export class HighlightEngine {
                         } else if (rect.top > viewport.bottom) {
                                 return rect.top - viewport.bottom
                         } else {
-                                return Math.abs(elementCenterY - viewportCenterY)
+                                return Math.abs(
+                                        elementCenterY - viewportCenterY
+                                )
                         }
                 }
         }
 
         private scrollToElement(element: HTMLElement) {
                 const rect = element.getBoundingClientRect()
-                const scrollY = window.scrollY + rect.top - window.innerHeight / 3
+                const scrollY =
+                        window.scrollY + rect.top - window.innerHeight / 3
                 window.scrollTo({ top: scrollY, behavior: 'smooth' })
         }
 

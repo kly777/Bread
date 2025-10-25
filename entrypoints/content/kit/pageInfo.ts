@@ -1,4 +1,4 @@
-let lang: string | null = null;
+let lang: string | null = null
 export function pageLang(): string {
         if (lang !== null) {
                 return lang
@@ -7,4 +7,3 @@ export function pageLang(): string {
         console.log('lang:', lang)
         return lang
 }
-

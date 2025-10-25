@@ -1,4 +1,7 @@
-import { getHighlightManager, destroyHighlightManager } from '../feature/highlight/highlightManager'
+import {
+        getHighlightManager,
+        destroyHighlightManager,
+} from '../feature/highlight/highlightManager'
 
 let isHighlightActive = false
 
@@ -15,10 +18,10 @@ function isSearchEngine(): boolean {
                 'duckduckgo.com',
                 'yandex.com',
                 'ask.com',
-                'aol.com'
+                'aol.com',
         ]
 
-        return searchEngines.some(engine => hostname.includes(engine))
+        return searchEngines.some((engine) => hostname.includes(engine))
 }
 
 /**

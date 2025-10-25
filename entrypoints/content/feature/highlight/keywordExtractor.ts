@@ -3,9 +3,9 @@
  * 定义搜索引擎的名称、关键词参数和URL模式
  */
 export interface SearchEngineConfig {
-        name: string          // 搜索引擎名称
-        keywordParam: string  // URL中表示关键词的参数名
-        urlPattern: string    // 用于匹配搜索引擎的URL模式
+        name: string // 搜索引擎名称
+        keywordParam: string // URL中表示关键词的参数名
+        urlPattern: string // 用于匹配搜索引擎的URL模式
 }
 
 /**
@@ -13,9 +13,14 @@ export interface SearchEngineConfig {
  * 描述关键词的来源和可信度
  */
 export interface KeywordSource {
-        type: 'search_engine' | 'referer' | 'input_box' | 'history' | 'inherited' // 来源类型
-        keywords: string[]   // 关键词列表
-        confidence: number   // 可信度分数 (0-1)
+        type:
+                | 'search_engine'
+                | 'referer'
+                | 'input_box'
+                | 'history'
+                | 'inherited' // 来源类型
+        keywords: string[] // 关键词列表
+        confidence: number // 可信度分数 (0-1)
 }
 
 /**
@@ -26,22 +31,51 @@ export class KeywordExtractor {
         // 支持的搜索引擎配置列表
         private searchEngines: SearchEngineConfig[] = [
                 { name: 'Google', keywordParam: 'q', urlPattern: '.google.' },
-                { name: 'Yahoo', keywordParam: 'p', urlPattern: 'search.yahoo.' },
+                {
+                        name: 'Yahoo',
+                        keywordParam: 'p',
+                        urlPattern: 'search.yahoo.',
+                },
                 { name: 'Baidu', keywordParam: 'wd', urlPattern: '.baidu.com' },
-                { name: 'Baidu', keywordParam: 'word', urlPattern: '.baidu.com' },
+                {
+                        name: 'Baidu',
+                        keywordParam: 'word',
+                        urlPattern: '.baidu.com',
+                },
                 { name: 'Bing', keywordParam: 'q', urlPattern: '.bing.com' },
-                { name: 'DuckDuckGo', keywordParam: 'q', urlPattern: 'duckduckgo.com' },
-                { name: 'Sogou', keywordParam: 'query', urlPattern: 'www.sogou.com' },
+                {
+                        name: 'DuckDuckGo',
+                        keywordParam: 'q',
+                        urlPattern: 'duckduckgo.com',
+                },
+                {
+                        name: 'Sogou',
+                        keywordParam: 'query',
+                        urlPattern: 'www.sogou.com',
+                },
                 { name: 'Weibo', keywordParam: 'q', urlPattern: 's.weibo.com' },
                 { name: '360', keywordParam: 'q', urlPattern: '.so.com' },
-                { name: 'Yandex', keywordParam: 'text', urlPattern: 'yandex.com' },
-                { name: 'Common1', keywordParam: 'search_query', urlPattern: '' }, // 通用搜索引擎参数
-                { name: 'Common2', keywordParam: 'keyword', urlPattern: '' }       // 通用搜索引擎参数
+                {
+                        name: 'Yandex',
+                        keywordParam: 'text',
+                        urlPattern: 'yandex.com',
+                },
+                {
+                        name: 'Common1',
+                        keywordParam: 'search_query',
+                        urlPattern: '',
+                }, // 通用搜索引擎参数
+                { name: 'Common2', keywordParam: 'keyword', urlPattern: '' }, // 通用搜索引擎参数
         ]
 
         // 搜索框选择器列表，用于识别页面中的搜索输入框
         private inputSelectors = [
-                '#query', '#search', '#keyword', '#script_q', '#search-q', '.input'
+                '#query',
+                '#search',
+                '#keyword',
+                '#script_q',
+                '#search-q',
+                '.input',
         ]
 
         /**
@@ -58,7 +92,7 @@ export class KeywordExtractor {
                         sources.push({
                                 type: 'search_engine',
                                 keywords: searchEngineKeywords,
-                                confidence: 0.9
+                                confidence: 0.9,
                         })
                 }
 
@@ -68,7 +102,7 @@ export class KeywordExtractor {
                         sources.push({
                                 type: 'referer',
                                 keywords: refererKeywords,
-                                confidence: 0.7
+                                confidence: 0.7,
                         })
                 }
 
@@ -78,7 +112,7 @@ export class KeywordExtractor {
                         sources.push({
                                 type: 'input_box',
                                 keywords: inputBoxKeywords,
-                                confidence: 0.6
+                                confidence: 0.6,
                         })
                 }
 
@@ -88,7 +122,7 @@ export class KeywordExtractor {
                         sources.push({
                                 type: 'inherited',
                                 keywords: inheritedKeywords,
-                                confidence: 0.8
+                                confidence: 0.8,
                         })
                 }
 
@@ -101,8 +135,14 @@ export class KeywordExtractor {
                 const host = window.location.host
 
                 for (const engine of this.searchEngines) {
-                        if (engine.urlPattern && host.includes(engine.urlPattern)) {
-                                const keywords = this.getKeywordsFromUrl(currentUrl, engine.keywordParam)
+                        if (
+                                engine.urlPattern &&
+                                host.includes(engine.urlPattern)
+                        ) {
+                                const keywords = this.getKeywordsFromUrl(
+                                        currentUrl,
+                                        engine.keywordParam
+                                )
                                 if (keywords.length > 0) {
                                         return keywords
                                 }
@@ -118,8 +158,14 @@ export class KeywordExtractor {
                 const host = new URL(referer).host
 
                 for (const engine of this.searchEngines) {
-                        if (engine.urlPattern && host.includes(engine.urlPattern)) {
-                                const keywords = this.getKeywordsFromUrl(referer, engine.keywordParam)
+                        if (
+                                engine.urlPattern &&
+                                host.includes(engine.urlPattern)
+                        ) {
+                                const keywords = this.getKeywordsFromUrl(
+                                        referer,
+                                        engine.keywordParam
+                                )
                                 if (keywords.length > 0) {
                                         return keywords
                                 }
@@ -130,7 +176,9 @@ export class KeywordExtractor {
 
         private extractFromInputBoxes(): string[] {
                 for (const selector of this.inputSelectors) {
-                        const input = document.querySelector(selector) as HTMLInputElement
+                        const input = document.querySelector(
+                                selector
+                        ) as HTMLInputElement
                         if (input && input.value && input.value.trim()) {
                                 return this.processKeywords(input.value.trim())
                         }
@@ -139,11 +187,16 @@ export class KeywordExtractor {
         }
 
         private extractFromInherited(): string[] {
-                if (window.name && window.name.startsWith('bread_highlight::')) {
+                if (
+                        window.name &&
+                        window.name.startsWith('bread_highlight::')
+                ) {
                         const match = window.name.match(/bread_highlight::(.+)/)
                         if (match && match[1]) {
                                 try {
-                                        const decoded = decodeURIComponent(match[1])
+                                        const decoded = decodeURIComponent(
+                                                match[1]
+                                        )
                                         return this.processKeywords(decoded)
                                 } catch {
                                         return []
@@ -167,14 +220,11 @@ export class KeywordExtractor {
         }
 
         private processKeywords(keywordStr: string): string[] {
-                let processed = keywordStr
-                        .replace(/\+/g, ' ')
-                        .trim()
+                let processed = keywordStr.replace(/\+/g, ' ').trim()
 
                 try {
                         processed = decodeURIComponent(processed)
-                } catch {
-                }
+                } catch {}
 
                 const keywords = this.splitKeywords(processed)
                 return this.filterKeywords(keywords)
@@ -195,12 +245,26 @@ export class KeywordExtractor {
 
         private filterKeywords(keywords: string[]): string[] {
                 const skipWords = new Set([
-                        'the', 'to', 'in', 'on', 'among', 'between', 'and', 'a', 'an', 'of', 'by', 'with'
+                        'the',
+                        'to',
+                        'in',
+                        'on',
+                        'among',
+                        'between',
+                        'and',
+                        'a',
+                        'an',
+                        'of',
+                        'by',
+                        'with',
                 ])
 
-                return keywords.filter(keyword => {
+                return keywords.filter((keyword) => {
                         if (keyword.length <= 1) return false
-                        if (skipWords.has(keyword.toLowerCase()) && keyword === keyword.toLowerCase()) {
+                        if (
+                                skipWords.has(keyword.toLowerCase()) &&
+                                keyword === keyword.toLowerCase()
+                        ) {
                                 return false
                         }
                         return true
