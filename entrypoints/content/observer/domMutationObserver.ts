@@ -32,77 +32,103 @@ export function manageMutationObserver(shouldObserve: boolean) {
  * DOM变更观察器核心回调函数
  * @remarks
  * 核心处理步骤：
- * 1. 暂停所有特性观察器避免冲突
- * 2. 处理新增节点：根据设置启用翻译或仿生功能
- * 3. 处理移除节点：清理相关资源
- * 4. 处理子树变动：更新文本节点映射
- * 异常处理：自动忽略无效节点操作
+ * 1. 收集所有需要处理的新增节点
+ * 2. 处理移除节点：清理相关资源
+ * 3. 统一处理新增节点的功能应用
+ * 4. 延迟重新应用高亮避免循环触发
  */
 const domMutationObserver: MutationObserver = new MutationObserver(
         (mutations: MutationRecord[]) => {
-                // pin()
                 console.log('domMutationObserver observed some changes')
-                mutations.forEach((mutation) => {
-                        mutation.addedNodes.forEach((node) => {
-                                if (node.nodeType === Node.ELEMENT_NODE) {
-                                        if (getSetting().translate) {
-                                                translateAddedElement(
-                                                        node as Element
-                                                )
-                                        }
-                                        if (getSetting().bionic) {
-                                                observeElementNode(
-                                                        node as Element
-                                                )
-                                        }
-                                        // 如果高亮功能已启用，重新应用高亮
-                                        const highlightManager = getHighlightManager()
-                                        if (highlightManager.isEnabled()) {
-                                                // 使用防抖避免频繁重绘
-                                                window.setTimeout(() => {
-                                                        highlightManager.highlightAll()
-                                                }, 100)
-                                        }
-                                }
-                        })
 
-                        mutation.removedNodes.forEach((node) => {
+                // 收集所有新增元素节点
+                const newElements: Element[] = []
+
+                for (const mutation of mutations) {
+                        // 处理新增节点
+                        for (const node of mutation.addedNodes) {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                        const element = node as Element
+                                        // 跳过翻译模块创建的翻译结果容器和高亮元素，避免循环触发
+                                        if (element.classList?.contains('translation-result') ||
+                                                element.classList?.contains('bread-highlight')) {
+                                                continue
+                                        }
+                                        newElements.push(element)
+                                }
+                        }
+
+                        // 处理移除节点
+                        for (const node of mutation.removedNodes) {
                                 handleRemovedNode(node)
-                        })
+                        }
 
                         // 处理子树变动（如元素被替换或修改）
                         if (mutation.type === 'childList') {
-                                mutation.target.childNodes.forEach((child) => {
-                                        if (
-                                                child.nodeType ===
-                                                Node.ELEMENT_NODE
-                                        ) {
-                                                const element = child as Element
-                                                // 检查该元素是否存在于映射中，并重新校验其文本节点
-                                                if (
-                                                        parentToTextNodesMap.has(
-                                                                element
-                                                        )
-                                                ) {
-                                                        // 重新获取该元素的所有文本节点并更新映射
-                                                        const texts =
-                                                                getTextNodes(
-                                                                        element
-                                                                )
-                                                        const textsSet =
-                                                                new Set(texts)
-
-                                                        parentToTextNodesMap.set(
-                                                                element,
-                                                                textsSet
-                                                        )
-                                                }
+                                for (const child of mutation.target.childNodes) {
+                                        if (child.nodeType === Node.ELEMENT_NODE) {
+                                                updateTextNodesMap(child as Element)
                                         }
-                                })
+                                }
                         }
-                })
+                }
+
+                // 处理新增元素的功能应用
+                if (newElements.length > 0) {
+                        processNewElements(newElements)
+
+                        // 如果高亮功能已启用，延迟重新应用高亮
+                        const highlightManager = getHighlightManager()
+                        if (highlightManager.isEnabled()) {
+                                scheduleHighlightUpdate(highlightManager)
+                        }
+                }
         }
 )
+
+/**
+ * 处理新增元素的功能应用
+ */
+function processNewElements(elements: Element[]) {
+        const translateEnabled = getSetting().translate
+        const bionicEnabled = getSetting().bionic
+
+        for (const element of elements) {
+                if (translateEnabled) {
+                        translateAddedElement(element)
+                }
+                if (bionicEnabled) {
+                        observeElementNode(element)
+                }
+        }
+}
+
+/**
+ * 更新文本节点映射
+ */
+function updateTextNodesMap(element: Element) {
+        if (parentToTextNodesMap.has(element)) {
+                const texts = getTextNodes(element)
+                const textsSet = new Set(texts)
+                parentToTextNodesMap.set(element, textsSet)
+        }
+}
+
+/**
+ * 延迟重新应用高亮
+ */
+function scheduleHighlightUpdate(highlightManager: ReturnType<typeof getHighlightManager>) {
+        // 使用防抖避免频繁重绘，并暂时关闭观察器避免循环触发
+        window.setTimeout(() => {
+                domMutationObserver.disconnect()
+                highlightManager.highlightAll()
+                // 重新开启观察器
+                domMutationObserver.observe(document.body, {
+                        childList: true,
+                        subtree: true,
+                })
+        }, 300)
+}
 
 /**
  * 处理DOM节点移除事件

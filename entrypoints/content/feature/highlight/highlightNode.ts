@@ -66,17 +66,7 @@ export function highlightTextInNode(text: string, root: Node = document.body, ex
         // 仅当存在有效文本时执行高亮
         if (text !== '') {
                 // 获取所有文本节点及其合并后的完整文本内容
-                console.log('getTexts', root)
                 let { texts, mergedText } = getTexts(root)
-
-                // 调试信息：输出文本节点结构及合并后的完整文本
-                console.table(
-                        texts.map((t) => ({
-                                ...t,
-                                text: t.node.textContent,
-                        }))
-                )
-                console.info('mer', mergedText)
 
                 // 存在有效文本时执行匹配逻辑
                 if (texts.length > 0 && text !== '') {
@@ -238,7 +228,6 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
  * @returns void
  */
 function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[], colorIndex: number = 0): void {
-        console.log('highlightMatches', texts.length)
         // 预处理：将匹配项按起始位置排序
         const sortedMatches = [...matches].sort((a, b) => a.start - b.start)
 
@@ -293,8 +282,7 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[], colorIn
                                 }
                         })
 
-                console.log('处理后内容:', node.textContent)
-        })
+            })
 }
 
 /**
