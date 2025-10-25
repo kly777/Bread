@@ -27,20 +27,14 @@ export default defineConfig({
                 if (env.mode === 'development') {
                         return {
                                 build: {
-                                        sourcemap: true,
-                                        rollupOptions: {
-                                                output: {
-                                                        inlineDynamicImports:
-                                                                false, //禁止合并为单文件
-                                                },
-                                        },
-                                },
-                                optimizeDeps: {
-                                        include: ['vue'],
+
+                                        sourcemap: true, // 确保生成 source maps 方便调试
                                 },
                                 server: {
-                                        hmr: { overlay: false }, // 避免错误遮罩层干扰
-                                },
+                                        hmr: {
+                                                timeout: 20000 // 增加热重载超时时间
+                                        }
+                                }
                         }
                 }
 
