@@ -3,6 +3,7 @@ import { HighlightWord, HighlightConfig, DEFAULT_CONFIG, createHighlightWord } f
 import { getKeyWithDomain } from '../../../kit/storage'
 import { highlightWordsInDocument, removeHighlights } from './highlightNode'
 import { getHighlightStyle } from './highlightConfig'
+import { manageMutationObserver } from '../../observer/domMutationObserver'
 
 /**
  * 高亮管理器
@@ -175,11 +176,15 @@ export class HighlightManager {
         start() {
                 this.isActive = true
                 this.highlightAll()
+                // 开始观察DOM变化，以便在动态内容加载时重新应用高亮
+                manageMutationObserver(true)
         }
 
         stop() {
                 this.isActive = false
                 removeHighlights()
+                // 停止观察DOM变化
+                manageMutationObserver(false)
         }
 
         updateConfig(newConfig: Partial<HighlightConfig>) {

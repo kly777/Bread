@@ -15,6 +15,7 @@ import {
         observeElementNode,
 } from './intersectionObserver/bionicObserver'
 import { observeTranslateElements as translateAddedElement } from './intersectionObserver/translateObserver'
+import { getHighlightManager } from '../feature/highlight/highlightManager'
 
 export function manageMutationObserver(shouldObserve: boolean) {
         if (shouldObserve) {
@@ -53,6 +54,14 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                                                 observeElementNode(
                                                         node as Element
                                                 )
+                                        }
+                                        // 如果高亮功能已启用，重新应用高亮
+                                        const highlightManager = getHighlightManager()
+                                        if (highlightManager.isEnabled()) {
+                                                // 使用防抖避免频繁重绘
+                                                setTimeout(() => {
+                                                        highlightManager.highlightAll()
+                                                }, 100)
                                         }
                                 }
                         })
