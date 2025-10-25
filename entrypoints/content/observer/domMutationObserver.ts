@@ -59,7 +59,7 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                                         const highlightManager = getHighlightManager()
                                         if (highlightManager.isEnabled()) {
                                                 // 使用防抖避免频繁重绘
-                                                setTimeout(() => {
+                                                window.setTimeout(() => {
                                                         highlightManager.highlightAll()
                                                 }, 100)
                                         }
