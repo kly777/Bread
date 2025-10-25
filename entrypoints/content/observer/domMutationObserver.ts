@@ -39,27 +39,35 @@ export function manageMutationObserver(shouldObserve: boolean) {
  */
 const domMutationObserver: MutationObserver = new MutationObserver(
         (mutations: MutationRecord[]) => {
-                console.log('domMutationObserver observed some changes')
-
+                console.group('🔍 DOM Mutation Observer')
+                console.log(`检测到 ${mutations.length} 个DOM变更`)
+                
                 // 收集所有新增元素节点
                 const newElements: Element[] = []
-
+                let skippedElements = 0
+                
                 for (const mutation of mutations) {
+                        console.log(`Mutation: ${mutation.type}`, mutation.target)
+
                         // 处理新增节点
                         for (const node of mutation.addedNodes) {
                                 if (node.nodeType === Node.ELEMENT_NODE) {
                                         const element = node as Element
                                         // 跳过翻译模块创建的翻译结果容器和高亮元素，避免循环触发
                                         if (element.classList?.contains('translation-result') ||
-                                                element.classList?.contains('bread-highlight')) {
+                                            element.classList?.contains('bread-highlight')) {
+                                                console.log(`⏭️  跳过内部元素: ${element.tagName}.${Array.from(element.classList).join('.')}`)
+                                                skippedElements++
                                                 continue
                                         }
+                                        console.log(`➕ 新增元素: ${element.tagName}`, element)
                                         newElements.push(element)
                                 }
                         }
 
                         // 处理移除节点
                         for (const node of mutation.removedNodes) {
+                                console.log(`➖ 移除节点: ${node.nodeName}`)
                                 handleRemovedNode(node)
                         }
 
@@ -73,16 +81,22 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                         }
                 }
 
+                console.log(`📊 统计: ${newElements.length} 个新元素, ${skippedElements} 个跳过元素`)
+
                 // 处理新增元素的功能应用
                 if (newElements.length > 0) {
+                        console.log('🚀 开始处理新元素功能')
                         processNewElements(newElements)
-
+                        
                         // 如果高亮功能已启用，延迟重新应用高亮
                         const highlightManager = getHighlightManager()
                         if (highlightManager.isEnabled()) {
+                                console.log('⏰ 调度高亮更新')
                                 scheduleHighlightUpdate(highlightManager)
                         }
                 }
+                
+                console.groupEnd()
         }
 )
 
@@ -92,15 +106,21 @@ const domMutationObserver: MutationObserver = new MutationObserver(
 function processNewElements(elements: Element[]) {
         const translateEnabled = getSetting().translate
         const bionicEnabled = getSetting().bionic
-
+        
+        console.log(`🎯 功能设置: 翻译=${translateEnabled}, 仿生=${bionicEnabled}`)
+        
         for (const element of elements) {
                 if (translateEnabled) {
+                        console.log(`🌐 应用翻译到: ${element.tagName}`)
                         translateAddedElement(element)
                 }
                 if (bionicEnabled) {
+                        console.log(`👁️ 应用仿生到: ${element.tagName}`)
                         observeElementNode(element)
                 }
         }
+        
+        console.log(`✅ 完成处理 ${elements.length} 个元素`)
 }
 
 /**
