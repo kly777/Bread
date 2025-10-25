@@ -215,8 +215,12 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
 
         let index = 0
 
+        // 大小写忽略
+        const searchText = selectedText.toLowerCase()
+        const searchMergedText = mergedText.toLowerCase()
+
         // 循环查找所有匹配项
-        while ((index = mergedText.indexOf(selectedText, index)) !== -1) {
+        while ((index = searchMergedText.indexOf(searchText, index)) !== -1) {
                 // 记录匹配范围（左闭右开区间）
                 matches.push({
                         start: index,
