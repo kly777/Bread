@@ -1,92 +1,82 @@
-import {
-        highlightTextInNode,
-        removeHighlights,
-} from '../feature/highlight/highlightNode'
-import { getTextContainerElement } from '../kit/getTextContainer'
-import { getSelectedText } from '../kit/getSelectedText'
-import { manageMutationObserver } from '../observer/domMutationObserver'
+import { getHighlightManager, destroyHighlightManager } from '../feature/highlight/highlightManager'
+import { HighlightPanel } from '../feature/highlight/highlightPanel'
 
-let listen = false
+let highlightPanel: HighlightPanel | null = null
 let isHighlightActive = false
-
-// 声明事件处理函数
-const handleDown = () => {
-        listen = true
-}
-
-const handleMove = () => {
-        if (listen) {
-                highlightFeature()
-        }
-}
-
-const handleUp = () => {
-        listen = false
-        highlightFeature()
-}
 
 /**
  * 开启文本高亮功能
- * 绑定鼠标事件监听器以激活高亮操作
- * 如果功能已激活则直接返回
+ * 初始化高亮管理器并自动提取关键词
  */
-export function openHighlight() {
-        // 仅当未激活时绑定事件
+export async function openHighlight() {
         if (isHighlightActive) return
 
-        // 绑定事件监听
-        document.addEventListener('mousedown', handleDown)
-        document.addEventListener('mousemove', handleMove)
-        document.addEventListener('mouseup', handleUp)
+        const manager = getHighlightManager()
+        console.log('Highlight Manager Config:', manager.getConfig())
+
+        // 自动提取关键词
+        await manager.autoExtractAndHighlight()
+
+        // 启动高亮
+        manager.start()
+
+        // 创建控制面板
+        highlightPanel = new HighlightPanel(manager)
+        highlightPanel.show()
 
         isHighlightActive = true
 }
 
 /**
  * 停止文本高亮功能
- * 移除所有事件监听器并清除高亮状态
- * 最终会移除页面上所有已存在的高亮标记
+ * 移除高亮并销毁面板
  */
 export function stopHighlight() {
-        // 获取存储的处理函数
+        if (!isHighlightActive) return
 
-        // 移除所有事件监听
-        document.removeEventListener('mousedown', handleDown)
-        document.removeEventListener('mousemove', handleMove)
-        document.removeEventListener('mouseup', handleUp)
+        const manager = getHighlightManager()
+        manager.stop()
 
-        // 清理状态
-        isHighlightActive = false
-        removeHighlights()
-}
-/**
- * 执行文本高亮核心逻辑
- * 1. 暂停DOM变更观察以避免冲突
- * 2. 获取当前选中文本并验证有效性
- * 3. 遍历所有文本容器元素进行高亮渲染
- * 4. 重新启动DOM变更观察器
- */
-function highlightFeature() {
-        console.log('highlightFeature')
-        manageMutationObserver(false)
-        removeHighlights()
-
-        const text = getSelectedText()
-        if (text.trim() === '') {
-                manageMutationObserver(true)
-                return
+        if (highlightPanel) {
+                highlightPanel.destroy()
+                highlightPanel = null
         }
 
-        const elements = getTextContainerElement()
-        /**
-         * 对每个文本容器元素执行高亮操作
-         * 通过highlightTextInNode方法将选中文本
-         * 在当前元素范围内进行标记渲染
-         */
-        elements.forEach((ele) => {
-                highlightTextInNode(text, ele)
-                // ele.style.border="1px solid red"
-        })
+        isHighlightActive = false
+}
 
-        manageMutationObserver(true)
+/**
+ * 初始化高亮功能
+ * 在页面加载时自动提取关键词但不立即高亮
+ */
+export async function initHighlight() {
+        const manager = getHighlightManager()
+        await manager.autoExtractAndHighlight()
+}
+
+/**
+ * 获取高亮功能状态
+ */
+export function isHighlightEnabled(): boolean {
+        return isHighlightActive
+}
+
+/**
+ * 切换高亮面板显示状态
+ */
+export function toggleHighlightPanel() {
+        if (!highlightPanel) {
+                const manager = getHighlightManager()
+                highlightPanel = new HighlightPanel(manager)
+        }
+
+        highlightPanel.toggle()
+}
+
+/**
+ * 清理高亮功能资源
+ */
+export function destroyHighlight() {
+        stopHighlight()
+        destroyHighlightManager()
 }

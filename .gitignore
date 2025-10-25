@@ -33,3 +33,5 @@ web-ext.config.ts
 *.temp.*
 
 .env.*
+
+ref

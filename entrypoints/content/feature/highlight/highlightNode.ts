@@ -52,15 +52,17 @@ function getTexts(
 }
 
 /**
- * 高亮显示文档中与选中文本匹配的文本节点（排除当前选中文本本身）
+ * 高亮显示文档中与指定文本匹配的文本节点
  *
+ * @param text - 要高亮的文本
  * @param root - 需要遍历的DOM根节点，默认为document.body。函数会在此节点的子树中查找匹配
+ * @param excludeSelection - 是否排除当前选中文本，默认为true
  * @returns void 本函数不返回任何值
  */
-export function highlightTextInNode(text: string, root: Node = document.body) {
+export function highlightTextInNode(text: string, root: Node = document.body, excludeSelection: boolean = true) {
         // console.log("highlightTextInNode", root);
 
-        // 仅当存在有效选中文本时执行高亮
+        // 仅当存在有效文本时执行高亮
         if (text !== '') {
                 // 获取所有文本节点及其合并后的完整文本内容
                 console.log('getTexts', root)
@@ -80,15 +82,18 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
                         // 在合并文本中查找所有匹配位置
                         const matches = findMatches(mergedText, text)
 
-                        // 过滤掉当前选中文本对应的匹配项（避免高亮自己）
-                        const filteredMatches = matches.filter(
-                                (m) =>
-                                        !isInSelection(
-                                                m,
-                                                texts,
-                                                window.getSelection()
-                                        )
-                        )
+                        // 根据参数决定是否过滤选中文本
+                        let filteredMatches = matches
+                        if (excludeSelection) {
+                                filteredMatches = matches.filter(
+                                        (m) =>
+                                                !isInSelection(
+                                                        m,
+                                                        texts,
+                                                        window.getSelection()
+                                                )
+                                )
+                        }
 
                         // 调试信息：输出所有匹配项详情
                         // console.table(
@@ -104,6 +109,25 @@ export function highlightTextInNode(text: string, root: Node = document.body) {
                         return
                 }
         }
+}
+
+/**
+ * 高亮显示文档中多个关键词
+ *
+ * @param words - 要高亮的关键词数组
+ * @param root - 需要遍历的DOM根节点，默认为document.body
+ * @returns void
+ */
+export function highlightWordsInDocument(words: string[], root: Node = document.body) {
+        // 先移除所有现有高亮
+        removeHighlights()
+
+        // 对每个关键词进行高亮（不排除选中文本）
+        words.forEach(word => {
+                if (word && word.trim() !== '') {
+                        highlightTextInNode(word, root, false)
+                }
+        })
 }
 
 export function removeHighlights() {
@@ -247,7 +271,7 @@ function highlightMatches(texts: TextNodeEntry[], matches: MatchRange[]): void {
                                 // 分割
                                 const pre = node.splitText(start)
                                 const highlighted = pre.splitText(end - start)
-                                const span = createMarkElement()
+                                const span = createMarkElement(0)  // 使用默认颜色索引0
 
                                 span.appendChild(pre.cloneNode(true))
                                 node.parentNode?.replaceChild(span, pre)
@@ -304,12 +328,10 @@ function mergeRanges(ranges: MatchRange[]): MatchRange[] {
  * 该函数用于创建一个新的span元素，并为其设置特定的样式和类名
  * 以便在页面中高亮显示文本
  *
- * @param textContent - span元素的文本内容
  * @returns 返回一个带有高亮样式的span元素
  */
-function createMarkElement(): HTMLElement {
-        //return document.createElement("span");
+function createMarkElement(colorIndex: number = 0): HTMLElement {
         const span = document.createElement('mark')
-        span.className = 'bread-highlight'
+        span.className = `bread-highlight bread-highlight-color-${colorIndex}`
         return span
 }
