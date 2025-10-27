@@ -27,14 +27,13 @@ export default defineConfig({
                 if (env.mode === 'development') {
                         return {
                                 build: {
-
                                         sourcemap: true, // 确保生成 source maps 方便调试
                                 },
                                 server: {
                                         hmr: {
-                                                timeout: 20000 // 增加热重载超时时间
-                                        }
-                                }
+                                                timeout: 20000, // 增加热重载超时时间
+                                        },
+                                },
                         }
                 }
 

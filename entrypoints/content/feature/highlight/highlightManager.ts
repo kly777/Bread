@@ -160,9 +160,9 @@ export class HighlightManager {
                         .filter((word) => word.enabled)
                         .map((word) => word.text)
 
-                console.group('🎨 高亮管理器 - highlightAll')
-                console.log(`📝 启用的关键词: ${enabledWords.join(', ')}`)
-                console.log(`🔢 关键词数量: ${enabledWords.length}`)
+                console.group('高亮管理器 - highlightAll')
+                console.log(`启用的关键词: ${enabledWords.join(', ')}`)
+                console.log(`关键词数量: ${enabledWords.length}`)
 
                 // 使用highlightNode.ts的高亮方案
                 highlightWordsInDocument(enabledWords)
@@ -205,24 +205,24 @@ export class HighlightManager {
         }
 
         start() {
-                console.group('▶️ 高亮管理器 - start')
-                console.log('🚀 激活高亮功能')
+                console.group('高亮管理器 - start')
+                console.log('激活高亮功能')
                 this.isActive = true
                 this.highlightAll()
                 // 开始观察DOM变化，以便在动态内容加载时重新应用高亮
                 manageMutationObserver(true)
-                console.log('👁️ 已启动DOM观察器')
+                console.log('已启动DOM观察器')
                 console.groupEnd()
         }
 
         stop() {
-                console.group('🛑 高亮管理器 - stop')
-                console.log('⏸️  停用高亮功能')
+                console.group('高亮管理器 - stop')
+                console.log('停用高亮功能')
                 this.isActive = false
                 removeHighlights()
                 // 停止观察DOM变化
                 manageMutationObserver(false)
-                console.log('👁️ 已停止DOM观察器')
+                console.log('已停止DOM观察器')
                 console.groupEnd()
         }
 
@@ -280,7 +280,7 @@ export class HighlightManager {
                 try {
                         if (document.head) {
                                 document.head.appendChild(this.styleElement)
-                        } else {
+
                                 document.documentElement.appendChild(
                                         this.styleElement
                                 )

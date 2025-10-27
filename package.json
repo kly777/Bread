@@ -19,23 +19,23 @@
                 "lint:fix": "eslint . --fix"
         },
         "dependencies": {
-                "@wxt-dev/storage": "^1.1.1",
-                "terser": "^5.43.1",
+                "@wxt-dev/storage": "^1.2.6",
+                "terser": "^5.44.0",
                 "tinycolor2": "^1.6.0",
                 "vue": "^3.5.22"
         },
         "devDependencies": {
-                "@eslint/js": "^9.30.0",
+                "@eslint/js": "^9.38.0",
                 "@types/chrome": "^0.0.280",
                 "@types/tinycolor2": "^1.4.6",
-                "@typescript-eslint/eslint-plugin": "^8.35.0",
-                "@typescript-eslint/parser": "^8.35.0",
-                "@wxt-dev/module-vue": "^1.0.2",
-                "eslint": "^9.30.0",
-                "eslint-plugin-vue": "^10.2.0",
+                "@typescript-eslint/eslint-plugin": "^8.46.2",
+                "@typescript-eslint/parser": "^8.46.2",
+                "@wxt-dev/module-vue": "^1.0.3",
+                "eslint": "^9.38.0",
+                "eslint-plugin-vue": "^10.5.1",
                 "typescript": "5.6.3",
-                "vue-eslint-parser": "^10.1.4",
-                "vue-tsc": "^2.2.10",
+                "vue-eslint-parser": "^10.2.0",
+                "vue-tsc": "^2.2.12",
                 "wxt": "^0.20.11"
         }
 }
