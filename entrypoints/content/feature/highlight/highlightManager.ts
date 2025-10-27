@@ -1,14 +1,13 @@
 import { KeywordExtractor } from './keywordExtractor'
 import {
-        HighlightWord,
         HighlightConfig,
         DEFAULT_CONFIG,
-        createHighlightWord,
 } from './highlightConfig'
 import { getKeyWithDomain } from '../../../kit/storage'
 import { highlightWordsInDocument, removeHighlights } from './highlightNode'
 import { getHighlightStyle } from './highlightConfig'
 import { manageMutationObserver } from '../../observer/domMutationObserver'
+import { getWordsManager, HighlightWord } from './wordsManager'
 
 /**
  * 高亮管理器
@@ -26,6 +25,7 @@ export class HighlightManager {
         private config: HighlightConfig
         private isActive: boolean = false
         private styleElement: HTMLStyleElement | null = null
+        private wordsManager = getWordsManager()
 
         constructor() {
                 this.config = { ...DEFAULT_CONFIG }
@@ -33,6 +33,12 @@ export class HighlightManager {
                 // 确保样式在初始化时就被注入
                 this.injectStyles()
                 this.loadConfig()
+                // 注册词更新回调
+                this.wordsManager.onWordsUpdate(() => {
+                        if (this.isActive) {
+                                this.highlightAll()
+                        }
+                })
         }
 
         async loadConfig() {
@@ -68,85 +74,33 @@ export class HighlightManager {
                 if (sources.length === 0) return
 
                 const bestSource = sources[0]
-                const newWords = bestSource.keywords.map((keyword) =>
-                        createHighlightWord(keyword, true)
-                )
+                const newWords = bestSource.keywords.map((keyword, index) => ({
+                        text: keyword,
+                        enabled: true,
+                        colorIndex: index % 10,
+                        caseSensitive: false,
+                        regex: false,
+                        source: 'persistent' as const,
+                }))
 
-                this.addWords(newWords)
+                this.wordsManager.addWords(newWords)
                 this.extractor.setWindowKeywords(bestSource.keywords)
-
-                if (this.isActive) {
-                        this.highlightAll()
-                }
         }
 
         addWords(words: HighlightWord[]) {
-                for (const newWord of words) {
-                        const existingIndex = this.config.words.findIndex(
-                                (w) => w.text === newWord.text
-                        )
-
-                        if (existingIndex >= 0) {
-                                this.config.words[existingIndex].enabled =
-                                        this.config.words[existingIndex]
-                                                .enabled || newWord.enabled
-                        } else {
-                                newWord.colorIndex =
-                                        this.config.words.length % 10
-                                this.config.words.push(newWord)
-                        }
-                }
-
-                if (this.config.sortByLength) {
-                        this.config.words.sort(
-                                (a, b) => b.text.length - a.text.length
-                        )
-                }
-
-                this.saveConfig()
-
-                // 如果高亮功能已激活，立即应用高亮
-                if (this.isActive) {
-                        this.highlightAll()
-                }
+                this.wordsManager.addWords(words)
         }
 
         removeWord(text: string) {
-                this.config.words = this.config.words.filter(
-                        (w) => w.text !== text
-                )
-                this.saveConfig()
-
-                if (this.isActive) {
-                        this.highlightAll()
-                }
+                this.wordsManager.removeWord(text)
         }
 
         toggleWord(text: string, enabled?: boolean) {
-                const word = this.config.words.find((w) => w.text === text)
-                if (word) {
-                        word.enabled =
-                                enabled !== undefined ? enabled : !word.enabled
-                        this.saveConfig()
-
-                        if (this.isActive) {
-                                this.highlightAll()
-                        }
-                }
+                this.wordsManager.toggleWord(text, enabled)
         }
 
         updateWord(word: HighlightWord) {
-                const index = this.config.words.findIndex(
-                        (w) => w.text === word.text
-                )
-                if (index >= 0) {
-                        this.config.words[index] = word
-                        this.saveConfig()
-
-                        if (this.isActive) {
-                                this.highlightAll()
-                        }
-                }
+                this.wordsManager.updateWord(word)
         }
 
         highlightAll() {
@@ -156,9 +110,7 @@ export class HighlightManager {
                 }
 
                 // 获取启用的高亮词
-                const enabledWords = this.config.words
-                        .filter((word) => word.enabled)
-                        .map((word) => word.text)
+                const enabledWords = this.wordsManager.getEnabledWords()
 
                 console.group('高亮管理器 - highlightAll')
                 console.log(`启用的关键词: ${enabledWords.join(', ')}`)
@@ -180,28 +132,14 @@ export class HighlightManager {
         }
 
         getWordStats(text: string) {
-                // 简化实现：暂时返回固定计数
-                return {
-                        count: 1, // 简化计数
-                        word: this.config.words.find((w) => w.text === text),
+                return this.wordsManager.getWordStats(text) || {
+                        count: 1,
+                        word: this.wordsManager.getAllWords().find((w) => w.text === text),
                 }
         }
 
         getAllStats() {
-                const stats: {
-                        [text: string]: { count: number; word: HighlightWord }
-                } = {}
-
-                for (const word of this.config.words) {
-                        if (word.enabled) {
-                                stats[word.text] = {
-                                        count: 1, // 简化计数
-                                        word,
-                                }
-                        }
-                }
-
-                return stats
+                return this.wordsManager.getAllStats()
         }
 
         start() {
@@ -241,7 +179,7 @@ export class HighlightManager {
         }
 
         getWords(): HighlightWord[] {
-                return [...this.config.words]
+                return this.wordsManager.getAllWords()
         }
 
         isEnabled(): boolean {
@@ -251,6 +189,11 @@ export class HighlightManager {
         destroy() {
                 this.stop()
                 this.removeStyles()
+                this.wordsManager.offWordsUpdate(() => {
+                        if (this.isActive) {
+                                this.highlightAll()
+                        }
+                })
         }
 
         /**

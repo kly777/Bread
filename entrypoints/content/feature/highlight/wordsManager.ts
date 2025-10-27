@@ -5,22 +5,32 @@
 
 export interface HighlightWord {
         text: string
+        enabled: boolean
         colorIndex: number
+        caseSensitive: boolean
+        regex: boolean
         source: 'persistent' | 'search' // 来源：持久高亮或搜索关键词
 }
 
 export type WordsUpdateCallback = (words: HighlightWord[]) => void
 
 class WordsManager {
-        private persistentWords: string[] = []
-        private searchWords: string[] = []
+        private persistentWords: HighlightWord[] = []
+        private searchWords: HighlightWord[] = []
         private callbacks: WordsUpdateCallback[] = []
 
         /**
          * 更新持久高亮词
          */
         updatePersistentWords(words: string[]): void {
-                this.persistentWords = words
+                this.persistentWords = words.map((word, index) => ({
+                        text: word,
+                        colorIndex: index % 5,
+                        enabled: true,
+                        caseSensitive: false,
+                        regex: false,
+                        source: 'persistent',
+                }))
                 this.notifyCallbacks()
         }
 
@@ -28,35 +38,119 @@ class WordsManager {
          * 更新搜索关键词
          */
         updateSearchWords(words: string[]): void {
-                this.searchWords = words
+                this.searchWords = words.map((word, index) => ({
+                        text: word,
+                        colorIndex: (index % 5) + 5,
+                        enabled: true,
+                        caseSensitive: false,
+                        regex: false,
+                        source: 'search',
+                }))
                 this.notifyCallbacks()
+        }
+
+        /**
+         * 添加高亮词
+         */
+        addWords(words: HighlightWord[]): void {
+                for (const newWord of words) {
+                        // 检查是否已存在
+                        const existingWord = this.getAllWords().find(
+                                (w) => w.text === newWord.text
+                        )
+                        if (!existingWord) {
+                                // 添加到持久高亮词
+                                this.persistentWords.push({
+                                        ...newWord,
+                                        source: 'persistent',
+                                })
+                        }
+                }
+                this.notifyCallbacks()
+        }
+
+        /**
+         * 移除高亮词
+         */
+        removeWord(text: string): void {
+                this.persistentWords = this.persistentWords.filter(
+                        (w) => w.text !== text
+                )
+                this.notifyCallbacks()
+        }
+
+        /**
+         * 切换高亮词状态
+         */
+        toggleWord(text: string, enabled?: boolean): void {
+                const word = this.getAllWords().find((w) => w.text === text)
+                if (word) {
+                        word.enabled = enabled !== undefined ? enabled : !word.enabled
+                        this.notifyCallbacks()
+                }
+        }
+
+        /**
+         * 更新高亮词
+         */
+        updateWord(word: HighlightWord): void {
+                const index = this.persistentWords.findIndex(
+                        (w) => w.text === word.text
+                )
+                if (index >= 0) {
+                        this.persistentWords[index] = word
+                        this.notifyCallbacks()
+                }
         }
 
         /**
          * 获取所有要高亮的词
          */
         getAllWords(): HighlightWord[] {
-                const words: HighlightWord[] = []
+                return [...this.persistentWords, ...this.searchWords]
+        }
 
-                // 持久高亮词使用颜色索引 0-4
-                this.persistentWords.forEach((word, index) => {
-                        words.push({
-                                text: word,
-                                colorIndex: index % 5,
-                                source: 'persistent',
-                        })
-                })
+        /**
+         * 获取启用的高亮词
+         */
+        getEnabledWords(): string[] {
+                return this.getAllWords()
+                        .filter((word) => word.enabled)
+                        .map((word) => word.text)
+        }
 
-                // 搜索关键词使用颜色索引 5-9
-                this.searchWords.forEach((word, index) => {
-                        words.push({
-                                text: word,
-                                colorIndex: (index % 5) + 5,
-                                source: 'search',
-                        })
-                })
+        /**
+         * 获取高亮词统计
+         */
+        getWordStats(text: string): { count: number; word: HighlightWord } | null {
+                const word = this.getAllWords().find((w) => w.text === text)
+                if (word) {
+                        return {
+                                count: 1, // 简化计数
+                                word,
+                        }
+                }
+                return null
+        }
 
-                return words
+        /**
+         * 获取所有高亮词统计
+         */
+        getAllStats(): { [text: string]: { count: number; word: HighlightWord } } {
+                const stats: {
+                        [text: string]: { count: number; word: HighlightWord }
+                } = {}
+
+                for (const word of this.getAllWords()) {
+                        if (word.enabled) {
+                                stats[word.text] = {
+                                        count: 1, // 简化计数
+                                        word,
+                                }
+                        }
+                }
+
+                return stats
         }
 
         /**
