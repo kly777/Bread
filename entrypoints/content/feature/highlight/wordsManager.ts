@@ -85,7 +85,8 @@ class WordsManager {
         toggleWord(text: string, enabled?: boolean): void {
                 const word = this.getAllWords().find((w) => w.text === text)
                 if (word) {
-                        word.enabled = enabled !== undefined ? enabled : !word.enabled
+                        word.enabled =
+                                enabled !== undefined ? enabled : !word.enabled
                         this.notifyCallbacks()
                 }
         }
@@ -122,7 +123,9 @@ class WordsManager {
         /**
          * 获取高亮词统计
          */
-        getWordStats(text: string): { count: number; word: HighlightWord } | null {
+        getWordStats(
+                text: string
+        ): { count: number; word: HighlightWord } | null {
                 const word = this.getAllWords().find((w) => w.text === text)
                 if (word) {
                         return {
@@ -136,7 +139,9 @@ class WordsManager {
         /**
          * 获取所有高亮词统计
          */
-        getAllStats(): { [text: string]: { count: number; word: HighlightWord } } {
+        getAllStats(): {
+                [text: string]: { count: number; word: HighlightWord }
+        } {
                 const stats: {
                         [text: string]: { count: number; word: HighlightWord }
                 } = {}

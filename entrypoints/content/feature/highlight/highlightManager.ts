@@ -1,8 +1,5 @@
 import { KeywordExtractor } from './keywordExtractor'
-import {
-        HighlightConfig,
-        DEFAULT_CONFIG,
-} from './highlightConfig'
+import { HighlightConfig, DEFAULT_CONFIG } from './highlightConfig'
 import { getKeyWithDomain } from '../../../kit/storage'
 import { highlightWordsInDocument, removeHighlights } from './highlightNode'
 import { getHighlightStyle } from './highlightConfig'
@@ -132,10 +129,14 @@ export class HighlightManager {
         }
 
         getWordStats(text: string) {
-                return this.wordsManager.getWordStats(text) || {
-                        count: 1,
-                        word: this.wordsManager.getAllWords().find((w) => w.text === text),
-                }
+                return (
+                        this.wordsManager.getWordStats(text) || {
+                                count: 1,
+                                word: this.wordsManager
+                                        .getAllWords()
+                                        .find((w) => w.text === text),
+                        }
+                )
         }
 
         getAllStats() {
