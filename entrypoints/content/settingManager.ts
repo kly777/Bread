@@ -5,11 +5,8 @@ import {
         openBionic,
         stopBionic,
 } from './featureManager/bionicManager'
-import {
-        openHighlight,
-        stopHighlight,
-        initHighlight,
-} from './featureManager/highlightManager'
+import { openHighlight, stopHighlight } from './featureManager/highlightManager'
+import { initializeHighlightSystem } from './feature/highlight/highlightInit'
 import { openTranslate, stopTranslate } from './featureManager/translateManager'
 import { pageLang } from './kit/pageInfo'
 
@@ -45,7 +42,7 @@ const features: { [key: string]: FeatureConfig } = {
         },
         highlight: {
                 default: false,
-                init: initHighlight,
+                init: initializeHighlightSystem,
                 on: openHighlight,
                 off: stopHighlight,
         },

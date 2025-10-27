@@ -6,25 +6,6 @@ import {
 let isHighlightActive = false
 
 /**
- * 判断当前页面是否为搜索引擎
- */
-function isSearchEngine(): boolean {
-        const hostname = window.location.hostname
-        const searchEngines = [
-                'google.com',
-                'bing.com',
-                'baidu.com',
-                'yahoo.com',
-                'duckduckgo.com',
-                'yandex.com',
-                'ask.com',
-                'aol.com',
-        ]
-
-        return searchEngines.some((engine) => hostname.includes(engine))
-}
-
-/**
  * 开启文本高亮功能
  * 初始化高亮管理器并自动提取关键词
  */
@@ -54,21 +35,6 @@ export function stopHighlight() {
         manager.stop()
 
         isHighlightActive = false
-}
-
-/**
- * 初始化高亮功能
- * 在页面加载时自动提取关键词，如果是搜索引擎则自动开启高亮
- */
-export async function initHighlight() {
-        const manager = getHighlightManager()
-        await manager.autoExtractAndHighlight()
-
-        // 如果是搜索引擎，自动开启高亮
-        if (isSearchEngine()) {
-                console.log('检测到搜索引擎页面，自动开启高亮功能')
-                await openHighlight()
-        }
 }
 
 /**
