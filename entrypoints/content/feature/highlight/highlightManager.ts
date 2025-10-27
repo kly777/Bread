@@ -26,6 +26,8 @@ export class HighlightManager {
         private config: HighlightConfig
         private isActive: boolean = false
         private styleElement: HTMLStyleElement | null = null
+        private urlObserver: MutationObserver | null = null
+        private lastUrl: string = ''
 
         constructor() {
                 this.config = { ...DEFAULT_CONFIG }
@@ -33,6 +35,7 @@ export class HighlightManager {
                 // 确保样式在初始化时就被注入
                 this.injectStyles()
                 this.loadConfig()
+                this.setupSearchKeywordAutoUpdate()
         }
 
         async loadConfig() {
@@ -251,6 +254,89 @@ export class HighlightManager {
         destroy() {
                 this.stop()
                 this.removeStyles()
+                this.cleanupSearchKeywordAutoUpdate()
+        }
+
+        /**
+         * 设置搜索关键词自动更新监听
+         */
+        private setupSearchKeywordAutoUpdate() {
+                this.lastUrl = window.location.href
+
+                // 监听URL变化
+                this.urlObserver = new MutationObserver(() => {
+                        if (window.location.href !== this.lastUrl) {
+                                this.lastUrl = window.location.href
+                                console.log('🔄 检测到URL变化，检查是否需要更新搜索关键词高亮')
+                                this.updateSearchKeywords()
+                        }
+                })
+
+                // 监听popstate事件（浏览器前进/后退）
+                window.addEventListener('popstate', this.handlePopState.bind(this))
+
+                // 监听hashchange事件（URL hash变化）
+                window.addEventListener('hashchange', this.handleHashChange.bind(this))
+
+                // 开始观察DOM变化
+                this.urlObserver.observe(document, { subtree: true, childList: true })
+
+                // 初始检查一次
+                setTimeout(() => {
+                        this.updateSearchKeywords()
+                }, 1000)
+        }
+
+        /**
+         * 清理搜索关键词自动更新监听
+         */
+        private cleanupSearchKeywordAutoUpdate() {
+                if (this.urlObserver) {
+                        this.urlObserver.disconnect()
+                        this.urlObserver = null
+                }
+                window.removeEventListener('popstate', this.handlePopState.bind(this))
+                window.removeEventListener('hashchange', this.handleHashChange.bind(this))
+        }
+
+        /**
+         * 处理popstate事件
+         */
+        private handlePopState() {
+                console.log('🔄 检测到popstate事件，检查是否需要更新搜索关键词高亮')
+                this.updateSearchKeywords()
+        }
+
+        /**
+         * 处理hashchange事件
+         */
+        private handleHashChange() {
+                console.log('🔄 检测到hashchange事件，检查是否需要更新搜索关键词高亮')
+                this.updateSearchKeywords()
+        }
+
+        /**
+         * 更新搜索关键词高亮
+         */
+        private updateSearchKeywords() {
+                // 检查当前页面是否是搜索引擎页面
+                const sources = this.extractor.extractKeywords()
+                const searchEngineSource = sources.find(source => source.type === 'search_engine')
+                
+                if (searchEngineSource && searchEngineSource.keywords.length > 0) {
+                        console.log('🔍 检测到搜索引擎页面，自动高亮搜索关键词:', searchEngineSource.keywords)
+                        
+                        // 应用搜索关键词高亮，使用不同的颜色索引
+                        const keywordsWithColor = searchEngineSource.keywords.map((keyword, index) => ({
+                                text: keyword,
+                                colorIndex: (index + 5) % 10 // 使用不同的颜色索引避免与持久高亮冲突
+                        }))
+                        
+                        // 如果高亮功能已激活，立即应用搜索关键词高亮
+                        if (this.isActive) {
+                                highlightWordsInDocument(keywordsWithColor)
+                        }
+                }
         }
 
         /**
