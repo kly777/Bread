@@ -18,7 +18,7 @@ interface FeatureConfig {
         off: () => void | Promise<void>
 }
 
-let setting: { [key: string]: boolean } = {
+const setting: { [key: string]: boolean } = {
         highlight: false,
         stripe: false,
         translate: false,

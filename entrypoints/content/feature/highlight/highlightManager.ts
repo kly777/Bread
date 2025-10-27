@@ -84,22 +84,6 @@ export class HighlightManager {
                 this.extractor.setWindowKeywords(bestSource.keywords)
         }
 
-        addWords(words: HighlightWord[]) {
-                this.wordsManager.addWords(words)
-        }
-
-        removeWord(text: string) {
-                this.wordsManager.removeWord(text)
-        }
-
-        toggleWord(text: string, enabled?: boolean) {
-                this.wordsManager.toggleWord(text, enabled)
-        }
-
-        updateWord(word: HighlightWord) {
-                this.wordsManager.updateWord(word)
-        }
-
         highlightAll() {
                 if (!this.isActive) {
                         console.log('⏸️  高亮功能未激活，跳过highlightAll')
@@ -122,11 +106,6 @@ export class HighlightManager {
                 return new Map() // 为了保持接口兼容性，返回空Map
         }
 
-        navigateToWord(text: string) {
-                // 简化实现：暂时不支持导航功能
-                console.log(`导航到关键词: ${text} - 功能暂未实现`)
-                return null
-        }
 
         getWordStats(text: string) {
                 return (

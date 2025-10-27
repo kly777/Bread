@@ -90,7 +90,7 @@ function findAncestorWithBackground(element: HTMLElement): HTMLElement | null {
  * @returns 如果元素只包含文本内容，返回 true；否则返回 false
  */
 function hasOnlyTextContent(element: HTMLElement): boolean {
-        for (let child of element.childNodes) {
+        for (const child of element.childNodes) {
                 if (child.nodeType === Node.ELEMENT_NODE) {
                         return false
                 }

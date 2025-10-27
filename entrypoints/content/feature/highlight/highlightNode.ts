@@ -71,7 +71,7 @@ export function highlightTextInNode(
         // 仅当存在有效文本时执行高亮
         if (text !== '') {
                 // 获取所有文本节点及其合并后的完整文本内容
-                let { texts, mergedText } = getTexts(root)
+                const { texts, mergedText } = getTexts(root)
 
                 // 存在有效文本时执行匹配逻辑
                 if (texts.length > 0 && text !== '') {

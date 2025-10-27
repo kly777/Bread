@@ -20,10 +20,10 @@ function getInfo(anchorElement: HTMLAnchorElement): anchorInfo {
 
 export function getAnchorsInfo() {
         const anchorElement = findAnchor()
-        let anchorInfos: anchorInfo[] = []
+        const anchorInfos: anchorInfo[] = []
         anchorElement.forEach((anchorElement) => {
                 const info = getInfo(anchorElement)
-                if (info.link != '' && info.title != '') {
+                if (info.link !== '' && info.title !== '') {
                         anchorInfos.push(info)
                 }
         })
