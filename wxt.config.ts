@@ -15,6 +15,14 @@ export default defineConfig({
                 ],
                 host_permissions: ['<all_urls>'],
                 summary: 'A browser extension for reading enhancement',
+                browser_specific_settings: {
+                        gecko: {
+                                // data_collection_permissions: {
+                                //         "telemetry": false,
+                                //         "study": false
+                                // }
+                        }
+                }
         },
         zip: {
                 downloadPackages: [
@@ -47,6 +55,8 @@ export default defineConfig({
                                                 drop_debugger: true, // 移除 debugger
                                                 pure_funcs: ['console.assert'], // 移除断言
                                                 unused: true, // 移除未使用代码
+                                                dead_code: true, // 移除死代码
+                                                evaluate: true,
                                         },
                                         mangle: true, // 混淆变量名（如 `myVar` → `a`）
                                         format: { comments: false }, // 移除注释
