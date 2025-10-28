@@ -86,7 +86,7 @@ export class HighlightManager {
 
         highlightAll() {
                 if (!this.isActive) {
-                        console.log('⏸️  高亮功能未激活，跳过highlightAll')
+                        console.log('高亮功能未激活，跳过highlightAll')
                         return
                 }
 
@@ -100,7 +100,7 @@ export class HighlightManager {
                 // 使用highlightNode.ts的高亮方案
                 highlightWordsInDocument(enabledWords)
 
-                console.log('✅ 高亮应用完成')
+                console.log('高亮应用完成')
                 console.groupEnd()
 
                 return new Map() // 为了保持接口兼容性，返回空Map

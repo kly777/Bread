@@ -36,7 +36,7 @@ export function initializeHighlightSystem(): void {
 function setupMessageListeners(): void {
         // 监听来自popup的消息
         browser.runtime.onMessage.addListener(
-                (message, sender, sendResponse) => {
+                (message, _, sendResponse) => {
                         console.group('📨 高亮系统收到消息')
                         console.log('消息内容:', message)
 
@@ -133,7 +133,7 @@ async function applyPersistentHighlightOnLoad(): Promise<void> {
                         'local:persistent_highlight_keywords'
                 )
                 if (persistentKeywords && persistentKeywords.trim()) {
-                        console.log('🚀 页面加载时自动应用持久高亮')
+                        console.log('页面加载时自动应用持久高亮')
                         const keywords = persistentKeywords
                                 .split('\n')
                                 .map((word) => word.trim())

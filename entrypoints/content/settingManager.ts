@@ -8,7 +8,7 @@ import {
 import { openHighlight, stopHighlight } from './featureManager/highlightManager'
 import { initializeHighlightSystem } from './feature/highlight/highlightInit'
 import { openTranslate, stopTranslate } from './featureManager/translateManager'
-import { pageLang } from './kit/pageInfo'
+import { isSearchEnginePage, pageLang } from './kit/pageInfo'
 
 // 状态配置：定义各功能的键名、默认值、启用/停用函数
 interface FeatureConfig {
@@ -41,7 +41,7 @@ const features: { [key: string]: FeatureConfig } = {
                 off: stopBionic,
         },
         highlight: {
-                default: false,
+                default: isSearchEnginePage(),
                 init: initializeHighlightSystem,
                 on: openHighlight,
                 off: stopHighlight,
