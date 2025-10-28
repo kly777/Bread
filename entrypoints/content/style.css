@@ -1,3 +1,6 @@
+@import url('./feature/translate/translate.css');
+
+
 .bionic-text {
         margin: 0;
         padding: 0;
@@ -28,26 +31,3 @@
         filter: invert(100%);
 }
 
-mark.bread-highlight {
-        background-color: rgba(255, 255, 0, 0.8); /* 半透明亮黄 */
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* 文字阴影 */
-        filter: brightness(1.2); /* 提升亮度 */
-}
-
-.translation-result {
-        opacity: 0.9;
-        font-size: 0.81em;
-        transition: opacity 0.3s ease-in-out;
-}
-span.translation-result {
-        display: inline;
-}
-
-div.translation-result {
-        margin-top: 0;
-        padding-top: 0;
-}
-
-.translation-result:hover {
-        opacity: 1;
-}

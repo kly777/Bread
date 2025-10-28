@@ -228,11 +228,12 @@ export function getHighlightStyle(colorScheme: number = 0): string {
         colors.forEach((color, index) => {
                 styles += `
             .bread-highlight-color-${index} {
-                background-color: ${color} !important;      // 背景颜色
-                color: black !important;                    // 文字颜色
-                padding: 0 1px !important;                  // 内边距
-                border-radius: 2px !important;              // 圆角边框
-                border: 1px solid ${borderColors[index]} !important; // 边框
+                box-sizing: border-box !important;
+                background-color: ${color} !important;
+                color: black !important;
+                padding: 0 1px !important;
+                border-radius: 2px !important;
+                border: 1px solid ${borderColors[index]} !important;
             }
         `
         })

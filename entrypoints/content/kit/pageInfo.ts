@@ -12,7 +12,6 @@ export function pageLang(): string {
 
 /**
  * 判断当前页面是否是搜索引擎页面
- * @returns 如果是搜索引擎页面返回true，否则返回false
  */
 export function isSearchEnginePage(): boolean {
         const host = window.location.host
