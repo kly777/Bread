@@ -35,45 +35,37 @@ export function initializeHighlightSystem(): void {
  */
 function setupMessageListeners(): void {
         // 监听来自popup的消息
-        browser.runtime.onMessage.addListener(
-                (message, _, sendResponse) => {
-                        console.group('📨 高亮系统收到消息')
-                        console.log('消息内容:', message)
+        browser.runtime.onMessage.addListener((message, _, sendResponse) => {
+                console.group('📨 高亮系统收到消息')
+                console.log('消息内容:', message)
 
-                        switch (message.action) {
-                                case 'highlightWords':
-                                        console.log(
-                                                '🎨 开始高亮关键词:',
-                                                message.words
-                                        )
-                                        handleHighlightWords(message.words)
-                                        sendResponse({
-                                                success: true,
-                                                words: message.words,
-                                        })
-                                        break
+                switch (message.action) {
+                        case 'highlightWords':
+                                console.log('🎨 开始高亮关键词:', message.words)
+                                handleHighlightWords(message.words)
+                                sendResponse({
+                                        success: true,
+                                        words: message.words,
+                                })
+                                break
 
-                                case 'removeHighlight':
-                                        console.log('🗑️ 移除所有高亮')
-                                        handleRemoveHighlight()
-                                        sendResponse({ success: true })
-                                        break
+                        case 'removeHighlight':
+                                console.log('🗑️ 移除所有高亮')
+                                handleRemoveHighlight()
+                                sendResponse({ success: true })
+                                break
 
-                                default:
-                                        console.log(
-                                                '❓ 未知消息类型:',
-                                                message.action
-                                        )
-                                        sendResponse({
-                                                success: false,
-                                                error: 'Unknown action',
-                                        })
-                        }
-
-                        console.groupEnd()
-                        return true // 保持消息通道开放以支持异步响应
+                        default:
+                                console.log('❓ 未知消息类型:', message.action)
+                                sendResponse({
+                                        success: false,
+                                        error: 'Unknown action',
+                                })
                 }
-        )
+
+                console.groupEnd()
+                return true // 保持消息通道开放以支持异步响应
+        })
 }
 
 /**

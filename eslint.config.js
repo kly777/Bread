@@ -37,7 +37,7 @@ export default defineConfig([
                         'no-unreachable': 'warn',
                         'no-dupe-keys': 'warn',
                         'no-dupe-else-if': 'warn',
-                        'eqeqeq': 'warn',
+                        eqeqeq: 'warn',
                         'no-var': 'warn',
                         'prefer-const': 'warn',
 

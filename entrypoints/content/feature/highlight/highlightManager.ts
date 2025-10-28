@@ -106,7 +106,6 @@ export class HighlightManager {
                 return new Map() // 为了保持接口兼容性，返回空Map
         }
 
-
         getWordStats(text: string) {
                 return (
                         this.wordsManager.getWordStats(text) || {
