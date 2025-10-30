@@ -1,4 +1,5 @@
 @import url('./feature/translate/translate.css');
+@import url('./feature/linkTarget/linkTarget.css');
 
 .bionic-text {
         margin: 0;

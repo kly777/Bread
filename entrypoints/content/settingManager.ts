@@ -8,6 +8,7 @@ import {
 import { openHighlight, stopHighlight } from './featureManager/highlightManager'
 import { initializeHighlightSystem } from './feature/highlight/highlightInit'
 import { openTranslate, stopTranslate } from './featureManager/translateManager'
+import { initLinkTarget, openLinkTarget, stopLinkTarget } from './featureManager/linkTargetManager'
 import { isSearchEnginePage, pageLang } from './utils/page/info'
 
 // 状态配置：定义各功能的键名、默认值、启用/停用函数
@@ -23,6 +24,7 @@ const setting: { [key: string]: boolean } = {
         stripe: false,
         translate: false,
         bionic: false,
+        linkTarget: false,
 }
 // 导出只读的 setting 副本
 export function getSetting(): { [key: string]: boolean } {
@@ -55,6 +57,12 @@ const features: { [key: string]: FeatureConfig } = {
                 default: false,
                 on: initStripe,
                 off: () => {}, // stripe无明确关闭函数，留空
+        },
+        linkTarget: {
+                default: true,
+                init: initLinkTarget,
+                on: openLinkTarget,
+                off: stopLinkTarget,
         },
 }
 
