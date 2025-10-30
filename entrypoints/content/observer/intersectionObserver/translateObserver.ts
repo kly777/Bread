@@ -1,7 +1,7 @@
 import { intersectionObserverOptions } from './options'
 
 import { manageMutationObserver } from '../domMutationObserver'
-import { getTextContainerElement } from '../../kit/getTextContainer'
+import { getTextContainerElement } from '../../utils/dom/traversal'
 import { translateElement } from '../../feature/translate/translateElement'
 import { preprocessExcludedElements } from '../../feature/translate/textExtractor'
 

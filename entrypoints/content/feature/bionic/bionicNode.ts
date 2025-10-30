@@ -1,4 +1,4 @@
-import { getTextNodes } from '../../kit/getTextNodes'
+import { getTextNodes } from '../../utils/dom/textNodes'
 
 export function bionicNestedTextNodes(root: Node = document.body) {
         const textNodes = getTextNodes(root)

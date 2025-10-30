@@ -1,6 +1,6 @@
 import { KeywordExtractor } from './keywordExtractor'
 import { HighlightConfig, DEFAULT_CONFIG } from './highlightConfig'
-import { getKeyWithDomain } from '../../../kit/storage'
+import { getKeyWithDomain } from '../../utils/storage/storage'
 import { highlightWordsInDocument, removeHighlights } from './highlightNode'
 import { getHighlightStyle } from './highlightConfig'
 import { manageMutationObserver } from '../../observer/domMutationObserver'

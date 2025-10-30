@@ -1,4 +1,4 @@
-import { searchEngines, SearchEngineConfig } from '../../kit/searchEngines'
+import { searchEngines, SearchEngineConfig } from '../../utils/page/search'
 
 /**
  * 关键词来源接口

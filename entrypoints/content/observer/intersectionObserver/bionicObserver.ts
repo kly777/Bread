@@ -1,7 +1,7 @@
 import { intersectionObserverOptions } from './options'
 import { bionicTextNode } from '../../feature/bionic/bionicNode'
 import { manageMutationObserver } from '../domMutationObserver'
-import { getTextNodes } from '../../kit/getTextNodes'
+import { getTextNodes } from '../../utils/dom/textNodes'
 
 /**
  * 仿生文本观察器模块

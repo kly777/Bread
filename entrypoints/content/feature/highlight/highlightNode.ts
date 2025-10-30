@@ -1,5 +1,5 @@
 // highlightNode.ts
-import { getTextWalker, GetTextNodesOptions } from '../../kit/getTextNodes'
+import { getTextWalker, GetTextNodesOptions } from '../../utils/dom/textNodes'
 interface TextNodeEntry {
         node: Text
         start: number

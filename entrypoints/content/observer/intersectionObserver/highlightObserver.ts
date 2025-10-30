@@ -1,8 +1,8 @@
 import { intersectionObserverOptions } from './options'
 
-import { getTextNodes } from '../../kit/getTextNodes'
+import { getTextNodes } from '../../utils/dom/textNodes'
 
-import { findNearestNonTextAncestor } from '../../kit/findNearestNonTextAncestor'
+import { findNearestNonTextAncestor } from '../../utils/dom/traversal'
 
 /**
  * 存储当前可见的非文本父元素集合

@@ -1,5 +1,5 @@
-import { translateContent as translateG } from '../../kit/translateG'
-import { translateContent as translateMS } from '../../kit/translateMS'
+import { translateContentGoogle as translateG } from '../../utils/text/translation'
+import { translateContentMicrosoft as translateMS } from '../../utils/text/translation'
 import { translator } from '../../featureManager/translateManager'
 
 // 优化缓存机制：限制缓存大小，防止内存泄漏

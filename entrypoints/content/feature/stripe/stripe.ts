@@ -1,4 +1,4 @@
-import { getTextWalker } from '../../kit/getTextNodes'
+import { getTextWalker } from '../../utils/dom/textNodes'
 
 export function initStripe() {
         const observe = new MutationObserver((mutations) => {

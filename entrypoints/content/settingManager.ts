@@ -1,4 +1,4 @@
-import { getKeyWithDomain } from '../kit/storage'
+import { getKeyWithDomain } from './utils/storage/storage'
 import { initStripe } from './feature/stripe/stripe'
 import {
         initBionic,
@@ -8,7 +8,7 @@ import {
 import { openHighlight, stopHighlight } from './featureManager/highlightManager'
 import { initializeHighlightSystem } from './feature/highlight/highlightInit'
 import { openTranslate, stopTranslate } from './featureManager/translateManager'
-import { isSearchEnginePage, pageLang } from './kit/pageInfo'
+import { isSearchEnginePage, pageLang } from './utils/page/info'
 
 // 状态配置：定义各功能的键名、默认值、启用/停用函数
 interface FeatureConfig {

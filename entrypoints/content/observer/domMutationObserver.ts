@@ -6,7 +6,7 @@
  * 2. 结合IntersectionObserver实现按需加载特性处理
  * 3. 维护元素-文本节点映射关系支持动态更新
  */
-import { getTextNodes } from '../kit/getTextNodes'
+import { getTextNodes } from '../utils/dom/textNodes'
 import { getSetting } from '../settingManager'
 
 import {
