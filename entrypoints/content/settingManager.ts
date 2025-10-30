@@ -8,7 +8,11 @@ import {
 import { openHighlight, stopHighlight } from './featureManager/highlightManager'
 import { initializeHighlightSystem } from './feature/highlight/highlightInit'
 import { openTranslate, stopTranslate } from './featureManager/translateManager'
-import { initLinkTarget, openLinkTarget, stopLinkTarget } from './featureManager/linkTargetManager'
+import {
+        initLinkTarget,
+        openLinkTarget,
+        stopLinkTarget,
+} from './featureManager/linkTargetManager'
 import { isSearchEnginePage, pageLang } from './utils/page/info'
 
 // 状态配置：定义各功能的键名、默认值、启用/停用函数
