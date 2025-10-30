@@ -21,8 +21,8 @@ export default defineConfig({
                                 //         "telemetry": false,
                                 //         "study": false
                                 // }
-                        }
-                }
+                        },
+                },
         },
         zip: {
                 downloadPackages: [

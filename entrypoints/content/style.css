@@ -1,6 +1,5 @@
 @import url('./feature/translate/translate.css');
 
-
 .bionic-text {
         margin: 0;
         padding: 0;
@@ -30,4 +29,3 @@
         );
         filter: invert(100%);
 }
-
