@@ -5,7 +5,8 @@
 }
 
 span.translation-result {
-        display: inline;
+        display: inline-block;
+        vertical-align: baseline;
 }
 
 div.translation-result {

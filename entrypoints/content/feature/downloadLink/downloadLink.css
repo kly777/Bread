@@ -1,0 +1,84 @@
+/* 下载链接标记样式模块 */
+
+/* 基础样式 - 合并共同属性 */
+.bread-download-link-download,
+.bread-download-link-default {
+        position: relative;
+}
+
+/* 共同的hover效果 */
+.bread-download-link-download:hover,
+.bread-download-link-default:hover {
+        text-decoration: underline;
+}
+
+/* 共同的::after伪元素基础样式 */
+.bread-download-link-download::after,
+.bread-download-link-default::after {
+        display: inline-block;
+        margin-left: 2px;
+        font-size: 0.8em;
+        opacity: 0.8;
+        transform: translateY(-1px);
+}
+
+/* 各类型特定的::after内容和颜色 */
+.bread-download-link-download::after {
+        content: '↓';
+        color: #ff6b35;
+}
+
+.bread-download-link-default::after {
+        content: '↵';
+        color: #aeaeae;
+}
+
+/* 各类型特定的hover颜色 */
+.bread-download-link-download:hover {
+        color: #ff6b35;
+}
+
+.bread-download-link-default:hover {
+        color: #ababab;
+}
+
+/* 各类型特定的边框样式 */
+.bread-download-link-download {
+        border-bottom-color: rgba(255, 107, 53, 0.7);
+}
+
+.bread-download-link-default {
+        border-bottom-color: rgba(102, 102, 102, 0.7);
+}
+
+.bread-download-link-default,
+.bread-download-link-download {
+        border-bottom-width: 1px;
+        border-bottom-style: dashed;
+}
+
+/* 下载链接的特殊动画效果 */
+.bread-download-link-download:hover::after {
+        animation: download-pulse 1s ease-in-out infinite;
+}
+
+@keyframes download-pulse {
+        0% {
+                transform: translateY(-1px);
+        }
+        50% {
+                transform: translateY(1px);
+        }
+        100% {
+                transform: translateY(-1px);
+        }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+        .bread-download-link-download::after,
+        .bread-download-link-default::after {
+                font-size: 0.7em;
+                margin-left: 1px;
+        }
+}

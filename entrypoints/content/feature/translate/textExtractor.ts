@@ -10,10 +10,37 @@ const EXCLUDE_TAGS = [
         'INPUT',
         'PRE',
         'TEXTAREA',
+        'INPUT'
 ]
 
 // 全局标记，用于记录已经被排除翻译的元素
 const excludedElements = new WeakSet<HTMLElement>()
+
+/**
+ * 检查单个元素是否应该被排除翻译
+ */
+function isElementExcludable(element: HTMLElement): boolean {
+        // 检查元素本身是否是排除标签
+        if (EXCLUDE_TAGS.includes(element.tagName)) {
+                return true
+        }
+
+        // 检查元素是否具有 code-line 类
+        if (element.className && element.className.includes('code-line')) {
+                return true
+        }
+
+        // 检查元素是否具有 contenteditable 属性
+        if (element.hasAttribute('contenteditable')) {
+                const editableValue = element.getAttribute('contenteditable')
+                // contenteditable 为 true 或空字符串时，元素可编辑
+                if (editableValue === 'true' || editableValue === '') {
+                        return true
+                }
+        }
+
+        return false
+}
 
 /**
  * 检查元素或其祖先是否在排除标签内
@@ -25,8 +52,8 @@ function isElementExcluded(element: HTMLElement): boolean {
                 return true
         }
 
-        // 检查元素本身是否是排除标签
-        if (EXCLUDE_TAGS.includes(element.tagName)) {
+        // 检查元素本身是否应该被排除
+        if (isElementExcludable(element)) {
                 excludedElements.add(element)
                 return true
         }
@@ -34,8 +61,7 @@ function isElementExcluded(element: HTMLElement): boolean {
         // 检查祖先元素链中是否有排除标签
         let parent = element.parentElement
         while (parent && parent !== document.body) {
-                if (EXCLUDE_TAGS.includes(parent.tagName)) {
-                        // 标记这个元素为排除，避免重复检查
+                if (isElementExcludable(parent)) {
                         excludedElements.add(element)
                         return true
                 }
@@ -152,7 +178,7 @@ export function shouldSkipElementTranslation(element: HTMLElement): boolean {
 
 /**
  * 批量预处理元素，标记所有应该排除翻译的元素
- * 这个方法应该在页面加载时调用，确保翻译行为与顺序无关
+ * 添加对可编辑元素的处理
  */
 export function preprocessExcludedElements(
         root: Element = document.body
@@ -165,6 +191,15 @@ export function preprocessExcludedElements(
                 })
         })
 
+        // 标记所有具有 contenteditable 属性的元素
+        const editableElements = root.querySelectorAll('[contenteditable]')
+        editableElements.forEach((el) => {
+                const editableValue = el.getAttribute('contenteditable')
+                if (editableValue === 'true' || editableValue === '') {
+                        excludedElements.add(el as HTMLElement)
+                }
+        })
+
         // 然后标记所有在排除标签内的子元素
         const allElements = root.querySelectorAll('*')
         allElements.forEach((el) => {
@@ -175,17 +210,19 @@ export function preprocessExcludedElements(
                                         excludedElements.add(el as HTMLElement)
                                         break
                                 }
+
+                                // 检查祖先元素是否可编辑
+                                if (parent.hasAttribute('contenteditable')) {
+                                        const editableValue = parent.getAttribute('contenteditable')
+                                        if (editableValue === 'true' || editableValue === '') {
+                                                excludedElements.add(el as HTMLElement)
+                                                break
+                                        }
+                                }
+
                                 parent = parent.parentElement
                         }
                 }
         })
 }
 
-/**
- * 清除排除标记（用于重新处理页面）
- */
-export function clearExclusionCache(): void {
-        // WeakSet 会自动垃圾回收，我们只需要创建一个新的
-        // 这里我们重新初始化 excludedElements
-        // 在实际使用中，如果需要清除缓存，应该重新调用 preprocessExcludedElements
-}

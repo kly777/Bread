@@ -1,90 +1,69 @@
-/* 链接目标样式模块 */
-
-/* 新建标签页链接样式 */
-.bread-link-target-new-tab {
-        position: relative;
-        /* 添加外部链接图标 */
+/* 共同的hover效果 */
+.bread-link-target-new-tab:hover,
+.bread-link-target-same-tab:hover,
+.bread-link-target-default:hover {
+        text-decoration: underline;
 }
 
-.bread-link-target-new-tab::after {
-        content: '↗';
-        display: inline-block;
+/* 共同的::after伪元素基础样式 */
+.bread-link-target-new-tab::after,
+.bread-link-target-same-tab::after,
+.bread-link-target-default::after {
+        position: absolute;
+        display: inline;
         margin-left: 2px;
         font-size: 0.8em;
-        opacity: 0.7;
+        opacity: 0.8;
         transform: translateY(-1px);
 }
 
-/* 替换当前页链接样式 */
-.bread-link-target-same-tab {
-        position: relative;
-        /* 添加内部链接样式 */
+/* 各类型特定的::after内容和颜色 */
+.bread-link-target-new-tab::after {
+        content: '↗';
+        color: #0066cc;
 }
 
 .bread-link-target-same-tab::after {
         content: '→';
-        display: inline-block;
-        margin-left: 2px;
-        font-size: 0.8em;
-        opacity: 0.7;
-        transform: translateY(-1px);
-}
-
-/* 默认链接样式（无target属性） */
-.bread-link-target-default {
-        position: relative;
-        /* 默认链接样式 */
+        color: #009900;
 }
 
 .bread-link-target-default::after {
         content: '↵';
-        display: inline-block;
-        margin-left: 2px;
-        font-size: 0.8em;
-        opacity: 0.5;
-        transform: translateY(-1px);
+        color: #aeaeae;
 }
 
-/* 悬停效果增强 */
+/* 各类型特定的hover颜色 */
 .bread-link-target-new-tab:hover {
         color: #0066cc;
-        text-decoration: underline;
 }
 
 .bread-link-target-same-tab:hover {
         color: #009900;
-        text-decoration: underline;
 }
 
 .bread-link-target-default:hover {
-        color: #666666;
-        text-decoration: underline;
+        color: #ababab;
 }
 
-/* 图标颜色区分 */
-.bread-link-target-new-tab::after {
-        color: #0066cc;
-}
-
-.bread-link-target-same-tab::after {
-        color: #009900;
-}
-
-.bread-link-target-default::after {
-        color: #666666;
-}
-
-/* 为不同目标类型添加边框提示（可选） */
+/* 各类型特定的边框样式 */
 .bread-link-target-new-tab {
-        border-bottom: 1px dotted rgba(0, 102, 204, 0.3);
+        border-bottom-color: rgba(0, 102, 204, 0.7);
 }
 
 .bread-link-target-same-tab {
-        border-bottom: 1px dotted rgba(0, 153, 0, 0.3);
+        border-bottom-color: rgba(0, 153, 0, 0.7);
 }
 
 .bread-link-target-default {
-        border-bottom: 1px dotted rgba(102, 102, 102, 0.3);
+        border-bottom-color: rgba(102, 102, 102, 0.7);
+}
+
+.bread-link-target-default,
+.bread-link-target-same-tab,
+.bread-link-target-new-tab {
+        border-bottom-width: 1px;
+        border-bottom-style: dashed;
 }
 
 /* 响应式调整 */

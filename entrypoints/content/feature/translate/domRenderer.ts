@@ -85,8 +85,81 @@ export function updateOrCreateTranslationContainer(
                         translatedText,
                         shouldWrap
                 )
+                insertAfterLastTextElement(element, resultContainer)
+        }
+}
+
+/**
+ * 将翻译结果容器插入到目标元素中最后一个有文本或svg的元素之后
+ * @param element - 目标HTML元素
+ * @param resultContainer - 翻译结果容器元素
+ */
+function insertAfterLastTextElement(
+        element: HTMLElement,
+        resultContainer: HTMLElement
+): void {
+        const childNodes = Array.from(element.childNodes)
+        let lastTextElement: Node | null = null
+
+        // 从后向前遍历直接子节点
+        for (let i = childNodes.length - 1; i >= 0; i--) {
+                const node = childNodes[i]
+
+                // 检查节点是否包含文本内容或为SVG元素
+                if (hasTextContent(node) || hasSvgElement(node)) {
+                        lastTextElement = node
+                        break
+                }
+        }
+
+        // 如果找到了最后一个包含文本的节点或SVG元素，则在其后插入
+        if (lastTextElement) {
+                lastTextElement.parentNode?.insertBefore(
+                        resultContainer,
+                        lastTextElement.nextSibling
+                )
+        } else {
+                // 否则追加到末尾
                 element.appendChild(resultContainer)
         }
+}
+
+/**
+ * 检查元素的子节点中是否包含SVG元素
+ * @param node 要检查的节点
+ * @returns 如果元素的子节点中包含SVG元素则返回true，否则返回false
+ */
+function hasSvgElement(node: Node): boolean {
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+                return false
+        }
+
+        const element = node as Element
+        return element.querySelector('svg') !== null
+}
+/**
+ * 检查节点是否包含文本内容
+ * @param node 要检查的节点
+ * @returns 如果节点包含文本内容则返回true，否则返回false
+ */
+function hasTextContent(node: Node): boolean {
+        if (node.nodeType === Node.TEXT_NODE) {
+                return !!node.textContent?.trim()
+        }
+
+        if (node.nodeType === Node.ELEMENT_NODE) {
+                const el = node as HTMLElement
+                // 排除翻译结果容器
+                if (
+                        el.classList &&
+                        el.classList.contains('translation-result')
+                ) {
+                        return false
+                }
+                return !!el.textContent?.trim()
+        }
+
+        return false
 }
 
 /**

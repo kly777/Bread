@@ -7,7 +7,7 @@
 import {
         initLinkTargetManager,
         setLinkTargetEnabled,
-} from '../feature/linkTarget/linkTargetManager'
+} from '../feature/linkTarget/linkTarget'
 
 let cleanupFunction: (() => void) | null = null
 
