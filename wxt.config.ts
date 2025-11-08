@@ -35,7 +35,7 @@ export default defineConfig({
                 if (env.mode === 'development') {
                         return {
                                 build: {
-                                        sourcemap: "inline", // 确保生成 source maps 方便调试
+                                        sourcemap: 'inline', // 确保生成 source maps 方便调试
                                 },
                                 server: {
                                         hmr: {

@@ -10,7 +10,7 @@ const EXCLUDE_TAGS = [
         'INPUT',
         'PRE',
         'TEXTAREA',
-        'INPUT'
+        'INPUT',
 ]
 
 // 全局标记，用于记录已经被排除翻译的元素
@@ -213,9 +213,17 @@ export function preprocessExcludedElements(
 
                                 // 检查祖先元素是否可编辑
                                 if (parent.hasAttribute('contenteditable')) {
-                                        const editableValue = parent.getAttribute('contenteditable')
-                                        if (editableValue === 'true' || editableValue === '') {
-                                                excludedElements.add(el as HTMLElement)
+                                        const editableValue =
+                                                parent.getAttribute(
+                                                        'contenteditable'
+                                                )
+                                        if (
+                                                editableValue === 'true' ||
+                                                editableValue === ''
+                                        ) {
+                                                excludedElements.add(
+                                                        el as HTMLElement
+                                                )
                                                 break
                                         }
                                 }
@@ -225,4 +233,3 @@ export function preprocessExcludedElements(
                 }
         })
 }
-
