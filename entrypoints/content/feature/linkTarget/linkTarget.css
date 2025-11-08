@@ -63,7 +63,6 @@
 .bread-link-target-same-tab,
 .bread-link-target-new-tab {
         border-bottom-width: 1px;
-        border-bottom-style: dashed;
 }
 
 /* 响应式调整 */
