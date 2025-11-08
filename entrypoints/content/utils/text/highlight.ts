@@ -105,18 +105,6 @@ export function getHighlightMatches(
 }
 
 /**
- * 获取高亮样式 CSS 字符串
- *
- * @param colorScheme - 颜色方案索引，默认为 0
- * @returns 包含所有高亮颜色的 CSS 样式字符串
- */
-export function getHighlightStyle(colorScheme: number = 0): string {
-        // 这里可以添加高亮样式的生成逻辑
-        // 例如：根据颜色方案生成对应的 CSS 类
-        return ''
-}
-
-/**
  * 检查文本是否应该被高亮
  *
  * @param text - 要检查的文本

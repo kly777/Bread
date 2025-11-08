@@ -40,9 +40,6 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                                         }
                                 })
 
-                                if (addedElements.length > 0) {
-                                        processNewElements(addedElements)
-                                }
                         }
 
                         if (mutation.type === 'childList') {
@@ -54,39 +51,7 @@ const domMutationObserver: MutationObserver = new MutationObserver(
         }
 )
 
-/**
- * 处理新添加的元素
- *
- * @param elements - 新添加的元素数组
- */
-function processNewElements(elements: Element[]): void {
-        elements.forEach((element) => {
-                updateTextNodesMap(element)
-                scheduleHighlightUpdate(element)
-        })
-}
 
-/**
- * 更新文本节点映射
- *
- * @param element - 要处理的元素
- */
-function updateTextNodesMap(element: Element): void {
-        // 这里可以添加文本节点映射的更新逻辑
-        // 例如：parentToTextNodesMap 的更新
-}
-
-/**
- * 调度高亮更新
- *
- * @param element - 需要更新高亮的元素
- */
-function scheduleHighlightUpdate(element: Element): void {
-        // 延迟执行以避免频繁更新
-        window.setTimeout(() => {
-                // 这里可以添加高亮更新的逻辑
-        }, 100)
-}
 
 /**
  * 处理被移除的节点
@@ -109,7 +74,7 @@ function handleRemovedNode(node: Node): void {
  */
 export function createMutationObserver(
         callback: MutationCallback,
-        options: MutationObserverInit = { childList: true, subtree: true }
+        // options: MutationObserverInit = { childList: true, subtree: true }
 ): MutationObserver {
         return new MutationObserver(callback)
 }
