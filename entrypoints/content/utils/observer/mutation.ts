@@ -39,7 +39,6 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                                                 )
                                         }
                                 })
-
                         }
 
                         if (mutation.type === 'childList') {
@@ -50,8 +49,6 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                 })
         }
 )
-
-
 
 /**
  * 处理被移除的节点
@@ -73,7 +70,7 @@ function handleRemovedNode(node: Node): void {
  * @returns MutationObserver 实例
  */
 export function createMutationObserver(
-        callback: MutationCallback,
+        callback: MutationCallback
         // options: MutationObserverInit = { childList: true, subtree: true }
 ): MutationObserver {
         return new MutationObserver(callback)

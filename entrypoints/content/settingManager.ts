@@ -23,15 +23,31 @@ interface FeatureConfig {
         off: () => void | Promise<void>
 }
 
-const setting: { [key: string]: boolean } = {
-        highlight: false,
-        stripe: false,
-        translate: false,
-        bionic: false,
-        linkTarget: false,
+// 设置状态类型定义
+interface SettingState {
+        value: boolean
+        isDefault: boolean
 }
+
+const setting: { [key: string]: SettingState } = {
+        highlight: { value: false, isDefault: true },
+        stripe: { value: false, isDefault: true },
+        translate: { value: false, isDefault: true },
+        bionic: { value: false, isDefault: true },
+        linkTarget: { value: false, isDefault: true },
+}
+
 // 导出只读的 setting 副本
 export function getSetting(): { [key: string]: boolean } {
+        const result: { [key: string]: boolean } = {}
+        Object.keys(setting).forEach((key) => {
+                result[key] = setting[key].value
+        })
+        return result
+}
+
+// 导出设置状态（包含默认值信息）
+export function getSettingState(): { [key: string]: SettingState } {
         return { ...setting }
 }
 
@@ -91,15 +107,21 @@ async function initFeature(key: string) {
  * 切换指定功能键的特性状态。
  * @param key - 功能键标识符，用于查找对应的配置
  * @param newValue - 新的布尔值或null，若为null则使用默认值
+ * @param isDefault - 是否为默认值
  * @returns void
  */
-async function switchFeature(key: string, newValue: boolean | null) {
+async function switchFeature(
+        key: string,
+        newValue: boolean | null,
+        isDefault: boolean = false
+) {
         const config = features[key]
         if (!config) return
 
         // 处理默认值逻辑
         if (newValue === null) {
                 newValue = config.default
+                isDefault = true
         }
 
         // 执行特性开关回调
@@ -109,8 +131,11 @@ async function switchFeature(key: string, newValue: boolean | null) {
                 await config.off()
         }
 
-        // 持久化存储当前状态
-        setting[key] = newValue
+        // 更新设置状态
+        setting[key] = {
+                value: newValue,
+                isDefault: isDefault,
+        }
 }
 
 /**
@@ -181,10 +206,19 @@ async function syncSettings(): Promise<void> {
                 const domainKey = getKeyWithDomain(key)
 
                 let value = await storage.getItem<boolean>(domainKey)
+                let isDefault = false
+
                 if (value === null) {
                         value = await storage.getItem<boolean>(`local:${key}`)
+                        if (value === null) {
+                                value = config.default
+                                isDefault = true
+                        }
                 }
 
-                setting[key] = value !== null ? value : config.default
+                setting[key] = {
+                        value: value,
+                        isDefault: isDefault,
+                }
         }
 }

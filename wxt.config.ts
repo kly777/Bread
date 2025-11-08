@@ -17,6 +17,7 @@ export default defineConfig({
                 summary: 'A browser extension for reading enhancement',
                 browser_specific_settings: {
                         gecko: {
+                                // id: 'bread-extension@kly777.com',
                                 // data_collection_permissions: {
                                 //         "telemetry": false,
                                 //         "study": false

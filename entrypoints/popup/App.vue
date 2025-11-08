@@ -6,12 +6,13 @@ import ApplyWebsites from './ApplyWebsites.vue'
 
 <template>
         <div class="popup">
+                <ApplyWebsites />
                 <!-- <HighlightKeywords /> -->
                 <FeatureSwitch
                         feature-name="highlight"
                         :settings="{ color: 'string', size: 'number' }"
                 />
-                <ApplyWebsites />
+
                 <FeatureSwitch feature-name="stripe" />
                 <FeatureSwitch feature-name="bionic" />
                 <FeatureSwitch feature-name="translate" />
