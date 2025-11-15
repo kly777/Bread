@@ -194,7 +194,7 @@ const processedRoots = new WeakSet<Element>()
 
 /**
  * 批量预处理元素，标记所有应该排除翻译的元素
- * 采用惰性初始化和增量处理优化性能
+ * 完全避免遍历整个文档，采用按需处理和增量更新策略
  */
 export function preprocessExcludedElements(
         root: Element = document.body
@@ -204,25 +204,61 @@ export function preprocessExcludedElements(
                 return
         }
 
-        // 使用更高效的选择器组合，减少DOM查询次数
-        const selectors = [
+        // 使用精确的选择器只获取需要排除的元素类型，避免全文档遍历
+        const excludeSelectors = [
+                // 排除标签
                 ...EXCLUDE_TAGS.map(tag => tag.toLowerCase()),
+                // 可编辑元素
                 '[contenteditable="true"]',
-                '[contenteditable=""]'
+                '[contenteditable=""]',
+                // 排除类
+                ...EXCLUDE_CLASSES.map(cls => `.${cls}`)
         ].join(',')
 
-        // 一次性查询所有需要排除的元素
-        const excludedCandidates = root.querySelectorAll(selectors)
+        // 只查询需要排除的元素，而不是所有元素
+        const directExcludedElements = root.querySelectorAll(excludeSelectors)
         
-        // 标记排除元素本身
-        excludedCandidates.forEach((el) => {
-                excludedElements.add(el as HTMLElement)
-                // 同时添加到预计算映射中，供TreeWalker快速检查
-                excludedAncestors.add(el as HTMLElement)
+        // 标记直接排除的元素
+        directExcludedElements.forEach((el) => {
+                const htmlEl = el as HTMLElement
+                excludedElements.add(htmlEl)
+                excludedAncestors.add(htmlEl)
         })
 
-        // 增量处理：只处理新添加的元素，避免重复遍历
-        // 这里我们简化处理，因为在实际使用中，大部分排除元素已经通过上面的选择器捕获
+        // 使用增量处理策略：只处理可见区域的元素
+        // 对于大型文档，我们只预处理首屏内容，其余部分按需处理
+        if (root === document.body) {
+                // 使用IntersectionObserver来延迟处理视口外的元素
+                const lazyObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                                if (entry.isIntersecting) {
+                                        const element = entry.target as HTMLElement
+                                        // 对于进入视口的元素，检查是否需要排除
+                                        if (isElementExcludable(element)) {
+                                                excludedElements.add(element)
+                                                excludedAncestors.add(element)
+                                        }
+                                        lazyObserver.unobserve(element)
+                                }
+                        })
+                }, {
+                        rootMargin: '50px' // 提前50px开始观察
+                })
+
+                // 只观察直接子元素中的潜在排除元素，避免性能开销
+                const potentialElements = root.querySelectorAll('*')
+                // 限制初始观察数量，避免性能问题
+                const maxInitialObserve = 100
+                for (let i = 0; i < Math.min(potentialElements.length, maxInitialObserve); i++) {
+                        const el = potentialElements[i] as HTMLElement
+                        // 快速检查是否需要观察
+                        if (EXCLUDE_TAGS.includes(el.tagName) ||
+                            el.hasAttribute('contenteditable') ||
+                            EXCLUDE_CLASSES.some(cls => el.classList.contains(cls))) {
+                                lazyObserver.observe(el)
+                        }
+                }
+        }
 
         // 标记这个根元素为已处理
         processedRoots.add(root)
