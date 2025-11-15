@@ -274,11 +274,11 @@ class BatchTranslator {
                                                 ({
                                                         item,
                                                         result,
-                                                }) as BatchResult
+                                                } as BatchResult)
                                 )
                                 .catch(
                                         (error) =>
-                                                ({ item, error }) as BatchResult
+                                                ({ item, error } as BatchResult)
                                 )
                 )
 
@@ -342,12 +342,11 @@ class BatchTranslator {
                 } catch (error) {
                         // 翻译失败时返回原文
                         result = originalText
-                        if (import.meta.env.DEV) {
-                                console.warn(
-                                        'Translation failed, using original text:',
-                                        error
-                                )
-                        }
+
+                        console.warn(
+                                'Translation failed, using original text:',
+                                error
+                        )
                 }
 
                 // 更新缓存
