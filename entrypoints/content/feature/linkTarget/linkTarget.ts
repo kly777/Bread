@@ -43,11 +43,12 @@ function shouldExcludeLinkTarget(link: HTMLAnchorElement): boolean {
                 return true
         }
 
-        // 检查是否已经有样式类
+        // 检查是否已经有样式类 - 优化：使用更快的检查方式
+        const classList = link.classList
         if (
-                link.classList.contains('bread-link-target-new-tab') ||
-                link.classList.contains('bread-link-target-same-tab') ||
-                link.classList.contains('bread-link-target-default')
+                classList.contains('bread-link-target-new-tab') ||
+                classList.contains('bread-link-target-same-tab') ||
+                classList.contains('bread-link-target-default')
         ) {
                 return true
         }
@@ -64,26 +65,25 @@ function applyLinkTargetStyle(link: HTMLAnchorElement): void {
         }
 
         const targetType = getLinkTargetType(link)
+        const classList = link.classList
 
-        // 移除可能存在的旧样式类
-        link.classList.remove(
+        // 优化：只在需要时修改DOM
+        const expectedClass = `bread-link-target-${targetType}`
+
+        // 检查当前是否已经是正确的样式类
+        if (classList.contains(expectedClass)) {
+                return // 已经是正确的样式，无需修改
+        }
+
+        // 批量移除所有可能的目标样式类
+        classList.remove(
                 'bread-link-target-new-tab',
                 'bread-link-target-same-tab',
                 'bread-link-target-default'
         )
 
         // 添加对应的样式类
-        switch (targetType) {
-                case LinkTargetType.NEW_TAB:
-                        link.classList.add('bread-link-target-new-tab')
-                        break
-                case LinkTargetType.SAME_TAB:
-                        link.classList.add('bread-link-target-same-tab')
-                        break
-                case LinkTargetType.DEFAULT:
-                        link.classList.add('bread-link-target-default')
-                        break
-        }
+        classList.add(expectedClass)
 }
 
 /**
