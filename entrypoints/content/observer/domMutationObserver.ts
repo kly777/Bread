@@ -8,6 +8,7 @@ import {
 } from './intersectionObserver/bionicObserver'
 import { observeTranslateElements as translateAddedElement } from './intersectionObserver/translateObserver'
 import { getHighlightManager } from '../feature/highlight/highlightManager'
+import { isLinkTargetEnabled, applyStyleToLink } from '../feature/linkTarget/linkTarget'
 
 /**
  * 管理DOM变更观察器的启动和停止
@@ -17,6 +18,8 @@ export function manageMutationObserver(shouldObserve: boolean) {
                 domMutationObserver.observe(document.body, {
                         childList: true,
                         subtree: true,
+                        attributes: true,
+                        attributeFilter: ['target'],
                 })
         } else {
                 domMutationObserver.disconnect()
@@ -39,6 +42,9 @@ const domMutationObserver: MutationObserver = new MutationObserver(
         (mutations: MutationRecord[]) => {
                 console.group('DOM Mutation Observer')
                 console.log(`检测到 ${mutations.length} 个DOM变更`)
+
+                // 处理属性变化（链接目标样式）
+                processAttributeChanges(mutations)
 
                 // 使用Set避免重复处理同一个元素
                 const newElementsSet = new Set<Element>()
@@ -150,6 +156,53 @@ function updateAffectedTextNodes(target: Node): void {
 }
 
 /**
+ * 处理新增元素中的链接目标样式
+ */
+function processLinkTargetElements(elements: Element[]) {
+        const linkTargetEnabled = isLinkTargetEnabled()
+        
+        if (!linkTargetEnabled) {
+                return
+        }
+
+        for (const element of elements) {
+                // 检查元素本身是否为链接
+                if (element instanceof HTMLAnchorElement) {
+                        applyStyleToLink(element)
+                }
+                
+                // 检查元素内的所有链接
+                const links = element.querySelectorAll('a')
+                for (const link of links) {
+                        if (link instanceof HTMLAnchorElement) {
+                                applyStyleToLink(link)
+                        }
+                }
+        }
+}
+
+/**
+ * 处理属性变化（target属性）
+ */
+function processAttributeChanges(mutations: MutationRecord[]) {
+        const linkTargetEnabled = isLinkTargetEnabled()
+        
+        if (!linkTargetEnabled) {
+                return
+        }
+
+        for (const mutation of mutations) {
+                if (
+                        mutation.type === 'attributes' &&
+                        mutation.attributeName === 'target' &&
+                        mutation.target instanceof HTMLAnchorElement
+                ) {
+                        applyStyleToLink(mutation.target)
+                }
+        }
+}
+
+/**
  * 处理新增元素的功能应用
  */
 function processNewElements(elements: Element[]) {
@@ -157,6 +210,9 @@ function processNewElements(elements: Element[]) {
         const bionicEnabled = getSetting().bionic
 
         console.log(`功能设置: 翻译=${translateEnabled}, 仿生=${bionicEnabled}`)
+
+        // 处理链接目标样式
+        processLinkTargetElements(elements)
 
         for (const element of elements) {
                 if (translateEnabled) {

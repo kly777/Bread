@@ -6,7 +6,6 @@
 
 import {
         shouldExcludeLink,
-        createLinkStyleManager,
         setLinkStyleEnabled,
 } from '../../utils/dom/link'
 
@@ -99,12 +98,15 @@ function removeLinkTargetStyle(link: HTMLAnchorElement): void {
 
 /**
  * 初始化链接目标样式管理器
+ * 现在使用全局的domMutationObserver，返回空清理函数
  */
 export function initLinkTargetManager(): () => void {
-        return createLinkStyleManager(
-                applyLinkTargetStyle,
-                removeLinkTargetStyle
-        )
+        // 处理现有链接
+        processAllLinks(applyLinkTargetStyle)
+        // 返回空清理函数，因为清理由全局domMutationObserver处理
+        return () => {
+                // 清理逻辑由全局domMutationObserver处理
+        }
 }
 
 /**
@@ -119,6 +121,21 @@ export function applyStyleToLink(link: HTMLAnchorElement): void {
  */
 export function removeStyleFromLink(link: HTMLAnchorElement): void {
         removeLinkTargetStyle(link)
+}
+
+/**
+ * 处理页面中的所有链接
+ */
+function processAllLinks(
+        applyStyle: (link: HTMLAnchorElement) => void
+): void {
+        const links = document.querySelectorAll('a')
+
+        links.forEach((link) => {
+                if (link instanceof HTMLAnchorElement) {
+                        applyStyle(link)
+                }
+        })
 }
 
 /**
