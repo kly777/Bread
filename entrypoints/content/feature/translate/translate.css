@@ -1,7 +1,6 @@
 .translation-result {
         opacity: 0.9;
         font-size: 0.81em;
-        transition: opacity 0.3s ease-in-out;
 }
 
 span.translation-result {
@@ -12,6 +11,7 @@ span.translation-result {
 div.translation-result {
         margin-top: 0;
         padding-top: 0;
+        line-height: normal;
 }
 
 .translation-result:hover {
