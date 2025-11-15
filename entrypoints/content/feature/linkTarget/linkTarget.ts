@@ -4,10 +4,7 @@
  * 根据a标签的target属性区分链接打开方式，并提供不同样式
  */
 
-import {
-        shouldExcludeLink,
-        setLinkStyleEnabled,
-} from '../../utils/dom/link'
+import { shouldExcludeLink, setLinkStyleEnabled } from '../../utils/dom/link'
 
 // 链接目标类型枚举
 export enum LinkTargetType {
@@ -126,9 +123,7 @@ export function removeStyleFromLink(link: HTMLAnchorElement): void {
 /**
  * 处理页面中的所有链接
  */
-function processAllLinks(
-        applyStyle: (link: HTMLAnchorElement) => void
-): void {
+function processAllLinks(applyStyle: (link: HTMLAnchorElement) => void): void {
         const links = document.querySelectorAll('a')
 
         links.forEach((link) => {

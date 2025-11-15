@@ -8,7 +8,10 @@ import {
 } from './intersectionObserver/bionicObserver'
 import { observeTranslateElements as translateAddedElement } from './intersectionObserver/translateObserver'
 import { getHighlightManager } from '../feature/highlight/highlightManager'
-import { isLinkTargetEnabled, applyStyleToLink } from '../feature/linkTarget/linkTarget'
+import {
+        isLinkTargetEnabled,
+        applyStyleToLink,
+} from '../feature/linkTarget/linkTarget'
 
 /**
  * 管理DOM变更观察器的启动和停止
@@ -160,7 +163,7 @@ function updateAffectedTextNodes(target: Node): void {
  */
 function processLinkTargetElements(elements: Element[]) {
         const linkTargetEnabled = isLinkTargetEnabled()
-        
+
         if (!linkTargetEnabled) {
                 return
         }
@@ -170,7 +173,7 @@ function processLinkTargetElements(elements: Element[]) {
                 if (element instanceof HTMLAnchorElement) {
                         applyStyleToLink(element)
                 }
-                
+
                 // 检查元素内的所有链接
                 const links = element.querySelectorAll('a')
                 for (const link of links) {
@@ -186,7 +189,7 @@ function processLinkTargetElements(elements: Element[]) {
  */
 function processAttributeChanges(mutations: MutationRecord[]) {
         const linkTargetEnabled = isLinkTargetEnabled()
-        
+
         if (!linkTargetEnabled) {
                 return
         }
