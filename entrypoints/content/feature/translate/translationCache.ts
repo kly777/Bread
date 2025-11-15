@@ -184,12 +184,29 @@ class TranslationCacheManager {
 
 const cacheManager = new TranslationCacheManager()
 
-// 批量翻译队列
+// 请求优先级枚举
+enum RequestPriority {
+        LOW = 1,    // 后台任务，低优先级
+        NORMAL = 2, // 普通翻译请求
+        HIGH = 3,   // 用户主动触发的翻译
+        URGENT = 4  // 即时翻译需求
+}
+
+// 扩展批量翻译项接口以支持优先级
 interface BatchTranslationItem {
         originalText: string
         targetLang: string
         resolve: (value: string) => void
         reject: (reason?: unknown) => void
+        priority: RequestPriority
+        timestamp: number
+}
+
+// 网络状况监控接口
+interface NetworkMetrics {
+        averageResponseTime: number
+        successRate: number
+        lastUpdate: number
 }
 
 // 批量处理结果类型
@@ -198,27 +215,139 @@ type BatchResult =
         | { item: BatchTranslationItem; error: unknown }
 
 /**
- * 批量翻译器类
+ * 智能批量翻译器类
+ * 支持自适应延迟、动态批量大小和请求优先级
  */
 class BatchTranslator {
         private queue: BatchTranslationItem[] = []
         private processing = false
-        private readonly BATCH_DELAY = 50 // 50ms 批处理延迟
-        private readonly MAX_BATCH_SIZE = 10 // 最大批处理数量
+        
+        // 自适应配置
+        private baseBatchDelay = 50 // 基础延迟50ms
+        private minBatchDelay = 10  // 最小延迟10ms
+        private maxBatchDelay = 200 // 最大延迟200ms
+        
+        private baseBatchSize = 10  // 基础批量大小
+        private minBatchSize = 1    // 最小批量大小
+        private maxBatchSize = 20   // 最大批量大小
+        
+        // 网络状况监控
+        private networkMetrics: NetworkMetrics = {
+                averageResponseTime: 0,
+                successRate: 1.0,
+                lastUpdate: Date.now()
+        }
+        
+        // 响应时间记录
+        private responseTimes: number[] = []
+        private readonly MAX_RESPONSE_TIME_SAMPLES = 20
 
         async addToBatch(
                 originalText: string,
-                targetLang: string
+                targetLang: string,
+                priority: RequestPriority = RequestPriority.NORMAL
         ): Promise<string> {
                 return new Promise((resolve, reject) => {
-                        this.queue.push({
+                        const item: BatchTranslationItem = {
                                 originalText,
                                 targetLang,
                                 resolve,
                                 reject,
-                        })
+                                priority,
+                                timestamp: Date.now()
+                        }
+                        
+                        this.insertItemByPriority(item)
                         this.processBatch()
                 })
+        }
+
+        /**
+         * 按优先级插入队列
+         */
+        private insertItemByPriority(item: BatchTranslationItem): void {
+                let insertIndex = this.queue.length
+                
+                // 从后往前找到第一个优先级小于等于当前项的索引
+                for (let i = this.queue.length - 1; i >= 0; i--) {
+                        if (this.queue[i].priority >= item.priority) {
+                                insertIndex = i + 1
+                                break
+                        }
+                }
+                
+                this.queue.splice(insertIndex, 0, item)
+        }
+
+        /**
+         * 计算自适应批处理延迟
+         */
+        private calculateAdaptiveDelay(): number {
+                const queueLength = this.queue.length
+                const urgency = this.calculateQueueUrgency()
+                
+                // 基础延迟根据队列长度调整
+                let delay = this.baseBatchDelay
+                
+                // 队列越长，延迟越短（尽快处理）
+                if (queueLength > 15) {
+                        delay = Math.max(this.minBatchDelay, delay - 30)
+                } else if (queueLength > 5) {
+                        delay = Math.max(this.minBatchDelay, delay - 15)
+                }
+                
+                // 根据网络状况调整
+                if (this.networkMetrics.averageResponseTime > 1000) {
+                        // 网络状况差，增加延迟以减少并发
+                        delay = Math.min(this.maxBatchDelay, delay + 50)
+                } else if (this.networkMetrics.averageResponseTime < 200) {
+                        // 网络状况好，减少延迟
+                        delay = Math.max(this.minBatchDelay, delay - 10)
+                }
+                
+                // 根据紧急程度调整
+                delay = Math.max(this.minBatchDelay, delay - (urgency * 10))
+                
+                return delay
+        }
+
+        /**
+         * 计算队列紧急程度（基于高优先级请求数量）
+         */
+        private calculateQueueUrgency(): number {
+                const highPriorityCount = this.queue.filter(
+                        item => item.priority >= RequestPriority.HIGH
+                ).length
+                
+                return Math.min(highPriorityCount / 5, 3) // 最大紧急程度为3
+        }
+
+        /**
+         * 计算动态批量大小
+         */
+        private calculateDynamicBatchSize(): number {
+                let batchSize = this.baseBatchSize
+                
+                // 根据网络状况调整
+                if (this.networkMetrics.averageResponseTime > 1000) {
+                        // 网络慢，减少批量大小
+                        batchSize = Math.max(this.minBatchSize, Math.floor(batchSize * 0.5))
+                } else if (this.networkMetrics.averageResponseTime < 200) {
+                        // 网络快，增加批量大小
+                        batchSize = Math.min(this.maxBatchSize, Math.floor(batchSize * 1.5))
+                }
+                
+                // 根据队列中高优先级请求数量调整
+                const highPriorityCount = this.queue.filter(
+                        item => item.priority >= RequestPriority.HIGH
+                ).length
+                
+                if (highPriorityCount > 0) {
+                        // 有高优先级请求时，减少批量大小以更快响应
+                        batchSize = Math.max(this.minBatchSize, Math.min(batchSize, 5))
+                }
+                
+                return batchSize
         }
 
         private async processBatch(): Promise<void> {
@@ -226,12 +355,15 @@ class BatchTranslator {
 
                 this.processing = true
 
-                // 延迟处理，收集更多请求
+                // 使用自适应延迟
+                const adaptiveDelay = this.calculateAdaptiveDelay()
                 await new Promise((resolve) =>
-                        window.setTimeout(resolve, this.BATCH_DELAY)
+                        window.setTimeout(resolve, adaptiveDelay)
                 )
 
-                const batch = this.queue.splice(0, this.MAX_BATCH_SIZE)
+                // 使用动态批量大小
+                const dynamicBatchSize = this.calculateDynamicBatchSize()
+                const batch = this.queue.splice(0, dynamicBatchSize)
                 this.processing = false
 
                 if (batch.length === 1) {
@@ -249,13 +381,16 @@ class BatchTranslator {
         }
 
         private async processSingle(item: BatchTranslationItem): Promise<void> {
+                const startTime = Date.now()
                 try {
                         const result = await this.performSingleTranslation(
                                 item.originalText,
                                 item.targetLang
                         )
+                        this.recordResponseTime(Date.now() - startTime, true)
                         item.resolve(result)
                 } catch (error) {
+                        this.recordResponseTime(Date.now() - startTime, false)
                         item.reject(error)
                 }
         }
@@ -263,6 +398,8 @@ class BatchTranslator {
         private async processBatchRequest(
                 batch: BatchTranslationItem[]
         ): Promise<void> {
+                const startTime = Date.now()
+                
                 // 使用并行处理模拟批量效果
                 const promises: Promise<BatchResult>[] = batch.map((item) =>
                         this.performSingleTranslation(
@@ -283,6 +420,14 @@ class BatchTranslator {
                 )
 
                 const results = await Promise.allSettled(promises)
+                
+                // 记录响应时间和成功率
+                const totalTime = Date.now() - startTime
+                const successCount = results.filter(r =>
+                        r.status === 'fulfilled' && 'result' in r.value
+                ).length
+                
+                this.recordResponseTime(totalTime / batch.length, successCount / batch.length)
 
                 results.forEach((result) => {
                         if (result.status === 'fulfilled') {
@@ -293,12 +438,40 @@ class BatchTranslator {
                                         value.item.reject(value.error)
                                 }
                         } else {
-                                // 处理 Promise 被拒绝的情况（理论上不会发生，因为使用了 allSettled）
                                 console.warn(
                                         'Unexpected promise rejection in batch translation'
                                 )
                         }
                 })
+        }
+
+        /**
+         * 记录响应时间并更新网络指标
+         */
+        private recordResponseTime(responseTime: number, success: boolean | number = true): void {
+                // 记录响应时间
+                this.responseTimes.push(responseTime)
+                if (this.responseTimes.length > this.MAX_RESPONSE_TIME_SAMPLES) {
+                        this.responseTimes.shift()
+                }
+                
+                // 计算平均响应时间
+                const avgResponseTime = this.responseTimes.reduce((a, b) => a + b, 0) / this.responseTimes.length
+                
+                // 更新成功率
+                let successRate: number
+                if (typeof success === 'boolean') {
+                        successRate = success ? 1.0 : 0.0
+                } else {
+                        successRate = success
+                }
+                
+                // 平滑更新网络指标
+                this.networkMetrics = {
+                        averageResponseTime: avgResponseTime,
+                        successRate: this.networkMetrics.successRate * 0.7 + successRate * 0.3,
+                        lastUpdate: Date.now()
+                }
         }
 
         private async performSingleTranslation(
@@ -364,7 +537,13 @@ const batchTranslator = new BatchTranslator()
 export async function performTranslation(
         translator: string,
         originalText: string,
-        targetLang: string
+        targetLang: string,
+        priority: RequestPriority = RequestPriority.NORMAL
 ): Promise<string> {
-        return batchTranslator.addToBatch(originalText, targetLang)
+        return batchTranslator.addToBatch(originalText, targetLang, priority)
 }
+
+/**
+ * 导出优先级枚举，供外部使用
+ */
+export { RequestPriority }
