@@ -160,6 +160,7 @@ function updateAffectedTextNodes(target: Node): void {
 
 /**
  * 处理新增元素中的链接目标样式
+ * TODO: 移动到linkTarget模块中
  */
 function processLinkTargetElements(elements: Element[]) {
         const linkTargetEnabled = isLinkTargetEnabled()
@@ -186,6 +187,7 @@ function processLinkTargetElements(elements: Element[]) {
 
 /**
  * 处理属性变化（target属性）
+ * TODO: 移动到linkTarget模块中
  */
 function processAttributeChanges(mutations: MutationRecord[]) {
         const linkTargetEnabled = isLinkTargetEnabled()
