@@ -6,11 +6,28 @@ import {
         shouldWrapElement,
 } from './elementStyle'
 
-// 缓存样式检测结果，避免重复计算
+// 高性能样式缓存系统
 const styleCache = new WeakMap<
         HTMLElement,
         { shouldUseInline: boolean; shouldWrap: boolean }
 >()
+
+// 常见元素样式预计算 - 基于标签名的快速缓存
+const tagNameStyleCache = new Map<string, { shouldUseInline: boolean; shouldWrap: boolean }>([
+        ['DIV', { shouldUseInline: false, shouldWrap: true }],
+        ['SPAN', { shouldUseInline: true, shouldWrap: false }],
+        ['P', { shouldUseInline: false, shouldWrap: true }],
+        ['A', { shouldUseInline: true, shouldWrap: false }],
+        ['STRONG', { shouldUseInline: true, shouldWrap: false }],
+        ['EM', { shouldUseInline: true, shouldWrap: false }],
+        ['LI', { shouldUseInline: false, shouldWrap: true }],
+        ['H1', { shouldUseInline: false, shouldWrap: true }],
+        ['H2', { shouldUseInline: false, shouldWrap: true }],
+        ['H3', { shouldUseInline: false, shouldWrap: true }],
+        ['H4', { shouldUseInline: false, shouldWrap: true }],
+        ['H5', { shouldUseInline: false, shouldWrap: true }],
+        ['H6', { shouldUseInline: false, shouldWrap: true }]
+])
 
 function desString(content: string, shouldWrap: boolean): string {
         const resultContent = shouldWrap
@@ -163,25 +180,49 @@ function hasTextContent(node: Node): boolean {
 }
 
 /**
- * 获取元素的样式信息
+ * 获取元素的样式信息 - 优化版本
  */
 export function getElementStyleInfo(element: HTMLElement): {
         shouldUseInline: boolean
         shouldWrap: boolean
 } {
+        // 首先检查WeakMap缓存
         let styleInfo = styleCache.get(element)
-        if (!styleInfo) {
-                const shouldUseInline =
+        if (styleInfo) {
+                return styleInfo
+        }
+
+        // 检查标签名缓存
+        const tagName = element.tagName
+        const tagStyle = tagNameStyleCache.get(tagName)
+        
+        let shouldUseInline: boolean
+        let shouldWrap: boolean
+        
+        if (tagStyle) {
+                // 使用预计算的标签样式作为基准
+                shouldUseInline = tagStyle.shouldUseInline
+                shouldWrap = tagStyle.shouldWrap
+                
+                // 对于预定义样式，只在实际需要时进行详细检查
+                if (shouldUseInline) {
+                        // 行内元素可能需要额外检查定位和flex上下文
+                        shouldUseInline = !isPositionedElement(element) && !isInFlexContext(element)
+                }
+        } else {
+                // 未知标签，进行完整计算
+                shouldUseInline =
                         isInlineElement(element) ||
                         isPositionedElement(element) ||
                         isInFlexContext(element) ||
                         hasVerticalAlign(element)
 
-                const shouldWrap =
+                shouldWrap =
                         !shouldUseInline && shouldWrapElement(element)
-
-                styleInfo = { shouldUseInline, shouldWrap }
-                styleCache.set(element, styleInfo)
         }
+
+        styleInfo = { shouldUseInline, shouldWrap }
+        styleCache.set(element, styleInfo)
+        
         return styleInfo
 }
