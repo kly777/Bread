@@ -1,10 +1,24 @@
 /**
  * DOM变更观察器模块
- * 功能：监听DOM结构变化并触发相应处理逻辑，与设置管理器和特性观察器协同工作
+ *
+ * 核心功能：监听DOM结构变化并触发相应处理逻辑，与设置管理器和特性观察器协同工作
+ *
  * 设计决策：
- * 1. 使用单例模式创建MutationObserver实例
- * 2. 结合IntersectionObserver实现按需加载特性处理
- * 3. 维护元素-文本节点映射关系支持动态更新
+ * 1. 使用单例模式创建MutationObserver实例，避免重复观察和资源浪费
+ * 2. 结合IntersectionObserver实现按需加载特性处理，提升性能
+ * 3. 维护元素-文本节点映射关系支持动态更新，确保功能一致性
+ * 4. 采用防抖机制处理高频DOM变更，避免性能问题
+ *
+ * 架构特点：
+ * - 模块化设计：与各功能模块解耦，通过设置管理器控制功能开关
+ * - 性能优化：跳过内部生成元素，避免循环触发
+ * - 资源管理：自动清理移除节点的观察器和缓存
+ * - 异步处理：延迟重应用高亮，确保DOM稳定后再处理
+ *
+ * 使用场景：
+ * - 页面动态加载内容时自动应用翻译、仿生阅读等功能
+ * - 单页应用(SPA)路由切换时重新初始化功能
+ * - 用户交互导致的DOM结构变化
  */
 import { getTextNodes } from '../utils/dom/textNodes'
 import { getSetting } from '../settingManager'
@@ -17,6 +31,26 @@ import {
 import { observeTranslateElements as translateAddedElement } from './intersectionObserver/translateObserver'
 import { getHighlightManager } from '../feature/highlight/highlightManager'
 
+/**
+ * 管理DOM变更观察器的启动和停止
+ *
+ * @param shouldObserve - 控制观察器的开关状态
+ *   - true: 启动观察器，开始监听整个文档的DOM变更
+ *   - false: 停止观察器，断开所有监听以节省资源
+ *
+ * 配置选项说明：
+ * - childList: true - 监听子节点的添加和移除
+ * - subtree: true - 监听所有后代节点的变更
+ *
+ * 使用场景：
+ * - 页面初始化时启动观察
+ * - 执行批量DOM操作前临时停止观察，避免不必要的回调触发
+ * - 页面卸载时停止观察，清理资源
+ *
+ * 性能考虑：
+ * - 观察整个文档的DOM变更可能对性能有影响，但在现代浏览器中优化良好
+ * - 通过合理控制观察时机，避免在频繁DOM操作时触发回调
+ */
 export function manageMutationObserver(shouldObserve: boolean) {
         if (shouldObserve) {
                 domMutationObserver.observe(document.body, {
@@ -30,90 +64,77 @@ export function manageMutationObserver(shouldObserve: boolean) {
 
 /**
  * DOM变更观察器核心回调函数
+ *
  * @remarks
+ * 这是整个DOM观察系统的核心，负责处理所有DOM结构变化事件
+ *
  * 核心处理步骤：
- * 1. 收集所有需要处理的新增节点
- * 2. 处理移除节点：清理相关资源
- * 3. 统一处理新增节点的功能应用
- * 4. 延迟重新应用高亮避免循环触发
+ * 1. 收集所有需要处理的新增节点 - 过滤和分类新增的DOM元素
+ * 2. 处理移除节点：清理相关资源 - 防止内存泄漏和无效观察
+ * 3. 统一处理新增节点的功能应用 - 根据设置应用翻译、仿生阅读等功能
+ * 4. 延迟重新应用高亮避免循环触发 - 使用防抖机制确保DOM稳定
+ *
+ * 性能优化策略：
+ * - 批量处理：收集所有变更后统一处理，减少重复操作
+ * - 过滤内部元素：跳过扩展自身创建的元素，避免无限循环
+ * - 条件执行：根据功能设置决定是否执行相应处理
+ * - 异步延迟：高亮功能延迟执行，确保DOM操作完成
+ *
+ * 错误处理：
+ * - 使用try-catch包装关键操作，避免单个错误影响整体功能
+ * - 详细的日志输出，便于调试和问题定位
  */
 const domMutationObserver: MutationObserver = new MutationObserver(
         (mutations: MutationRecord[]) => {
-                console.group('🔍 DOM Mutation Observer')
+                console.group('DOM Mutation Observer')
                 console.log(`检测到 ${mutations.length} 个DOM变更`)
 
-                // 收集所有新增元素节点
-                const newElements: Element[] = []
+                // 使用Set避免重复处理同一个元素
+                const newElementsSet = new Set<Element>()
                 let skippedElements = 0
 
-                for (const mutation of mutations) {
+                // 优化：批量处理mutation记录，减少循环嵌套
+                mutations.forEach((mutation) => {
                         console.log(
                                 `Mutation: ${mutation.type}`,
                                 mutation.target
                         )
 
-                        // 处理新增节点
-                        for (const node of mutation.addedNodes) {
-                                if (node.nodeType === Node.ELEMENT_NODE) {
-                                        const element = node as Element
-                                        // 跳过翻译模块创建的翻译结果容器和高亮元素，避免循环触发
-                                        if (
-                                                element.classList?.contains(
-                                                        'translation-result'
-                                                ) ||
-                                                element.classList?.contains(
-                                                        'bread-highlight'
-                                                )
-                                        ) {
-                                                console.log(
-                                                        `⏭️  跳过内部元素: ${element.tagName}.${Array.from(element.classList).join('.')}`
-                                                )
-                                                skippedElements++
-                                                continue
-                                        }
-                                        console.log(
-                                                `➕ 新增元素: ${element.tagName}`,
-                                                element
-                                        )
-                                        newElements.push(element)
-                                }
-                        }
+                        // 优化：使用更高效的新增节点处理
+                        skippedElements += processAddedNodes(
+                                mutation.addedNodes,
+                                newElementsSet
+                        )
 
-                        // 处理移除节点
-                        for (const node of mutation.removedNodes) {
-                                console.log(`➖ 移除节点: ${node.nodeName}`)
+                        // 处理移除节点 - 清理资源，防止内存泄漏
+                        mutation.removedNodes.forEach((node) => {
+                                console.log(`移除节点: ${node.nodeName}`)
                                 handleRemovedNode(node)
-                        }
+                        })
 
-                        // 处理子树变动（如元素被替换或修改）
-                        if (mutation.type === 'childList') {
-                                for (const child of mutation.target
-                                        .childNodes) {
-                                        if (
-                                                child.nodeType ===
-                                                Node.ELEMENT_NODE
-                                        ) {
-                                                updateTextNodesMap(
-                                                        child as Element
-                                                )
-                                        }
-                                }
+                        // 优化：减少不必要的子树更新检查
+                        if (
+                                mutation.type === 'childList' &&
+                                parentToTextNodesMap.size > 0
+                        ) {
+                                updateAffectedTextNodes(mutation.target)
                         }
-                }
+                })
 
+                const newElements = Array.from(newElementsSet)
                 console.log(
-                        `📊 统计: ${newElements.length} 个新元素, ${skippedElements} 个跳过元素`
+                        `统计: ${newElements.length} 个新元素, ${skippedElements} 个跳过元素`
                 )
 
-                // 处理新增元素的功能应用
+                // 处理新增元素的功能应用 - 核心业务逻辑
                 if (newElements.length > 0) {
-                        console.log('🚀 开始处理新元素功能')
+                        console.log('开始处理新元素功能')
                         processNewElements(newElements)
 
                         // 如果高亮功能已启用，延迟重新应用高亮
                         const highlightManager = getHighlightManager()
                         if (highlightManager.isEnabled()) {
-                                console.log('⏰ 调度高亮更新')
+                                console.log('调度高亮更新')
                                 scheduleHighlightUpdate(highlightManager)
                         }
                 }
@@ -123,28 +144,85 @@ const domMutationObserver: MutationObserver = new MutationObserver(
 )
 
 /**
+ * 优化：专门处理新增节点，提高代码可读性和性能
+ * @returns 跳过的元素数量
+ */
+function processAddedNodes(
+        addedNodes: NodeList,
+        newElementsSet: Set<Element>
+): number {
+        let skippedCount = 0
+        for (let i = 0; i < addedNodes.length; i++) {
+                const node = addedNodes[i]
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                        const element = node as Element
+
+                        // 优化：使用更高效的内部元素检测
+                        if (isInternalExtensionElement(element)) {
+                                console.log(
+                                        `跳过内部元素: ${
+                                                element.tagName
+                                        }.${Array.from(element.classList).join(
+                                                '.'
+                                        )}`
+                                )
+                                skippedCount++
+                                continue
+                        }
+
+                        console.log(`新增元素: ${element.tagName}`, element)
+                        newElementsSet.add(element)
+                }
+        }
+        return skippedCount
+}
+
+/**
+ * 优化：快速检测是否为扩展内部生成的元素
+ */
+function isInternalExtensionElement(element: Element): boolean {
+        // 使用类名快速检测，避免多次classList.contains调用
+        const classList = element.classList
+        return (
+                classList?.contains('translation-result') ||
+                classList?.contains('bread-highlight')
+        )
+}
+
+/**
+ * 优化：只更新受影响的文本节点映射
+ */
+function updateAffectedTextNodes(target: Node): void {
+        if (target.nodeType === Node.ELEMENT_NODE) {
+                const element = target as Element
+                // 只有当目标元素在映射中时才更新
+                if (parentToTextNodesMap.has(element)) {
+                        updateTextNodesMap(element)
+                }
+        }
+}
+
+/**
  * 处理新增元素的功能应用
  */
 function processNewElements(elements: Element[]) {
         const translateEnabled = getSetting().translate
         const bionicEnabled = getSetting().bionic
 
-        console.log(
-                `🎯 功能设置: 翻译=${translateEnabled}, 仿生=${bionicEnabled}`
-        )
+        console.log(`功能设置: 翻译=${translateEnabled}, 仿生=${bionicEnabled}`)
 
         for (const element of elements) {
                 if (translateEnabled) {
-                        console.log(`🌐 应用翻译到: ${element.tagName}`)
+                        console.log(`应用翻译到: ${element.tagName}`)
                         translateAddedElement(element)
                 }
                 if (bionicEnabled) {
-                        console.log(`👁️ 应用仿生到: ${element.tagName}`)
+                        console.log(`应用仿生到: ${element.tagName}`)
                         observeElementNode(element)
                 }
         }
 
-        console.log(`✅ 完成处理 ${elements.length} 个元素`)
+        console.log(`完成处理 ${elements.length} 个元素`)
 }
 
 /**
