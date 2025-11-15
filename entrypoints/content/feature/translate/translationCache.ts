@@ -186,10 +186,10 @@ const cacheManager = new TranslationCacheManager()
 
 // 请求优先级枚举
 enum RequestPriority {
-        LOW = 1,    // 后台任务，低优先级
+        LOW = 1, // 后台任务，低优先级
         NORMAL = 2, // 普通翻译请求
-        HIGH = 3,   // 用户主动触发的翻译
-        URGENT = 4  // 即时翻译需求
+        HIGH = 3, // 用户主动触发的翻译
+        URGENT = 4, // 即时翻译需求
 }
 
 // 扩展批量翻译项接口以支持优先级
@@ -221,23 +221,23 @@ type BatchResult =
 class BatchTranslator {
         private queue: BatchTranslationItem[] = []
         private processing = false
-        
+
         // 自适应配置
         private baseBatchDelay = 50 // 基础延迟50ms
-        private minBatchDelay = 10  // 最小延迟10ms
+        private minBatchDelay = 10 // 最小延迟10ms
         private maxBatchDelay = 200 // 最大延迟200ms
-        
-        private baseBatchSize = 10  // 基础批量大小
-        private minBatchSize = 1    // 最小批量大小
-        private maxBatchSize = 20   // 最大批量大小
-        
+
+        private baseBatchSize = 10 // 基础批量大小
+        private minBatchSize = 1 // 最小批量大小
+        private maxBatchSize = 20 // 最大批量大小
+
         // 网络状况监控
         private networkMetrics: NetworkMetrics = {
                 averageResponseTime: 0,
                 successRate: 1.0,
-                lastUpdate: Date.now()
+                lastUpdate: Date.now(),
         }
-        
+
         // 响应时间记录
         private responseTimes: number[] = []
         private readonly MAX_RESPONSE_TIME_SAMPLES = 20
@@ -254,9 +254,9 @@ class BatchTranslator {
                                 resolve,
                                 reject,
                                 priority,
-                                timestamp: Date.now()
+                                timestamp: Date.now(),
                         }
-                        
+
                         this.insertItemByPriority(item)
                         this.processBatch()
                 })
@@ -267,7 +267,7 @@ class BatchTranslator {
          */
         private insertItemByPriority(item: BatchTranslationItem): void {
                 let insertIndex = this.queue.length
-                
+
                 // 从后往前找到第一个优先级小于等于当前项的索引
                 for (let i = this.queue.length - 1; i >= 0; i--) {
                         if (this.queue[i].priority >= item.priority) {
@@ -275,7 +275,7 @@ class BatchTranslator {
                                 break
                         }
                 }
-                
+
                 this.queue.splice(insertIndex, 0, item)
         }
 
@@ -285,17 +285,17 @@ class BatchTranslator {
         private calculateAdaptiveDelay(): number {
                 const queueLength = this.queue.length
                 const urgency = this.calculateQueueUrgency()
-                
+
                 // 基础延迟根据队列长度调整
                 let delay = this.baseBatchDelay
-                
+
                 // 队列越长，延迟越短（尽快处理）
                 if (queueLength > 15) {
                         delay = Math.max(this.minBatchDelay, delay - 30)
                 } else if (queueLength > 5) {
                         delay = Math.max(this.minBatchDelay, delay - 15)
                 }
-                
+
                 // 根据网络状况调整
                 if (this.networkMetrics.averageResponseTime > 1000) {
                         // 网络状况差，增加延迟以减少并发
@@ -304,10 +304,10 @@ class BatchTranslator {
                         // 网络状况好，减少延迟
                         delay = Math.max(this.minBatchDelay, delay - 10)
                 }
-                
+
                 // 根据紧急程度调整
-                delay = Math.max(this.minBatchDelay, delay - (urgency * 10))
-                
+                delay = Math.max(this.minBatchDelay, delay - urgency * 10)
+
                 return delay
         }
 
@@ -316,9 +316,9 @@ class BatchTranslator {
          */
         private calculateQueueUrgency(): number {
                 const highPriorityCount = this.queue.filter(
-                        item => item.priority >= RequestPriority.HIGH
+                        (item) => item.priority >= RequestPriority.HIGH
                 ).length
-                
+
                 return Math.min(highPriorityCount / 5, 3) // 最大紧急程度为3
         }
 
@@ -327,26 +327,35 @@ class BatchTranslator {
          */
         private calculateDynamicBatchSize(): number {
                 let batchSize = this.baseBatchSize
-                
+
                 // 根据网络状况调整
                 if (this.networkMetrics.averageResponseTime > 1000) {
                         // 网络慢，减少批量大小
-                        batchSize = Math.max(this.minBatchSize, Math.floor(batchSize * 0.5))
+                        batchSize = Math.max(
+                                this.minBatchSize,
+                                Math.floor(batchSize * 0.5)
+                        )
                 } else if (this.networkMetrics.averageResponseTime < 200) {
                         // 网络快，增加批量大小
-                        batchSize = Math.min(this.maxBatchSize, Math.floor(batchSize * 1.5))
+                        batchSize = Math.min(
+                                this.maxBatchSize,
+                                Math.floor(batchSize * 1.5)
+                        )
                 }
-                
+
                 // 根据队列中高优先级请求数量调整
                 const highPriorityCount = this.queue.filter(
-                        item => item.priority >= RequestPriority.HIGH
+                        (item) => item.priority >= RequestPriority.HIGH
                 ).length
-                
+
                 if (highPriorityCount > 0) {
                         // 有高优先级请求时，减少批量大小以更快响应
-                        batchSize = Math.max(this.minBatchSize, Math.min(batchSize, 5))
+                        batchSize = Math.max(
+                                this.minBatchSize,
+                                Math.min(batchSize, 5)
+                        )
                 }
-                
+
                 return batchSize
         }
 
@@ -399,7 +408,7 @@ class BatchTranslator {
                 batch: BatchTranslationItem[]
         ): Promise<void> {
                 const startTime = Date.now()
-                
+
                 // 使用并行处理模拟批量效果
                 const promises: Promise<BatchResult>[] = batch.map((item) =>
                         this.performSingleTranslation(
@@ -411,23 +420,26 @@ class BatchTranslator {
                                                 ({
                                                         item,
                                                         result,
-                                                } as BatchResult)
+                                                }) as BatchResult
                                 )
                                 .catch(
                                         (error) =>
-                                                ({ item, error } as BatchResult)
+                                                ({ item, error }) as BatchResult
                                 )
                 )
 
                 const results = await Promise.allSettled(promises)
-                
+
                 // 记录响应时间和成功率
                 const totalTime = Date.now() - startTime
-                const successCount = results.filter(r =>
-                        r.status === 'fulfilled' && 'result' in r.value
+                const successCount = results.filter(
+                        (r) => r.status === 'fulfilled' && 'result' in r.value
                 ).length
-                
-                this.recordResponseTime(totalTime / batch.length, successCount / batch.length)
+
+                this.recordResponseTime(
+                        totalTime / batch.length,
+                        successCount / batch.length
+                )
 
                 results.forEach((result) => {
                         if (result.status === 'fulfilled') {
@@ -448,16 +460,24 @@ class BatchTranslator {
         /**
          * 记录响应时间并更新网络指标
          */
-        private recordResponseTime(responseTime: number, success: boolean | number = true): void {
+        private recordResponseTime(
+                responseTime: number,
+                success: boolean | number = true
+        ): void {
                 // 记录响应时间
                 this.responseTimes.push(responseTime)
-                if (this.responseTimes.length > this.MAX_RESPONSE_TIME_SAMPLES) {
+                if (
+                        this.responseTimes.length >
+                        this.MAX_RESPONSE_TIME_SAMPLES
+                ) {
                         this.responseTimes.shift()
                 }
-                
+
                 // 计算平均响应时间
-                const avgResponseTime = this.responseTimes.reduce((a, b) => a + b, 0) / this.responseTimes.length
-                
+                const avgResponseTime =
+                        this.responseTimes.reduce((a, b) => a + b, 0) /
+                        this.responseTimes.length
+
                 // 更新成功率
                 let successRate: number
                 if (typeof success === 'boolean') {
@@ -465,12 +485,14 @@ class BatchTranslator {
                 } else {
                         successRate = success
                 }
-                
+
                 // 平滑更新网络指标
                 this.networkMetrics = {
                         averageResponseTime: avgResponseTime,
-                        successRate: this.networkMetrics.successRate * 0.7 + successRate * 0.3,
-                        lastUpdate: Date.now()
+                        successRate:
+                                this.networkMetrics.successRate * 0.7 +
+                                successRate * 0.3,
+                        lastUpdate: Date.now(),
                 }
         }
 

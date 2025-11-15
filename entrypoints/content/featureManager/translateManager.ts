@@ -12,7 +12,9 @@ const TRANSLATOR_STORAGE_KEY = 'translator'
 // 初始化翻译器设置
 async function initTranslator() {
         try {
-                const storedTranslator = await storage.getItem<Translator>(`local:${TRANSLATOR_STORAGE_KEY}`)
+                const storedTranslator = await storage.getItem<Translator>(
+                        `local:${TRANSLATOR_STORAGE_KEY}`
+                )
                 if (storedTranslator === 'MS' || storedTranslator === 'G') {
                         translator = storedTranslator
                 }
@@ -25,7 +27,10 @@ async function initTranslator() {
 export async function setTranslator(newTranslator: Translator) {
         translator = newTranslator
         try {
-                await storage.setItem(`local:${TRANSLATOR_STORAGE_KEY}`, newTranslator)
+                await storage.setItem(
+                        `local:${TRANSLATOR_STORAGE_KEY}`,
+                        newTranslator
+                )
         } catch (error) {
                 console.warn('Failed to save translator setting:', error)
         }

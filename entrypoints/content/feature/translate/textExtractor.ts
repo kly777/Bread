@@ -112,13 +112,23 @@ export async function extractTextFragments(
 
                                 // 保持原有的父元素链检查逻辑
                                 let currentParent = parent
-                                while (currentParent && currentParent !== element) {
-                                        if (EXCLUDE_TAGS.includes(currentParent.tagName)) {
+                                while (
+                                        currentParent &&
+                                        currentParent !== element
+                                ) {
+                                        if (
+                                                EXCLUDE_TAGS.includes(
+                                                        currentParent.tagName
+                                                )
+                                        ) {
                                                 // 将排除的祖先添加到预计算映射中，供后续快速检查
-                                                excludedAncestors.add(currentParent)
+                                                excludedAncestors.add(
+                                                        currentParent
+                                                )
                                                 return NodeFilter.FILTER_REJECT
                                         }
-                                        currentParent = currentParent.parentElement
+                                        currentParent =
+                                                currentParent.parentElement
                                 }
                                 return NodeFilter.FILTER_ACCEPT
                         },
@@ -207,17 +217,17 @@ export function preprocessExcludedElements(
         // 使用精确的选择器只获取需要排除的元素类型，避免全文档遍历
         const excludeSelectors = [
                 // 排除标签
-                ...EXCLUDE_TAGS.map(tag => tag.toLowerCase()),
+                ...EXCLUDE_TAGS.map((tag) => tag.toLowerCase()),
                 // 可编辑元素
                 '[contenteditable="true"]',
                 '[contenteditable=""]',
                 // 排除类
-                ...EXCLUDE_CLASSES.map(cls => `.${cls}`)
+                ...EXCLUDE_CLASSES.map((cls) => `.${cls}`),
         ].join(',')
 
         // 只查询需要排除的元素，而不是所有元素
         const directExcludedElements = root.querySelectorAll(excludeSelectors)
-        
+
         // 标记直接排除的元素
         directExcludedElements.forEach((el) => {
                 const htmlEl = el as HTMLElement
@@ -229,32 +239,53 @@ export function preprocessExcludedElements(
         // 对于大型文档，我们只预处理首屏内容，其余部分按需处理
         if (root === document.body) {
                 // 使用IntersectionObserver来延迟处理视口外的元素
-                const lazyObserver = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                                if (entry.isIntersecting) {
-                                        const element = entry.target as HTMLElement
-                                        // 对于进入视口的元素，检查是否需要排除
-                                        if (isElementExcludable(element)) {
-                                                excludedElements.add(element)
-                                                excludedAncestors.add(element)
+                const lazyObserver = new IntersectionObserver(
+                        (entries) => {
+                                entries.forEach((entry) => {
+                                        if (entry.isIntersecting) {
+                                                const element =
+                                                        entry.target as HTMLElement
+                                                // 对于进入视口的元素，检查是否需要排除
+                                                if (
+                                                        isElementExcludable(
+                                                                element
+                                                        )
+                                                ) {
+                                                        excludedElements.add(
+                                                                element
+                                                        )
+                                                        excludedAncestors.add(
+                                                                element
+                                                        )
+                                                }
+                                                lazyObserver.unobserve(element)
                                         }
-                                        lazyObserver.unobserve(element)
-                                }
-                        })
-                }, {
-                        rootMargin: '50px' // 提前50px开始观察
-                })
+                                })
+                        },
+                        {
+                                rootMargin: '50px', // 提前50px开始观察
+                        }
+                )
 
                 // 只观察直接子元素中的潜在排除元素，避免性能开销
                 const potentialElements = root.querySelectorAll('*')
                 // 限制初始观察数量，避免性能问题
                 const maxInitialObserve = 100
-                for (let i = 0; i < Math.min(potentialElements.length, maxInitialObserve); i++) {
+                for (
+                        let i = 0;
+                        i <
+                        Math.min(potentialElements.length, maxInitialObserve);
+                        i++
+                ) {
                         const el = potentialElements[i] as HTMLElement
                         // 快速检查是否需要观察
-                        if (EXCLUDE_TAGS.includes(el.tagName) ||
-                            el.hasAttribute('contenteditable') ||
-                            EXCLUDE_CLASSES.some(cls => el.classList.contains(cls))) {
+                        if (
+                                EXCLUDE_TAGS.includes(el.tagName) ||
+                                el.hasAttribute('contenteditable') ||
+                                EXCLUDE_CLASSES.some((cls) =>
+                                        el.classList.contains(cls)
+                                )
+                        ) {
                                 lazyObserver.observe(el)
                         }
                 }

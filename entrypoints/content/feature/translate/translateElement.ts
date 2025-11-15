@@ -54,7 +54,6 @@ export const translateElement = async (
                         styleInfo.shouldWrap
                 )
         } catch (error) {
-
                 console.error('Element translation failed:', {
                         error,
                         element,
