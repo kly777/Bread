@@ -13,7 +13,10 @@ const styleCache = new WeakMap<
 >()
 
 // 常见元素样式预计算 - 基于标签名的快速缓存
-const tagNameStyleCache = new Map<string, { shouldUseInline: boolean; shouldWrap: boolean }>([
+const tagNameStyleCache = new Map<
+        string,
+        { shouldUseInline: boolean; shouldWrap: boolean }
+>([
         ['DIV', { shouldUseInline: false, shouldWrap: true }],
         ['SPAN', { shouldUseInline: true, shouldWrap: false }],
         ['P', { shouldUseInline: false, shouldWrap: true }],
@@ -26,7 +29,7 @@ const tagNameStyleCache = new Map<string, { shouldUseInline: boolean; shouldWrap
         ['H3', { shouldUseInline: false, shouldWrap: true }],
         ['H4', { shouldUseInline: false, shouldWrap: true }],
         ['H5', { shouldUseInline: false, shouldWrap: true }],
-        ['H6', { shouldUseInline: false, shouldWrap: true }]
+        ['H6', { shouldUseInline: false, shouldWrap: true }],
 ])
 
 function desString(content: string, shouldWrap: boolean): string {
@@ -106,8 +109,111 @@ export function updateOrCreateTranslationContainer(
         }
 }
 
+// 批量DOM操作队列
+const domOperationQueue: { element: HTMLElement; container: HTMLElement }[] = []
+let domOperationScheduled = false
+
+/**
+ * 调度批量DOM操作
+ */
+function scheduleDomOperation(
+        element: HTMLElement,
+        container: HTMLElement
+): void {
+        domOperationQueue.push({ element, container })
+
+        if (!domOperationScheduled) {
+                domOperationScheduled = true
+
+                // 使用 requestAnimationFrame 在下一帧批量处理DOM操作
+                window.requestAnimationFrame(() => {
+                        processDomOperationQueue()
+                })
+        }
+}
+
+/**
+ * 处理批量DOM操作队列
+ */
+function processDomOperationQueue(): void {
+        domOperationScheduled = false
+
+        const operations = [...domOperationQueue]
+        domOperationQueue.length = 0
+
+        // 批量处理所有DOM操作
+        operations.forEach(({ element, container }) => {
+                const position = findOptimalInsertPosition(element)
+                if (position.node && position.isAfter) {
+                        position.node.parentNode?.insertBefore(
+                                container,
+                                position.node.nextSibling
+                        )
+                } else if (position.node && !position.isAfter) {
+                        position.node.parentNode?.insertBefore(
+                                container,
+                                position.node
+                        )
+                } else {
+                        element.appendChild(container)
+                }
+        })
+}
+
+/**
+ * 优化的插入位置查找算法
+ */
+function findOptimalInsertPosition(element: HTMLElement): {
+        node: Node | null
+        isAfter: boolean
+} {
+        // 快速检查：如果元素没有子节点，直接返回null表示追加到末尾
+        if (!element.lastChild) {
+                return { node: null, isAfter: false }
+        }
+
+        // 从最后一个子节点开始向前查找
+        let node: Node | null = element.lastChild
+
+        while (node) {
+                // 快速检查：如果是文本节点且包含内容
+                if (
+                        node.nodeType === Node.TEXT_NODE &&
+                        node.textContent?.trim()
+                ) {
+                        return { node, isAfter: true }
+                }
+
+                // 如果是元素节点
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                        const el = node as HTMLElement
+
+                        // 快速排除翻译结果容器
+                        if (el.classList?.contains('translation-result')) {
+                                node = node.previousSibling
+                                continue
+                        }
+
+                        // 检查是否包含文本内容
+                        if (el.textContent?.trim()) {
+                                return { node, isAfter: true }
+                        }
+
+                        // 检查是否包含SVG
+                        if (el.querySelector('svg')) {
+                                return { node, isAfter: true }
+                        }
+                }
+
+                node = node.previousSibling
+        }
+
+        return { node: null, isAfter: false }
+}
+
 /**
  * 将翻译结果容器插入到目标元素中最后一个有文本或svg的元素之后
+ * 使用批量DOM操作和优化算法
  * @param element - 目标HTML元素
  * @param resultContainer - 翻译结果容器元素
  */
@@ -115,68 +221,8 @@ function insertAfterLastTextElement(
         element: HTMLElement,
         resultContainer: HTMLElement
 ): void {
-        const childNodes = Array.from(element.childNodes)
-        let lastTextElement: Node | null = null
-
-        // 从后向前遍历直接子节点
-        for (let i = childNodes.length - 1; i >= 0; i--) {
-                const node = childNodes[i]
-
-                // 检查节点是否包含文本内容或为SVG元素
-                if (hasTextContent(node) || hasSvgElement(node)) {
-                        lastTextElement = node
-                        break
-                }
-        }
-
-        // 如果找到了最后一个包含文本的节点或SVG元素，则在其后插入
-        if (lastTextElement) {
-                lastTextElement.parentNode?.insertBefore(
-                        resultContainer,
-                        lastTextElement.nextSibling
-                )
-        } else {
-                // 否则追加到末尾
-                element.appendChild(resultContainer)
-        }
-}
-
-/**
- * 检查元素的子节点中是否包含SVG元素
- * @param node 要检查的节点
- * @returns 如果元素的子节点中包含SVG元素则返回true，否则返回false
- */
-function hasSvgElement(node: Node): boolean {
-        if (node.nodeType !== Node.ELEMENT_NODE) {
-                return false
-        }
-
-        const element = node as Element
-        return element.querySelector('svg') !== null
-}
-/**
- * 检查节点是否包含文本内容
- * @param node 要检查的节点
- * @returns 如果节点包含文本内容则返回true，否则返回false
- */
-function hasTextContent(node: Node): boolean {
-        if (node.nodeType === Node.TEXT_NODE) {
-                return !!node.textContent?.trim()
-        }
-
-        if (node.nodeType === Node.ELEMENT_NODE) {
-                const el = node as HTMLElement
-                // 排除翻译结果容器
-                if (
-                        el.classList &&
-                        el.classList.contains('translation-result')
-                ) {
-                        return false
-                }
-                return !!el.textContent?.trim()
-        }
-
-        return false
+        // 使用批量DOM操作调度
+        scheduleDomOperation(element, resultContainer)
 }
 
 /**
@@ -195,19 +241,21 @@ export function getElementStyleInfo(element: HTMLElement): {
         // 检查标签名缓存
         const tagName = element.tagName
         const tagStyle = tagNameStyleCache.get(tagName)
-        
+
         let shouldUseInline: boolean
         let shouldWrap: boolean
-        
+
         if (tagStyle) {
                 // 使用预计算的标签样式作为基准
                 shouldUseInline = tagStyle.shouldUseInline
                 shouldWrap = tagStyle.shouldWrap
-                
+
                 // 对于预定义样式，只在实际需要时进行详细检查
                 if (shouldUseInline) {
                         // 行内元素可能需要额外检查定位和flex上下文
-                        shouldUseInline = !isPositionedElement(element) && !isInFlexContext(element)
+                        shouldUseInline =
+                                !isPositionedElement(element) &&
+                                !isInFlexContext(element)
                 }
         } else {
                 // 未知标签，进行完整计算
@@ -217,12 +265,11 @@ export function getElementStyleInfo(element: HTMLElement): {
                         isInFlexContext(element) ||
                         hasVerticalAlign(element)
 
-                shouldWrap =
-                        !shouldUseInline && shouldWrapElement(element)
+                shouldWrap = !shouldUseInline && shouldWrapElement(element)
         }
 
         styleInfo = { shouldUseInline, shouldWrap }
         styleCache.set(element, styleInfo)
-        
+
         return styleInfo
 }
