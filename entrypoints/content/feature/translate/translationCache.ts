@@ -1,6 +1,6 @@
 import { translateContentGoogle as translateG } from '../../utils/text/translation'
 import { translateContentMicrosoft as translateMS } from '../../utils/text/translation'
-import { translator } from '../../featureManager/translateManager'
+import { getTranslator } from '../../featureManager/translateManager'
 
 // 多级缓存系统
 class TranslationCacheManager {
@@ -305,7 +305,8 @@ class BatchTranslator {
                 originalText: string,
                 targetLang: string
         ): Promise<string> {
-                const cacheKey = `${originalText}:${targetLang}:${translator}`
+                const currentTranslator = getTranslator()
+                const cacheKey = `${originalText}:${targetLang}:${currentTranslator}`
 
                 // 检查缓存
                 const cachedResult = await cacheManager.get(cacheKey)
@@ -320,13 +321,13 @@ class BatchTranslator {
 
                 let result: string = ''
                 try {
-                        if (translator === 'MS') {
+                        if (currentTranslator === 'MS') {
                                 result = await translateMS(
                                         originalText,
                                         undefined,
                                         targetLang
                                 )
-                        } else if (translator === 'G') {
+                        } else if (currentTranslator === 'G') {
                                 result = await translateG(
                                         originalText,
                                         undefined,

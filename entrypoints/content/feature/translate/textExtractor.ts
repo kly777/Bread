@@ -16,6 +16,8 @@ const EXCLUDE_TAGS = [
 // 全局标记，用于记录已经被排除翻译的元素
 const excludedElements = new WeakSet<HTMLElement>()
 
+const EXCLUDE_CLASSES = ['code-line', 'anchor-container']
+
 /**
  * 检查单个元素是否应该被排除翻译
  */
@@ -25,9 +27,12 @@ function isElementExcludable(element: HTMLElement): boolean {
                 return true
         }
 
-        // 检查元素是否具有 code-line 类
-        if (element.className && element.className.includes('code-line')) {
-                return true
+        // 检查元素是否具有排除的类名
+        if (element.className) {
+                const classList = element.className.split(' ')
+                if (EXCLUDE_CLASSES.some((cls) => classList.includes(cls))) {
+                        return true
+                }
         }
 
         // 检查元素是否具有 contenteditable 属性

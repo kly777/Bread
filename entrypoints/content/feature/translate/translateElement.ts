@@ -54,13 +54,11 @@ export const translateElement = async (
                         styleInfo.shouldWrap
                 )
         } catch (error) {
-                // 优化错误处理：只在开发环境记录详细错误
-                if (import.meta.env.DEV) {
-                        console.error('Element translation failed:', {
-                                error,
-                                element,
-                                timestamp: new Date().toISOString(),
-                        })
-                }
+
+                console.error('Element translation failed:', {
+                        error,
+                        element,
+                        timestamp: new Date().toISOString(),
+                })
         }
 }

@@ -2,7 +2,7 @@
         "name": "bread",
         "description": "a extension for reading",
         "private": true,
-        "version": "0.1.25",
+        "version": "0.1.26",
         "type": "module",
         "scripts": {
                 "dev": "wxt",
@@ -26,10 +26,10 @@
         },
         "devDependencies": {
                 "@eslint/js": "^9.39.1",
-                "@types/chrome": "^0.1.27",
+                "@types/chrome": "^0.1.29",
                 "@types/tinycolor2": "^1.4.6",
-                "@typescript-eslint/eslint-plugin": "^8.46.3",
-                "@typescript-eslint/parser": "^8.46.3",
+                "@typescript-eslint/eslint-plugin": "^8.46.4",
+                "@typescript-eslint/parser": "^8.46.4",
                 "@wxt-dev/module-vue": "^1.0.3",
                 "eslint": "^9.39.1",
                 "eslint-plugin-vue": "^10.5.1",

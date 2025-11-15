@@ -7,6 +7,24 @@ const props = defineProps<{
         settings?: Record<string, 'string' | 'number' | 'boolean'>
 }>()
 
+// 翻译器选择相关
+import {
+        setTranslator,
+        getTranslator,
+        type Translator,
+} from '../content/featureManager/translateManager'
+const translator = ref<Translator>('MS')
+
+// 初始化翻译器设置
+onMounted(async () => {
+        // 原有的初始化代码...
+
+        // 初始化翻译器设置
+        if (props.featureName === 'translate') {
+                translator.value = getTranslator()
+        }
+})
+
 // 设置状态类型
 type SettingState = 'default' | 'enabled' | 'disabled'
 
@@ -71,6 +89,17 @@ watch(
         },
         { deep: true }
 )
+
+// 监听翻译器变化
+watch(
+        () => translator.value,
+        async (newTranslator) => {
+                if (props.featureName === 'translate') {
+                        await setTranslator(newTranslator)
+                }
+        },
+        { deep: true }
+)
 </script>
 
 <template>
@@ -120,6 +149,35 @@ watch(
                                 />
                         </div>
                 </template>
+
+                <!-- 翻译器选择（仅对translate功能显示） -->
+                <!-- <div
+                        v-if="
+                                featureName === 'translate' &&
+                                settingState !== 'disabled'
+                        "
+                        class="translator-setting"
+                >
+                        <div class="translator-label">翻译器:</div>
+                        <div class="translator-options">
+                                <label class="translator-option">
+                                        <input
+                                                type="radio"
+                                                v-model="translator"
+                                                value="MS"
+                                        />
+                                        <span>微软翻译</span>
+                                </label>
+                                <label class="translator-option">
+                                        <input
+                                                type="radio"
+                                                v-model="translator"
+                                                value="G"
+                                        />
+                                        <span>谷歌翻译</span>
+                                </label>
+                        </div>
+                </div> -->
         </div>
 </template>
 
@@ -171,5 +229,53 @@ watch(
 .setting-item {
         margin-top: 6px;
         padding-left: 12px;
+}
+
+/* 翻译器选择样式 */
+.translator-setting {
+        margin-top: 8px;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #e9ecef;
+}
+
+.translator-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 6px;
+}
+
+.translator-options {
+        display: flex;
+        gap: 8px;
+}
+
+.translator-option {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+        color: #6c757d;
+        background: white;
+        border: 1px solid #dee2e6;
+}
+
+.translator-option:hover {
+        background: #e9ecef;
+}
+
+.translator-option input[type='radio'] {
+        margin: 0;
+}
+
+.translator-option:has(input[type='radio']:checked) {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
 }
 </style>

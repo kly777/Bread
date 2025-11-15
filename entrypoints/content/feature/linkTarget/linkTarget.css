@@ -46,24 +46,6 @@
         color: #ababab;
 }
 
-/* 各类型特定的边框样式 */
-.bread-link-target-new-tab {
-        border-bottom-color: rgba(0, 102, 204, 0.7);
-}
-
-.bread-link-target-same-tab {
-        border-bottom-color: rgba(0, 153, 0, 0.7);
-}
-
-.bread-link-target-default {
-        border-bottom-color: rgba(102, 102, 102, 0.7);
-}
-
-.bread-link-target-default,
-.bread-link-target-same-tab,
-.bread-link-target-new-tab {
-        border-bottom-width: 1px;
-}
 
 /* 响应式调整 */
 @media (max-width: 768px) {
