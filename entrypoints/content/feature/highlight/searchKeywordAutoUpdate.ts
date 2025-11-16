@@ -20,7 +20,7 @@ export function startSearchKeywordAutoUpdate(): void {
         isActive = true
         lastUrl = window.location.href
 
-        console.log('🚀 启动搜索关键词自动更新')
+        console.log('启动搜索关键词自动更新')
 
         setupUrlChangeListeners()
         updateSearchKeywords()

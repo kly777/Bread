@@ -8,7 +8,7 @@ import vueParser from 'vue-eslint-parser'
 export default defineConfig([
         // 全局配置
         {
-                ignores: ['.output/**/*', '.wxt/**/*', 'dev/**/*'],
+                ignores: ['**/.output/**/*', '.wxt/**/*', 'dev/**/*'],
                 languageOptions: {
                         globals: {
                                 browser: 'readonly',
