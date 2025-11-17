@@ -2,7 +2,7 @@
         "extends": "./tsconfig.json",
         "include": [
                 "entrypoints/**/*.ts",
-                "entrypoints/**/*.vue", // 明确包含Vue文件
+                "entrypoints/**/*.vue",
                 "src/**/*.ts",
                 "src/**/*.vue"
         ]

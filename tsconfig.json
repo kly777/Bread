@@ -11,7 +11,6 @@
                 ".wxt/**/*.d.ts",
                 ".wxt\\**\\*.d.ts",
                 "entrypoints/**/*.ts",
-                "entrypoints\\**\\*.ts",
-                "*.ts"
+                "entrypoints\\**\\*.ts"
         ]
 }

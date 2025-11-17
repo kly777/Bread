@@ -2,7 +2,6 @@ import { translateContentGoogle as translateG } from '../../utils/text/translati
 import { translateContentMicrosoft as translateMS } from '../../utils/text/translation'
 import { getTranslator } from '../../featureManager/translateManager'
 
-// 简化的内存缓存
 class SimpleTranslationCache {
         private cache = new Map<string, string>()
         private readonly MAX_CACHE_SIZE = 1000
@@ -30,7 +29,6 @@ class SimpleTranslationCache {
 
 const cache = new SimpleTranslationCache()
 
-// 简化的批量翻译器
 class SimpleBatchTranslator {
         private queue: Array<{
                 originalText: string
@@ -42,9 +40,17 @@ class SimpleBatchTranslator {
         private readonly BATCH_DELAY = 10 // 固定延迟10ms
         private readonly BATCH_SIZE = 5 // 固定批量大小
 
-        async addToBatch(originalText: string, targetLang: string): Promise<string> {
+        async addToBatch(
+                originalText: string,
+                targetLang: string
+        ): Promise<string> {
                 return new Promise((resolve, reject) => {
-                        this.queue.push({ originalText, targetLang, resolve, reject })
+                        this.queue.push({
+                                originalText,
+                                targetLang,
+                                resolve,
+                                reject,
+                        })
                         this.processBatch()
                 })
         }
@@ -55,22 +61,27 @@ class SimpleBatchTranslator {
                 this.processing = true
 
                 // 使用固定延迟
-                await new Promise(resolve => window.setTimeout(resolve, this.BATCH_DELAY))
+                await new Promise((resolve) =>
+                        window.setTimeout(resolve, this.BATCH_DELAY)
+                )
 
                 // 处理固定大小的批次
                 const batch = this.queue.splice(0, this.BATCH_SIZE)
                 this.processing = false
 
                 // 并行处理批次
-                const promises = batch.map(item =>
-                        this.performSingleTranslation(item.originalText, item.targetLang)
-                                .then(result => ({ item, result }))
-                                .catch(error => ({ item, error }))
+                const promises = batch.map((item) =>
+                        this.performSingleTranslation(
+                                item.originalText,
+                                item.targetLang
+                        )
+                                .then((result) => ({ item, result }))
+                                .catch((error) => ({ item, error }))
                 )
 
                 const results = await Promise.allSettled(promises)
 
-                results.forEach(result => {
+                results.forEach((result) => {
                         if (result.status === 'fulfilled') {
                                 const value = result.value
                                 if ('result' in value) {
@@ -128,7 +139,10 @@ class SimpleBatchTranslator {
                 } catch (error) {
                         // 翻译失败时返回原文
                         result = originalText
-                        console.warn('Translation failed, using original text:', error)
+                        console.warn(
+                                'Translation failed, using original text:',
+                                error
+                        )
                 }
 
                 // 更新缓存
@@ -138,10 +152,11 @@ class SimpleBatchTranslator {
         }
 }
 
+
 const batchTranslator = new SimpleBatchTranslator()
 
 /**
- * 执行翻译操作
+ * 翻译操作
  */
 export async function performTranslation(
         _translator: string,
