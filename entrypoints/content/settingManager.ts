@@ -1,5 +1,4 @@
 import { getKeyWithDomain } from './utils/storage/storage'
-import { isSearchEnginePage, pageLang } from './utils/page/info'
 import { IFeature } from './feature/Feature'
 import { BionicFeature } from './feature/bionic/BionicFeature'
 import { HighlightFeature } from './feature/highlight/HighlightFeature'
@@ -35,10 +34,6 @@ export function getSettingState(): { [key: string]: SettingState } {
         return { ...setting }
 }
 
-function isEnglishPage(): boolean {
-        return pageLang().startsWith('en')
-}
-
 // 创建功能实例
 const featureInstances: { [key: string]: IFeature } = {
         bionic: new BionicFeature(),
@@ -48,65 +43,26 @@ const featureInstances: { [key: string]: IFeature } = {
         linkTarget: new LinkTargetFeature(),
 }
 
-// 功能配置映射（兼容旧接口）
-const features: {
-        [key: string]: {
-                default: boolean
-                init?: () => void | Promise<void>
-                on: () => void | Promise<void>
-                off: () => void | Promise<void>
-        }
-} = {
-        bionic: {
-                default: false,
-                init: () => featureInstances.bionic.init?.(),
-                on: () => featureInstances.bionic.on(),
-                off: () => featureInstances.bionic.off(),
-        },
-        highlight: {
-                default: isSearchEnginePage(),
-                init: () => featureInstances.highlight.init?.(),
-                on: () => featureInstances.highlight.on(),
-                off: () => featureInstances.highlight.off(),
-        },
-        translate: {
-                default: isEnglishPage(),
-                on: () => featureInstances.translate.on(),
-                off: () => featureInstances.translate.off(),
-        },
-        stripe: {
-                default: false,
-                on: () => featureInstances.stripe.on(),
-                off: () => featureInstances.stripe.off(),
-        },
-        linkTarget: {
-                default: true,
-                init: () => featureInstances.linkTarget.init?.(),
-                on: () => featureInstances.linkTarget.on(),
-                off: () => featureInstances.linkTarget.off(),
-        },
-}
-
 // 通用初始化函数
 async function initFeature(key: string) {
-        const config = features[key]
-        if (config) {
-                try {
-                        const domainKey = getKeyWithDomain(key) // 生成域名键
-                        const value = await storage.getItem<boolean>(domainKey)
-                        await switchFeature(
-                                key,
-                                value !== null ? value : config.default
-                        )
-                } catch (err) {
-                        console.error(`初始化${key}失败`, err)
-                }
+        const feature = featureInstances[key]
+        if (!feature) return
+
+        try {
+                const domainKey = getKeyWithDomain(key) // 生成域名键
+                const value = await storage.getItem<boolean>(domainKey)
+                await switchFeature(
+                        key,
+                        value !== null ? value : feature.default
+                )
+        } catch (err) {
+                console.error(`初始化${key}失败`, err)
         }
 }
 
 /**
  * 切换指定功能键的特性状态。
- * @param key - 功能键标识符，用于查找对应的配置
+ * @param key - 功能键标识符
  * @param newValue - 新的布尔值或null，若为null则使用默认值
  * @param isDefault - 是否为默认值
  * @returns void
@@ -116,20 +72,20 @@ async function switchFeature(
         newValue: boolean | null,
         isDefault: boolean = false
 ) {
-        const config = features[key]
-        if (!config) return
+        const feature = featureInstances[key]
+        if (!feature) return
 
         // 处理默认值逻辑
         if (newValue === null) {
-                newValue = config.default
+                newValue = feature.default
                 isDefault = true
         }
 
         // 执行特性开关回调
         if (newValue) {
-                await config.on()
+                await feature.on()
         } else {
-                await config.off()
+                await feature.off()
         }
 
         // 更新设置状态
@@ -157,7 +113,7 @@ export function initSettingManager() {
          * 并行初始化所有功能模块
          * 使用 Promise.all 提高初始化效率
          */
-        Object.keys(features).map((key) =>
+        Object.keys(featureInstances).map((key) =>
                 initFeature(key).catch((err) =>
                         console.error(`初始化${key}失败`, err)
                 )
@@ -170,7 +126,7 @@ export function initSettingManager() {
          * @internal
          * 使用带域名前缀的存储键进行监听，变化时调用switchFeature处理
          */
-        Object.keys(features).forEach((key) => {
+        Object.keys(featureInstances).forEach((key) => {
                 storage.watch<boolean>(
                         getKeyWithDomain(key),
                         async (newValue: boolean | null) => {
@@ -201,9 +157,9 @@ function initShortcuts() {
  * @returns {Promise<void>} 无返回值，但会修改全局setting对象
  */
 async function syncSettings(): Promise<void> {
-        const keys = Object.keys(features)
+        const keys = Object.keys(featureInstances)
         for (const key of keys) {
-                const config = features[key]
+                const feature = featureInstances[key]
                 const domainKey = getKeyWithDomain(key)
 
                 let value = await storage.getItem<boolean>(domainKey)
@@ -212,7 +168,7 @@ async function syncSettings(): Promise<void> {
                 if (value === null) {
                         value = await storage.getItem<boolean>(`local:${key}`)
                         if (value === null) {
-                                value = config.default
+                                value = feature.default
                                 isDefault = true
                         }
                 }

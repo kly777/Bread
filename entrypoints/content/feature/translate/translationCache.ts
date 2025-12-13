@@ -152,7 +152,6 @@ class SimpleBatchTranslator {
         }
 }
 
-
 const batchTranslator = new SimpleBatchTranslator()
 
 /**

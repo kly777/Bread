@@ -7,9 +7,12 @@ const translateFeature = new TranslateFeature()
 let currentTranslator: Translator = 'MS'
 
 // 初始化翻译器设置（异步）
-translateFeature.init().then(() => {
-    currentTranslator = translateFeature.getTranslator()
-}).catch(() => {})
+translateFeature
+        .init()
+        .then(() => {
+                currentTranslator = translateFeature.getTranslator()
+        })
+        .catch(() => {})
 
 // 重新导出类型和函数
 export type { Translator }
@@ -17,20 +20,20 @@ export const translator: Translator = currentTranslator // 导出变量，但注
 
 // 设置翻译器
 export async function setTranslator(newTranslator: Translator) {
-    await translateFeature.setTranslator(newTranslator)
-    currentTranslator = newTranslator
+        await translateFeature.setTranslator(newTranslator)
+        currentTranslator = newTranslator
 }
 
 // 获取当前翻译器
 export function getTranslator(): Translator {
-    return translateFeature.getTranslator()
+        return translateFeature.getTranslator()
 }
 
 // 以下函数为了兼容性保留，但实际调用会委托给 translateFeature
 export async function openTranslate() {
-    await translateFeature.on()
+        await translateFeature.on()
 }
 
 export function stopTranslate() {
-    translateFeature.off()
+        translateFeature.off()
 }
