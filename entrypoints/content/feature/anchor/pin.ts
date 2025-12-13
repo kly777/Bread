@@ -1,6 +1,6 @@
-import anchorLay from './anchorLayout.vue'
+// import anchorLay from './anchorLayout.vue'
 import './anchor.css'
-import { getAnchorsInfo } from './anchor'
+// import { getAnchorsInfo } from './anchor'
 import { manageMutationObserver } from '../../observer/domMutationObserver'
 export function pin() {
         if (document.readyState === 'loading') {
@@ -18,9 +18,9 @@ function initAnchorApp() {
                 container.classList.add('anchor-container', 'no-translate')
                 manageMutationObserver(false)
                 target.appendChild(container)
-                createApp(anchorLay, {
-                        textToAnchor: getAnchorsInfo(),
-                }).mount(container)
+                // createApp(anchorLay, {
+                //         textToAnchor: getAnchorsInfo(),
+                // }).mount(container)
                 manageMutationObserver(true)
                 console.log('挂载完成')
         }
