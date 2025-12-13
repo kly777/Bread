@@ -1,6 +1,6 @@
 import { translateContentGoogle as translateG } from '../../utils/text/translation'
 import { translateContentMicrosoft as translateMS } from '../../utils/text/translation'
-import { getTranslator } from '../../featureManager/translateManager'
+import { getTranslator } from '../../feature/translate/translateAdapter'
 
 class SimpleTranslationCache {
         private cache = new Map<string, string>()

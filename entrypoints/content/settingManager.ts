@@ -1,27 +1,11 @@
 import { getKeyWithDomain } from './utils/storage/storage'
-import { initStripe } from './feature/stripe/stripe'
-import {
-        initBionic,
-        openBionic,
-        stopBionic,
-} from './featureManager/bionicManager'
-import { openHighlight, stopHighlight } from './featureManager/highlightManager'
-import { initializeHighlightSystem } from './feature/highlight/highlightInit'
-import { openTranslate, stopTranslate } from './featureManager/translateManager'
-import {
-        initLinkTarget,
-        openLinkTarget,
-        stopLinkTarget,
-} from './featureManager/linkTargetManager'
 import { isSearchEnginePage, pageLang } from './utils/page/info'
-
-// 状态配置：定义各功能的键名、默认值、启用/停用函数
-interface FeatureConfig {
-        default: boolean
-        init?: () => void | Promise<void> // 可选的初始化函数
-        on: () => void | Promise<void>
-        off: () => void | Promise<void>
-}
+import { IFeature } from './feature/Feature'
+import { BionicFeature } from './feature/bionic/BionicFeature'
+import { HighlightFeature } from './feature/highlight/HighlightFeature'
+import { TranslateFeature } from './feature/translate/TranslateFeature'
+import { StripeFeature } from './feature/stripe/StripeFeature'
+import { LinkTargetFeature } from './feature/linkTarget/LinkTargetFeature'
 
 // 设置状态类型定义
 interface SettingState {
@@ -55,34 +39,51 @@ function isEnglishPage(): boolean {
         return pageLang().startsWith('en')
 }
 
-const features: { [key: string]: FeatureConfig } = {
+// 创建功能实例
+const featureInstances: { [key: string]: IFeature } = {
+        bionic: new BionicFeature(),
+        highlight: new HighlightFeature(),
+        translate: new TranslateFeature(),
+        stripe: new StripeFeature(),
+        linkTarget: new LinkTargetFeature(),
+}
+
+// 功能配置映射（兼容旧接口）
+const features: {
+        [key: string]: {
+                default: boolean
+                init?: () => void | Promise<void>
+                on: () => void | Promise<void>
+                off: () => void | Promise<void>
+        }
+} = {
         bionic: {
                 default: false,
-                init: initBionic, // 特殊处理：bionic的初始化
-                on: openBionic,
-                off: stopBionic,
+                init: () => featureInstances.bionic.init?.(),
+                on: () => featureInstances.bionic.on(),
+                off: () => featureInstances.bionic.off(),
         },
         highlight: {
                 default: isSearchEnginePage(),
-                init: initializeHighlightSystem,
-                on: openHighlight,
-                off: stopHighlight,
+                init: () => featureInstances.highlight.init?.(),
+                on: () => featureInstances.highlight.on(),
+                off: () => featureInstances.highlight.off(),
         },
         translate: {
                 default: isEnglishPage(),
-                on: openTranslate,
-                off: stopTranslate,
+                on: () => featureInstances.translate.on(),
+                off: () => featureInstances.translate.off(),
         },
         stripe: {
                 default: false,
-                on: initStripe,
-                off: () => {}, // stripe无明确关闭函数，留空
+                on: () => featureInstances.stripe.on(),
+                off: () => featureInstances.stripe.off(),
         },
         linkTarget: {
                 default: true,
-                init: initLinkTarget,
-                on: openLinkTarget,
-                off: stopLinkTarget,
+                init: () => featureInstances.linkTarget.init?.(),
+                on: () => featureInstances.linkTarget.on(),
+                off: () => featureInstances.linkTarget.off(),
         },
 }
 
@@ -93,7 +94,7 @@ async function initFeature(key: string) {
                 try {
                         const domainKey = getKeyWithDomain(key) // 生成域名键
                         const value = await storage.getItem<boolean>(domainKey)
-                        switchFeature(
+                        await switchFeature(
                                 key,
                                 value !== null ? value : config.default
                         )

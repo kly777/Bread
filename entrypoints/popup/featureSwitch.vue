@@ -12,7 +12,7 @@ import {
         setTranslator,
         getTranslator,
         type Translator,
-} from '../content/featureManager/translateManager'
+} from '../content/feature/translate/translateAdapter'
 const translator = ref<Translator>('MS')
 
 // 初始化翻译器设置

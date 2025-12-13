@@ -1,4 +1,4 @@
-import { translator } from '../../featureManager/translateManager'
+import { translator } from '../../feature/translate/translateAdapter'
 import {
         extractTextFragments,
         shouldSkipTranslation,
