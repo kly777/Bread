@@ -2,7 +2,7 @@ export default defineBackground(() => {
         console.log('Hello background!', { id: browser.runtime.id })
 
         browser.runtime.onMessage.addListener(
-                (message, sender, sendResponse) => {
+                (message, _, sendResponse) => {
                         if (message.action === 'getDomain') {
                                 browser.tabs.query(
                                         { active: true, currentWindow: true },
