@@ -4,6 +4,9 @@ import { Feature } from '../Feature'
 /**
  * 链接目标样式功能
  */
+
+
+
 export class LinkTargetFeature extends Feature {
         readonly name = 'linkTarget'
         readonly default = true
@@ -44,11 +47,9 @@ export class LinkTargetFeature extends Feature {
         // 以下是从 linkTargetManager.ts 迁移的函数
         private async isLinkTargetFeatureEnabled(): Promise<boolean> {
                 try {
-                        const enabled =
-                                await storage.getItem<boolean>(
-                                        'local:linkTarget'
-                                )
-                        return enabled !== null ? enabled : false // 默认禁用
+                        const result = await browser.storage.local.get('local:linkTarget')
+                        const enabled = result['local:linkTarget'] as boolean | undefined
+                        return enabled !== undefined ? enabled : false // 默认禁用
                 } catch (error) {
                         console.warn(
                                 'Failed to read link target setting:',
@@ -62,7 +63,7 @@ export class LinkTargetFeature extends Feature {
                 enabled: boolean
         ): Promise<void> {
                 try {
-                        await storage.setItem('local:linkTarget', enabled)
+                        await browser.storage.local.set({ 'local:linkTarget': enabled })
                 } catch (error) {
                         console.error(
                                 'Failed to save link target setting:',

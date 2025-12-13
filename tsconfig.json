@@ -1,17 +1,35 @@
 {
-        "extends": "./.wxt/tsconfig.json",
         "compilerOptions": {
+                "target": "ES2020",
+                "module": "ESNext",
+                "lib": ["ES2020", "DOM", "DOM.Iterable"],
+                "moduleResolution": "bundler",
+                "resolveJsonModule": true,
+                "allowImportingTsExtensions": true,
+                "isolatedModules": true,
+                "noEmit": true,
+                "strict": true,
                 "noUnusedLocals": true,
-                "noUnusedParameters": true
+                "noUnusedParameters": true,
+                "noImplicitReturns": true,
+                "skipLibCheck": true,
+                "esModuleInterop": true,
+                "allowSyntheticDefaultImports": true,
+                "forceConsistentCasingInFileNames": true,
+                "jsx": "preserve",
+                "types": ["@types/chrome"],
+                "baseUrl": ".",
+                "paths": {
+                        "@/*": ["./*"]
+                }
         },
         "include": [
-                "src/**/*",
-                "entrypoints/**/*.vue",
-                "entrypoints\\**\\*.vue",
-                ".wxt/**/*.d.ts",
-                ".wxt\\**\\*.d.ts",
+                "types/**/*.d.ts",
                 "entrypoints/**/*.ts",
-                "entrypoints\\**\\*.ts",
-                "**/*.ts"
-        ]
+                "entrypoints/**/*.vue",
+                "entrypoints/**/*.tsx",
+                "entrypoints/**/*.js",
+                "entrypoints/**/*.jsx"
+        ],
+        "exclude": ["node_modules", "dist"]
 }

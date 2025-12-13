@@ -6,6 +6,7 @@ import { TranslateFeature } from './feature/translate/TranslateFeature'
 import { StripeFeature } from './feature/stripe/StripeFeature'
 import { LinkTargetFeature } from './feature/linkTarget/LinkTargetFeature'
 
+
 // 设置状态类型定义
 interface SettingState {
         value: boolean
@@ -50,10 +51,11 @@ async function initFeature(key: string) {
 
         try {
                 const domainKey = getKeyWithDomain(key) // 生成域名键
-                const value = await storage.getItem<boolean>(domainKey)
+                const result = await browser.storage.local.get(domainKey)
+                const value = result[domainKey] as boolean | undefined
                 await switchFeature(
                         key,
-                        value !== null ? value : feature.default
+                        value !== undefined ? value : feature.default
                 )
         } catch (err) {
                 console.error(`初始化${key}失败`, err)
@@ -127,16 +129,22 @@ export function initSettingManager() {
          * 使用带域名前缀的存储键进行监听，变化时调用switchFeature处理
          */
         Object.keys(featureInstances).forEach((key) => {
-                storage.watch<boolean>(
-                        getKeyWithDomain(key),
-                        async (newValue: boolean | null) => {
+                const storageKey = getKeyWithDomain(key)
+                const listener = (changes: Record<string, unknown>, area: string) => {
+                        if (area === 'local' && changes[storageKey]) {
+                                const change = changes[storageKey] as { newValue?: boolean; oldValue?: boolean }
+                                const newValue = change.newValue ?? null
                                 try {
-                                        await switchFeature(key, newValue)
+                                        switchFeature(key, newValue).catch(err =>
+                                                console.error(`更新${key}失败`, err)
+                                        )
                                 } catch (err) {
                                         console.error(`更新${key}失败`, err)
                                 }
                         }
-                )
+                }
+
+                browser.storage.onChanged.addListener(listener)
         })
 
         initShortcuts()
@@ -162,19 +170,24 @@ async function syncSettings(): Promise<void> {
                 const feature = featureInstances[key]
                 const domainKey = getKeyWithDomain(key)
 
-                let value = await storage.getItem<boolean>(domainKey)
+                // 获取域名专属配置
+                let domainResult = await browser.storage.local.get(domainKey)
+                let value = domainResult[domainKey] as boolean | undefined
                 let isDefault = false
 
-                if (value === null) {
-                        value = await storage.getItem<boolean>(`local:${key}`)
-                        if (value === null) {
+                if (value === undefined) {
+                        // 降级使用全局配置
+                        const globalKey = `local:${key}`
+                        let globalResult = await browser.storage.local.get(globalKey)
+                        value = globalResult[globalKey] as boolean | undefined
+                        if (value === undefined) {
                                 value = feature.default
                                 isDefault = true
                         }
                 }
 
                 setting[key] = {
-                        value: value,
+                        value: value as boolean,
                         isDefault: isDefault,
                 }
         }

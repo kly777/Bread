@@ -7,6 +7,7 @@ import { pageLang } from '../../utils/page/info'
 
 export type Translator = 'MS' | 'G'
 
+
 /**
  * 翻译功能
  */
@@ -39,10 +40,8 @@ export class TranslateFeature extends Feature {
         // 以下是从 translateManager.ts 迁移的函数
         private async initTranslator() {
                 try {
-                        const storedTranslator =
-                                await storage.getItem<Translator>(
-                                        'local:translator'
-                                )
+                        const result = await browser.storage.local.get('local:translator')
+                        const storedTranslator = result['local:translator'] as Translator | undefined
                         if (
                                 storedTranslator === 'MS' ||
                                 storedTranslator === 'G'
@@ -60,7 +59,7 @@ export class TranslateFeature extends Feature {
         async setTranslator(newTranslator: Translator) {
                 this.translator = newTranslator
                 try {
-                        await storage.setItem('local:translator', newTranslator)
+                        await browser.storage.local.set({ 'local:translator': newTranslator })
                 } catch (error) {
                         console.warn(
                                 'Failed to save translator setting:',

@@ -8,6 +8,7 @@ import { getKeyWithDomain, getCurrentDomain } from './domain'
 
 type StorageKey = `local:${string}`
 
+
 /**
  * 获取配置项值
  *
@@ -26,8 +27,9 @@ export async function getSetting<T>(
                         key,
                         domain
                 ) as StorageKey
-                const value = await storage.getItem(storageKey)
-                return value !== null ? (value as T) : defaultValue
+                const result = await browser.storage.local.get(storageKey)
+                const value = result[storageKey]
+                return value !== undefined ? (value as T) : defaultValue
         } catch (error) {
                 console.warn(`获取配置 ${key} 失败:`, error)
                 return defaultValue
@@ -51,7 +53,7 @@ export async function setSetting<T>(
                         key,
                         domain
                 ) as StorageKey
-                await storage.setItem(storageKey, value)
+                await browser.storage.local.set({ [storageKey]: value })
         } catch (error) {
                 console.error(`设置配置 ${key} 失败:`, error)
         }
@@ -111,7 +113,8 @@ export async function getSettings<T extends Record<string, unknown>>(
                         key,
                         domain
                 ) as StorageKey
-                const value = await storage.getItem(storageKey)
+                const storageResult = await browser.storage.local.get(storageKey)
+                const value = storageResult[storageKey]
                 result[key as keyof T] = value as T[keyof T]
         }
 
@@ -128,18 +131,18 @@ export async function setSettings<T extends Record<string, unknown>>(
         settings: T,
         domain: string = getCurrentDomain()
 ): Promise<void> {
-        const updates: { key: StorageKey; value: unknown }[] = []
+        const updates: Record<string, unknown> = {}
 
         for (const [key, value] of Object.entries(settings)) {
                 const storageKey: StorageKey = getKeyWithDomain(
                         key,
                         domain
                 ) as StorageKey
-                updates.push({ key: storageKey, value })
+                updates[storageKey] = value
         }
 
         try {
-                await storage.setItems(updates)
+                await browser.storage.local.set(updates)
         } catch (error) {
                 console.error('批量设置配置失败:', error)
         }
@@ -160,7 +163,7 @@ export async function removeSetting(
                         key,
                         domain
                 ) as StorageKey
-                await storage.removeItem(storageKey)
+                await browser.storage.local.remove(storageKey)
         } catch (error) {
                 console.error(`删除配置 ${key} 失败:`, error)
         }
