@@ -8,7 +8,6 @@ import { getKeyWithDomain, getCurrentDomain } from './domain'
 
 type StorageKey = `local:${string}`
 
-
 /**
  * 获取配置项值
  *
@@ -113,7 +112,8 @@ export async function getSettings<T extends Record<string, unknown>>(
                         key,
                         domain
                 ) as StorageKey
-                const storageResult = await browser.storage.local.get(storageKey)
+                const storageResult =
+                        await browser.storage.local.get(storageKey)
                 const value = storageResult[storageKey]
                 result[key as keyof T] = value as T[keyof T]
         }

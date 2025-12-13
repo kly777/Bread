@@ -6,7 +6,6 @@ import { TranslateFeature } from './feature/translate/TranslateFeature'
 import { StripeFeature } from './feature/stripe/StripeFeature'
 import { LinkTargetFeature } from './feature/linkTarget/LinkTargetFeature'
 
-
 // 设置状态类型定义
 interface SettingState {
         value: boolean
@@ -130,13 +129,23 @@ export function initSettingManager() {
          */
         Object.keys(featureInstances).forEach((key) => {
                 const storageKey = getKeyWithDomain(key)
-                const listener = (changes: Record<string, unknown>, area: string) => {
+                const listener = (
+                        changes: Record<string, unknown>,
+                        area: string
+                ) => {
                         if (area === 'local' && changes[storageKey]) {
-                                const change = changes[storageKey] as { newValue?: boolean; oldValue?: boolean }
+                                const change = changes[storageKey] as {
+                                        newValue?: boolean
+                                        oldValue?: boolean
+                                }
                                 const newValue = change.newValue ?? null
                                 try {
-                                        switchFeature(key, newValue).catch(err =>
-                                                console.error(`更新${key}失败`, err)
+                                        switchFeature(key, newValue).catch(
+                                                (err) =>
+                                                        console.error(
+                                                                `更新${key}失败`,
+                                                                err
+                                                        )
                                         )
                                 } catch (err) {
                                         console.error(`更新${key}失败`, err)
@@ -178,7 +187,8 @@ async function syncSettings(): Promise<void> {
                 if (value === undefined) {
                         // 降级使用全局配置
                         const globalKey = `local:${key}`
-                        let globalResult = await browser.storage.local.get(globalKey)
+                        let globalResult =
+                                await browser.storage.local.get(globalKey)
                         value = globalResult[globalKey] as boolean | undefined
                         if (value === undefined) {
                                 value = feature.default

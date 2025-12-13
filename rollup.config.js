@@ -18,157 +18,177 @@ const outputFiles = new Map()
 
 // 生成manifest的函数
 function generateManifest() {
-    const baseManifest = JSON.parse(readFileSync('manifest.json', 'utf-8'))
-    const manifest = { ...baseManifest }
+        const baseManifest = JSON.parse(readFileSync('manifest.json', 'utf-8'))
+        const manifest = { ...baseManifest }
 
-    if (browser === 'chrome') {
-        manifest.manifest_version = 3
-        manifest.background = {
-            service_worker: 'background.js'
+        if (browser === 'chrome') {
+                manifest.manifest_version = 3
+                manifest.background = {
+                        service_worker: 'background.js',
+                }
+                manifest.action = manifest.browser_action
+                delete manifest.browser_action
+
+                manifest.host_permissions = manifest.permissions.filter(
+                        (p) => p.startsWith('http') || p === '<all_urls>'
+                )
+                manifest.permissions = manifest.permissions.filter(
+                        (p) => !p.startsWith('http') && p !== '<all_urls>'
+                )
+
+                delete manifest.browser_specific_settings
+        } else {
+                manifest.manifest_version = 2
         }
-        manifest.action = manifest.browser_action
-        delete manifest.browser_action
 
-        manifest.host_permissions = manifest.permissions.filter(p =>
-            p.startsWith('http') || p === '<all_urls>'
+        if (!isProduction) {
+                manifest.name = `[DEV] ${manifest.name}`
+        }
+
+        const distDir = join('dist', browser)
+        if (!existsSync(distDir)) {
+                mkdirSync(distDir, { recursive: true })
+        }
+
+        const manifestPath = join(distDir, 'manifest.json')
+        writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
+        console.log(
+                `Generated manifest for ${browser} (MV${manifest.manifest_version})`
         )
-        manifest.permissions = manifest.permissions.filter(p =>
-            !p.startsWith('http') && p !== '<all_urls>'
-        )
 
-        delete manifest.browser_specific_settings
-    } else {
-        manifest.manifest_version = 2
-    }
-
-    if (!isProduction) {
-        manifest.name = `[DEV] ${manifest.name}`
-    }
-
-    const distDir = join('dist', browser)
-    if (!existsSync(distDir)) {
-        mkdirSync(distDir, { recursive: true })
-    }
-
-    const manifestPath = join(distDir, 'manifest.json')
-    writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
-    console.log(`Generated manifest for ${browser} (MV${manifest.manifest_version})`)
-
-    return manifestPath
+        return manifestPath
 }
 
 export default {
-    input: {
-        'background': 'entrypoints/background/index.ts',
-        'content': 'entrypoints/content/index.ts',
-        'popup': 'entrypoints/popup/main.ts'
-    },
-    output: {
-        dir: `dist/${browser}`,
-        format: 'es',
-        sourcemap: isProduction ? false : 'inline',
-        entryFileNames: (chunkInfo) => {
-            if (chunkInfo.name === 'content') {
-                return 'content-scripts/content.js'
-            }
-            if (chunkInfo.name === 'background') {
-                return 'background.js'
-            }
-            return 'assets/[name]-[hash].js'
+        input: {
+                background: 'entrypoints/background/index.ts',
+                content: 'entrypoints/content/index.ts',
+                popup: 'entrypoints/popup/main.ts',
         },
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
-            if (assetInfo.name === 'content.css') {
-                return 'content-scripts/content.css'
-            }
-            return 'assets/[name]-[hash][extname]'
-        }
-    },
-    plugins: [
-        alias({
-            entries: [
-                { find: '@', replacement: 'src' }
-            ]
-        }),
-        nodeResolve({
-            browser: true,
-            extensions: ['.js', '.ts', '.vue', '.css']
-        }),
-        typescript({
-            tsconfig: './tsconfig.json',
-            sourceMap: !isProduction,
-            inlineSources: !isProduction,
-            include: ['**/*.ts', '**/*.vue']
-        }),
-        commonjs(),
-        // 处理CSS文件
-        postcss({
-            extract: true,
-            minimize: isProduction,
-            extensions: ['.css']
-        }),
-
-        replace({
-            'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-            'process.env.BROWSER': JSON.stringify(browser),
-            preventAssignment: true
-        }),
-        isProduction && terser({
-            format: {
-                comments: false
-            },
-            compress: {
-                drop_console: true,
-                drop_debugger: true
-            }
-        }),
-        // 记录输出文件
-        {
-            name: 'record-output-files',
-            generateBundle(options, bundle) {
-                for (const [fileName, fileInfo] of Object.entries(bundle)) {
-                    if (fileInfo.type === 'chunk' && fileInfo.isEntry) {
-                        outputFiles.set(fileInfo.name, fileName)
-                    }
-                }
-            }
+        output: {
+                dir: `dist/${browser}`,
+                format: 'es',
+                sourcemap: isProduction ? false : 'inline',
+                entryFileNames: (chunkInfo) => {
+                        if (chunkInfo.name === 'content') {
+                                return 'content-scripts/content.js'
+                        }
+                        if (chunkInfo.name === 'background') {
+                                return 'background.js'
+                        }
+                        return 'assets/[name]-[hash].js'
+                },
+                chunkFileNames: 'assets/[name]-[hash].js',
+                assetFileNames: (assetInfo) => {
+                        if (assetInfo.name === 'content.css') {
+                                return 'content-scripts/content.css'
+                        }
+                        return 'assets/[name]-[hash][extname]'
+                },
         },
-        // 生成manifest
-        {
-            name: 'generate-manifest',
-            buildStart() {
-                generateManifest()
-            }
-        },
-        copy({
-            targets: [
-                { src: 'entrypoints/popup/index.html', dest: `dist/${browser}` },
-                { src: 'public/icon/*', dest: `dist/${browser}/icon` }
-            ]
-        }),
-        // 更新popup.html中的脚本引用
-        {
-            name: 'update-popup-html',
-            writeBundle() {
-                const distDir = `dist/${browser}`
-                const htmlPath = join(distDir, 'popup.html')
+        plugins: [
+                alias({
+                        entries: [{ find: '@', replacement: 'src' }],
+                }),
+                nodeResolve({
+                        browser: true,
+                        extensions: ['.js', '.ts', '.vue', '.css'],
+                }),
+                typescript({
+                        tsconfig: './tsconfig.json',
+                        sourceMap: !isProduction,
+                        inlineSources: !isProduction,
+                        include: ['**/*.ts', '**/*.vue'],
+                }),
+                commonjs(),
+                // 处理CSS文件
+                postcss({
+                        extract: true,
+                        minimize: isProduction,
+                        extensions: ['.css'],
+                }),
 
-                if (!existsSync(htmlPath)) {
-                    return
-                }
+                replace({
+                        'process.env.NODE_ENV': JSON.stringify(
+                                isProduction ? 'production' : 'development'
+                        ),
+                        'process.env.BROWSER': JSON.stringify(browser),
+                        preventAssignment: true,
+                }),
+                isProduction &&
+                        terser({
+                                format: {
+                                        comments: false,
+                                },
+                                compress: {
+                                        drop_console: true,
+                                        drop_debugger: true,
+                                },
+                        }),
+                // 记录输出文件
+                {
+                        name: 'record-output-files',
+                        generateBundle(options, bundle) {
+                                for (const [
+                                        fileName,
+                                        fileInfo,
+                                ] of Object.entries(bundle)) {
+                                        if (
+                                                fileInfo.type === 'chunk' &&
+                                                fileInfo.isEntry
+                                        ) {
+                                                outputFiles.set(
+                                                        fileInfo.name,
+                                                        fileName
+                                                )
+                                        }
+                                }
+                        },
+                },
+                // 生成manifest
+                {
+                        name: 'generate-manifest',
+                        buildStart() {
+                                generateManifest()
+                        },
+                },
+                copy({
+                        targets: [
+                                {
+                                        src: 'entrypoints/popup/index.html',
+                                        dest: `dist/${browser}`,
+                                },
+                                {
+                                        src: 'public/icon/*',
+                                        dest: `dist/${browser}/icon`,
+                                },
+                        ],
+                }),
+                // 更新popup.html中的脚本引用
+                {
+                        name: 'update-popup-html',
+                        writeBundle() {
+                                const distDir = `dist/${browser}`
+                                const htmlPath = join(distDir, 'popup.html')
 
-                let html = readFileSync(htmlPath, 'utf-8')
-                const popupEntryFile = outputFiles.get('popup')
+                                if (!existsSync(htmlPath)) {
+                                        return
+                                }
 
-                if (popupEntryFile) {
-                    html = html.replace(
-                        /<script type="module" src="\.\/main\.ts"><\/script>/,
-                        `<script type="module" src="./${popupEntryFile}"></script>`
-                    )
-                    writeFileSync(htmlPath, html)
-                    console.log(`Updated popup.html to reference ${popupEntryFile}`)
-                }
-            }
-        }
-    ]
+                                let html = readFileSync(htmlPath, 'utf-8')
+                                const popupEntryFile = outputFiles.get('popup')
+
+                                if (popupEntryFile) {
+                                        html = html.replace(
+                                                /<script type="module" src="\.\/main\.ts"><\/script>/,
+                                                `<script type="module" src="./${popupEntryFile}"></script>`
+                                        )
+                                        writeFileSync(htmlPath, html)
+                                        console.log(
+                                                `Updated popup.html to reference ${popupEntryFile}`
+                                        )
+                                }
+                        },
+                },
+        ],
 }

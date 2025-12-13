@@ -106,10 +106,10 @@ export function createLinkStyleManager(
         removeStyle: (link: HTMLAnchorElement) => void
 ): () => void {
         const processedLinks = new WeakSet<HTMLAnchorElement>()
-        
+
         // 初始处理所有链接
         processAllLinks(applyStyle, processedLinks)
-        
+
         // 创建MutationObserver来监听新添加的链接
         const observer = new MutationObserver((mutations) => {
                 for (const mutation of mutations) {
@@ -117,16 +117,33 @@ export function createLinkStyleManager(
                                 for (const node of mutation.addedNodes) {
                                         if (node instanceof HTMLElement) {
                                                 // 检查新节点中的链接
-                                                const links = node.querySelectorAll('a')
-                                                links.forEach(link => {
-                                                        if (link instanceof HTMLAnchorElement && !processedLinks.has(link)) {
+                                                const links =
+                                                        node.querySelectorAll(
+                                                                'a'
+                                                        )
+                                                links.forEach((link) => {
+                                                        if (
+                                                                link instanceof
+                                                                        HTMLAnchorElement &&
+                                                                !processedLinks.has(
+                                                                        link
+                                                                )
+                                                        ) {
                                                                 applyStyle(link)
-                                                                processedLinks.add(link)
+                                                                processedLinks.add(
+                                                                        link
+                                                                )
                                                         }
                                                 })
-                                                
+
                                                 // 如果节点本身就是链接
-                                                if (node instanceof HTMLAnchorElement && !processedLinks.has(node)) {
+                                                if (
+                                                        node instanceof
+                                                                HTMLAnchorElement &&
+                                                        !processedLinks.has(
+                                                                node
+                                                        )
+                                                ) {
                                                         applyStyle(node)
                                                         processedLinks.add(node)
                                                 }
@@ -135,13 +152,13 @@ export function createLinkStyleManager(
                         }
                 }
         })
-        
+
         // 开始观察文档变化
         observer.observe(document.body, {
                 childList: true,
-                subtree: true
+                subtree: true,
         })
-        
+
         // 返回清理函数
         return () => {
                 observer.disconnect()
