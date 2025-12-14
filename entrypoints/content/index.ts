@@ -6,7 +6,7 @@ import './feature/linkTarget/linkTarget.css'
 import './feature/translate/translate.css'
 
 import { initFunctions } from './initFunctions'
-import { pin } from './feature/anchor/pin'
+import { pin } from './feature/anchor/init'
 
 // 移除wxt的defineContentScript，改为直接执行
 console.log('-'.repeat(20))

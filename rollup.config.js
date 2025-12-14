@@ -101,6 +101,7 @@ export default {
                 }),
                 nodeResolve({
                         browser: true,
+                    exportConditions: ['solid', 'browser', 'module', 'import', 'default'],
                         extensions: ['.js', '.ts', '.tsx', '.jsx', '.css'],
                 }),
                 typescript({
