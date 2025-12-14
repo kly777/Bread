@@ -68,89 +68,77 @@ function generateManifest() {
         return manifestPath
 }
 
-export default {
-        input: {
-                background: 'entrypoints/background/index.ts',
-                content: 'entrypoints/content/index.ts',
-                popup: 'entrypoints/popup/main.tsx',
+// 共享插件配置
+const sharedPlugins = [
+        alias({
+                entries: [{ find: '@', replacement: 'src' }],
+        }),
+        nodeResolve({
+                browser: true,
+                exportConditions: [
+                        'solid',
+                        'browser',
+                        'module',
+                        'import',
+                        'default',
+                ],
+                extensions: ['.js', '.ts', '.tsx', '.jsx', '.css'],
+        }),
+        typescript({
+                tsconfig: './tsconfig.json',
+                sourceMap: !isProduction,
+                inlineSources: !isProduction,
+                include: ['**/*.ts', '**/*.tsx'],
+                exclude: ['**/*.css'],
+        }),
+        babel({
+                babelHelpers: 'bundled',
+                extensions: ['.ts', '.tsx', '.js', '.jsx'],
+                presets: ['solid'],
+        }),
+        commonjs(),
+        // 处理CSS导入
+        {
+                name: 'css-import',
+                resolveId(source) {
+                        if (source.endsWith('.css')) {
+                                return { id: source, external: false }
+                        }
+                        return null
+                },
+                load(id) {
+                        if (id.endsWith('.css')) {
+                                // 返回空内容，因为CSS会被合并到单独的文件中
+                                return ''
+                        }
+                        return null
+                },
         },
+        replace({
+                'process.env.NODE_ENV': JSON.stringify(
+                        isProduction ? 'production' : 'development'
+                ),
+                'process.env.BROWSER': JSON.stringify(browser),
+                preventAssignment: true,
+        }),
+]
+
+// Content script 构建配置 - 构建为独立的 IIFE 文件
+const contentScriptConfig = {
+        input: 'entrypoints/content/index.ts',
         output: {
-                dir: `dist/${browser}`,
-                format: 'es',
+                file: `dist/${browser}/content-scripts/content.js`,
+                format: 'iife', // 使用 IIFE 格式，适合 content script
+                name: 'contentScript', // 全局变量名
                 sourcemap: isProduction ? false : 'inline',
-                entryFileNames: (chunkInfo) => {
-                        if (chunkInfo.name === 'content') {
-                                return 'content-scripts/content.js'
-                        }
-                        if (chunkInfo.name === 'background') {
-                                return 'background.js'
-                        }
-                        return 'assets/[name]-[hash].js'
-                },
-                chunkFileNames: 'assets/[name]-[hash].js',
-                assetFileNames: (assetInfo) => {
-                        if (assetInfo.name === 'content.css') {
-                                return 'content-scripts/content.css'
-                        }
-                        return 'assets/[name]-[hash][extname]'
-                },
+                // 禁用代码分割，所有代码打包到一个文件
+                inlineDynamicImports: true,
         },
         plugins: [
-                alias({
-                        entries: [{ find: '@', replacement: 'src' }],
-                }),
-                nodeResolve({
-                        browser: true,
-                        exportConditions: [
-                                'solid',
-                                'browser',
-                                'module',
-                                'import',
-                                'default',
-                        ],
-                        extensions: ['.js', '.ts', '.tsx', '.jsx', '.css'],
-                }),
-                typescript({
-                        tsconfig: './tsconfig.json',
-                        sourceMap: !isProduction,
-                        inlineSources: !isProduction,
-                        include: ['**/*.ts', '**/*.tsx'],
-                        exclude: ['**/*.css'],
-                }),
-                babel({
-                        babelHelpers: 'bundled',
-                        extensions: ['.ts', '.tsx', '.js', '.jsx'],
-                        presets: ['solid'],
-                }),
-                commonjs(),
-                // 处理CSS导入
+                ...sharedPlugins,
+                // 自定义CSS合并插件（使用postcss处理）- 仅用于 content script
                 {
-                        name: 'css-import',
-                        resolveId(source) {
-                                if (source.endsWith('.css')) {
-                                        return { id: source, external: false }
-                                }
-                                return null
-                        },
-                        load(id) {
-                                if (id.endsWith('.css')) {
-                                        // 返回空内容，因为CSS会被合并到单独的文件中
-                                        return ''
-                                }
-                                return null
-                        },
-                },
-
-                replace({
-                        'process.env.NODE_ENV': JSON.stringify(
-                                isProduction ? 'production' : 'development'
-                        ),
-                        'process.env.BROWSER': JSON.stringify(browser),
-                        preventAssignment: true,
-                }),
-                // 自定义CSS合并插件（使用postcss处理）
-                {
-                        name: 'merge-css',
+                        name: 'merge-content-css',
                         async buildStart() {
                                 // 处理content CSS
                                 const contentCssContent = readFileSync(
@@ -158,6 +146,89 @@ export default {
                                         'utf-8'
                                 )
 
+                                // 导入所有功能CSS文件
+                                const featureCssFiles = [
+                                        'entrypoints/content/feature/anchor/anchor.css',
+                                        'entrypoints/content/feature/downloadLink/downloadLink.css',
+                                        'entrypoints/content/feature/linkTarget/linkTarget.css',
+                                        'entrypoints/content/feature/translate/translate.css',
+                                ]
+
+                                let allCssContent = contentCssContent
+                                for (const cssFile of featureCssFiles) {
+                                        if (existsSync(cssFile)) {
+                                                allCssContent +=
+                                                        '\n' +
+                                                        readFileSync(
+                                                                cssFile,
+                                                                'utf-8'
+                                                        )
+                                        }
+                                }
+
+                                // 配置PostCSS插件链
+                                const plugins = [
+                                        postcss_import,
+                                        ...(isProduction ? [csso] : []),
+                                ]
+
+                                // 处理合并后的CSS
+                                const result = await postcss(plugins).process(
+                                        allCssContent,
+                                        {
+                                                from: 'entrypoints/content/style.css',
+                                                to: 'content-scripts/content.css',
+                                        }
+                                )
+
+                                // 保存处理后的CSS
+                                this.emitFile({
+                                        type: 'asset',
+                                        fileName: 'content-scripts/content.css',
+                                        source: result.css,
+                                })
+                        },
+                },
+                isProduction &&
+                        terser({
+                                format: {
+                                        comments: false,
+                                },
+                                compress: {
+                                        drop_console: true,
+                                        drop_debugger: true,
+                                },
+                        }),
+        ],
+}
+
+// Background 和 Popup 构建配置 - 保持原有 ES 模块格式
+const backgroundPopupConfig = {
+        input: {
+                background: 'entrypoints/background/index.ts',
+                popup: 'entrypoints/popup/main.tsx',
+        },
+        output: {
+                dir: `dist/${browser}`,
+                format: 'es',
+                sourcemap: isProduction ? false : 'inline',
+                entryFileNames: (chunkInfo) => {
+                        if (chunkInfo.name === 'background') {
+                                return 'background.js'
+                        }
+                        return 'assets/[name]-[hash].js'
+                },
+                chunkFileNames: 'assets/[name]-[hash].js',
+                assetFileNames: (assetInfo) => {
+                        return 'assets/[name]-[hash][extname]'
+                },
+        },
+        plugins: [
+                ...sharedPlugins,
+                // 自定义CSS合并插件（使用postcss处理）- 用于 popup
+                {
+                        name: 'merge-popup-css',
+                        async buildStart() {
                                 // 处理popup CSS
                                 const popupCssContent = readFileSync(
                                         'entrypoints/popup/style.css',
@@ -170,14 +241,6 @@ export default {
                                         ...(isProduction ? [csso] : []),
                                 ]
 
-                                // 处理content CSS
-                                const contentResult = await postcss(
-                                        plugins
-                                ).process(contentCssContent, {
-                                        from: 'entrypoints/content/style.css',
-                                        to: 'content-scripts/content.css',
-                                })
-
                                 // 处理popup CSS
                                 const popupResult = await postcss(
                                         plugins
@@ -187,12 +250,6 @@ export default {
                                 })
 
                                 // 保存处理后的CSS
-                                this.emitFile({
-                                        type: 'asset',
-                                        fileName: 'content-scripts/content.css',
-                                        source: contentResult.css,
-                                })
-
                                 this.emitFile({
                                         type: 'asset',
                                         fileName: 'assets/popup.css',
@@ -336,3 +393,6 @@ export default {
                 },
         ],
 }
+
+// 导出两个构建配置
+export default [contentScriptConfig, backgroundPopupConfig]
