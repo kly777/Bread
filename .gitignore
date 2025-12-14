@@ -38,3 +38,5 @@ pnpm-workspace.yaml
 ref
 
 dist
+
+dist-signed/

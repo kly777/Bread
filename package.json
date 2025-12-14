@@ -3,6 +3,7 @@
         "description": "a extension for reading",
         "private": true,
         "version": "0.1.29",
+        "license": "Apache-2.0",
         "type": "module",
         "scripts": {
                 "dev": "rollup -c --environment NODE_ENV:development",
@@ -19,7 +20,11 @@
                 "fmt": "prettier --write .",
                 "lint": "eslint .",
                 "lint:fix": "eslint . --fix",
-                "clean": "rm -rf dist dist-zip"
+                "clean": "rm -rf dist dist-zip",
+                "sign:firefox": "web-ext sign --config=web-ext-config.mjs",
+                "sign:firefox:unlisted": "web-ext sign --config=web-ext-config.mjs --channel=unlisted",
+                "submit:firefox": "pnpm run build:firefox && pnpm run sign:firefox",
+                "submit:firefox:unlisted": "pnpm run build:firefox && pnpm run sign:firefox:unlisted"
         },
         "devDependencies": {
                 "@babel/core": "^7.28.5",
