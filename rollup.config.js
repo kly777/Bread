@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import postcss from 'postcss'
 import csso from 'postcss-csso'
+import postcss_import from 'postcss-import'
 
 const isProduction = process.env.NODE_ENV === 'production'
 const browser = process.env.BROWSER || 'firefox'
@@ -132,51 +133,32 @@ export default {
                 {
                         name: 'merge-css',
                         async buildStart() {
-                                // 收集所有CSS文件
-                                const cssFiles = [
+                                // 读取CSS文件内容（会自动处理@import）
+                                const cssContent = readFileSync(
                                         'entrypoints/content/style.css',
-                                        'entrypoints/content/feature/anchor/anchor.css',
-                                        'entrypoints/content/feature/downloadLink/downloadLink.css',
-                                        'entrypoints/content/feature/linkTarget/linkTarget.css',
-                                        'entrypoints/content/feature/translate/translate.css',
+                                        'utf-8'
+                                )
+
+                                // 配置PostCSS插件链
+                                const plugins = [
+                                        postcss_import,
+                                        ...(isProduction ? [csso] : []),
                                 ]
 
-                                let combinedCss = ''
-                                for (const cssFile of cssFiles) {
-                                        if (existsSync(cssFile)) {
-                                                const cssContent = readFileSync(
-                                                        cssFile,
-                                                        'utf-8'
-                                                )
-                                                combinedCss += `/* ${cssFile} */\n${cssContent}\n\n`
+                                // 处理CSS
+                                const result = await postcss(plugins).process(
+                                        cssContent,
+                                        {
+                                                from: 'entrypoints/content/style.css',
+                                                to: 'content-scripts/content.css',
                                         }
-                                }
+                                )
 
-                                // 使用postcss处理CSS
-                                let processedCss = combinedCss
-                                if (isProduction) {
-                                        // 生产环境：压缩CSS
-                                        try {
-                                                const result = await postcss([
-                                                        csso,
-                                                ]).process(combinedCss, {
-                                                        from: undefined,
-                                                })
-                                                processedCss = result.css
-                                        } catch (error) {
-                                                console.warn(
-                                                        'CSS压缩失败:',
-                                                        error
-                                                )
-                                                processedCss = combinedCss
-                                        }
-                                }
-
-                                // 保存合并后的CSS
+                                // 保存处理后的CSS
                                 this.emitFile({
                                         type: 'asset',
                                         fileName: 'content-scripts/content.css',
-                                        source: processedCss,
+                                        source: result.css,
                                 })
                         },
                 },
