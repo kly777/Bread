@@ -1,5 +1,13 @@
-import { initLinkTargetManager, setLinkTargetEnabled } from './linkTarget'
+import {
+        initLinkTargetManager,
+        setLinkTargetEnabled,
+        applyStyleToLink,
+} from './linkTarget'
 import { Feature } from '../Feature'
+import {
+        registerNewElementsHook,
+        registerAttributeChangesHook,
+} from '../../observer/observerHooks'
 
 /**
  * 链接目标样式功能
@@ -12,6 +20,25 @@ export class LinkTargetFeature extends Feature {
         private cleanupFunction: (() => void) | null = null
 
         async init() {
+                // 注册新元素钩子
+                registerNewElementsHook((elements) => {
+                        this.processLinkTargetElements(elements)
+                })
+
+                // 注册属性变化钩子
+                registerAttributeChangesHook((mutations) => {
+                        mutations.forEach((mutation) => {
+                                if (
+                                        mutation.type === 'attributes' &&
+                                        mutation.attributeName === 'target' &&
+                                        mutation.target instanceof
+                                                HTMLAnchorElement
+                                ) {
+                                        applyStyleToLink(mutation.target)
+                                }
+                        })
+                })
+
                 // 检查功能是否启用
                 const enabled = await this.isLinkTargetFeatureEnabled()
                 if (enabled) {
@@ -39,6 +66,24 @@ export class LinkTargetFeature extends Feature {
                 if (this.cleanupFunction) {
                         this.cleanupFunction()
                         this.cleanupFunction = null
+                }
+        }
+
+        // 处理新增元素中的链接目标样式
+        private processLinkTargetElements(elements: Element[]) {
+                for (const element of elements) {
+                        // 检查元素本身是否为链接
+                        if (element instanceof HTMLAnchorElement) {
+                                applyStyleToLink(element)
+                        }
+
+                        // 检查元素内的所有链接
+                        const links = element.querySelectorAll('a')
+                        for (const link of links) {
+                                if (link instanceof HTMLAnchorElement) {
+                                        applyStyleToLink(link)
+                                }
+                        }
                 }
         }
 
@@ -74,28 +119,6 @@ export class LinkTargetFeature extends Feature {
                                 'Failed to save link target setting:',
                                 error
                         )
-                }
-        }
-
-        async getLinkTargetStatus(): Promise<boolean> {
-                return await this.isLinkTargetFeatureEnabled()
-        }
-
-        async toggleLinkTarget(): Promise<boolean> {
-                const currentStatus = await this.getLinkTargetStatus()
-                const newStatus = !currentStatus
-                if (newStatus) {
-                        await this.on()
-                } else {
-                        await this.off()
-                }
-                return newStatus
-        }
-
-        cleanup() {
-                if (this.cleanupFunction) {
-                        this.cleanupFunction()
-                        this.cleanupFunction = null
                 }
         }
 }

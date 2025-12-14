@@ -1,6 +1,5 @@
 import { translateContentGoogle as translateG } from '../../utils/text/translation'
 import { translateContentMicrosoft as translateMS } from '../../utils/text/translation'
-import { getTranslator } from '../../feature/translate/translateAdapter'
 
 class SimpleTranslationCache {
         private cache = new Map<string, string>()
@@ -102,7 +101,7 @@ class SimpleBatchTranslator {
                 originalText: string,
                 targetLang: string
         ): Promise<string> {
-                const currentTranslator = getTranslator()
+                const currentTranslator = 'MS'
                 const cacheKey = `${originalText}:${targetLang}:${currentTranslator}`
 
                 // 检查缓存

@@ -1,4 +1,3 @@
-import { translator } from '../../feature/translate/translateAdapter'
 import {
         extractTextFragments,
         shouldSkipTranslation,
@@ -34,7 +33,7 @@ export const translateElement = async (
         try {
                 // 执行文本翻译操作
                 const translatedText = await performTranslation(
-                        translator,
+                        'MS',
                         originalText,
                         targetLang
                 )

@@ -1,17 +1,15 @@
 import { getTextNodes } from '../utils/dom/textNodes'
-import { getSetting } from '../settingManager'
 
 import {
         parentToTextNodesMap,
         bionicTextObserver,
-        observeElementNode,
 } from './intersectionObserver/bionicObserver'
-import { observeTranslateElements as translateAddedElement } from './intersectionObserver/translateObserver'
-import { getHighlightManager } from '../feature/highlight/highlightManager'
 import {
-        isLinkTargetEnabled,
-        applyStyleToLink,
-} from '../feature/linkTarget/linkTarget'
+        triggerNewElements,
+        triggerAttributeChanges,
+        triggerRemovedNodes,
+        triggerDomStable,
+} from './observerHooks'
 
 /**
  * 管理DOM变更观察器的启动和停止
@@ -51,6 +49,7 @@ const domMutationObserver: MutationObserver = new MutationObserver(
 
                 // 使用Set避免重复处理同一个元素
                 const newElementsSet = new Set<Element>()
+                const removedNodes: Node[] = []
                 let skippedElements = 0
 
                 // 优化：批量处理mutation记录，减少循环嵌套
@@ -66,9 +65,10 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                                 newElementsSet
                         )
 
-                        // 处理移除节点 - 清理资源，防止内存泄漏
+                        // 收集移除节点
                         mutation.removedNodes.forEach((node) => {
                                 console.log(`移除节点: ${node.nodeName}`)
+                                removedNodes.push(node)
                                 handleRemovedNode(node)
                         })
 
@@ -81,6 +81,11 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                         }
                 })
 
+                // 触发移除节点钩子
+                if (removedNodes.length > 0) {
+                        triggerRemovedNodes(removedNodes)
+                }
+
                 const newElements = Array.from(newElementsSet)
                 console.log(
                         `统计: ${newElements.length} 个新元素, ${skippedElements} 个跳过元素`
@@ -91,12 +96,9 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                         console.log('开始处理新元素功能')
                         processNewElements(newElements)
 
-                        // 如果高亮功能已启用，延迟重新应用高亮
-                        const highlightManager = getHighlightManager()
-                        if (highlightManager.isEnabled()) {
-                                console.log('调度高亮更新')
-                                scheduleHighlightUpdate(highlightManager)
-                        }
+                        // 延迟重新应用高亮（由高亮模块通过钩子处理）
+                        console.log('调度高亮更新')
+                        scheduleHighlightUpdate()
                 }
 
                 console.groupEnd()
@@ -159,76 +161,21 @@ function updateAffectedTextNodes(target: Node): void {
 }
 
 /**
- * 处理新增元素中的链接目标样式
- * TODO: 移动到linkTarget模块中
- */
-function processLinkTargetElements(elements: Element[]) {
-        const linkTargetEnabled = isLinkTargetEnabled()
-
-        if (!linkTargetEnabled) {
-                return
-        }
-
-        for (const element of elements) {
-                // 检查元素本身是否为链接
-                if (element instanceof HTMLAnchorElement) {
-                        applyStyleToLink(element)
-                }
-
-                // 检查元素内的所有链接
-                const links = element.querySelectorAll('a')
-                for (const link of links) {
-                        if (link instanceof HTMLAnchorElement) {
-                                applyStyleToLink(link)
-                        }
-                }
-        }
-}
-
-/**
  * 处理属性变化（target属性）
- * TODO: 移动到linkTarget模块中
+ * 触发属性变化钩子，让模块自行处理
  */
 function processAttributeChanges(mutations: MutationRecord[]) {
-        const linkTargetEnabled = isLinkTargetEnabled()
-
-        if (!linkTargetEnabled) {
-                return
-        }
-
-        for (const mutation of mutations) {
-                if (
-                        mutation.type === 'attributes' &&
-                        mutation.attributeName === 'target' &&
-                        mutation.target instanceof HTMLAnchorElement
-                ) {
-                        applyStyleToLink(mutation.target)
-                }
-        }
+        triggerAttributeChanges(mutations)
 }
 
 /**
  * 处理新增元素的功能应用
  */
 function processNewElements(elements: Element[]) {
-        const translateEnabled = getSetting().translate
-        const bionicEnabled = getSetting().bionic
+        console.log(`处理 ${elements.length} 个新元素`)
 
-        console.log(`功能设置: 翻译=${translateEnabled}, 仿生=${bionicEnabled}`)
-
-        // 处理链接目标样式
-        processLinkTargetElements(elements)
-
-        for (const element of elements) {
-                if (translateEnabled) {
-                        console.log(`应用翻译到: ${element.tagName}`)
-                        translateAddedElement(element)
-                }
-                if (bionicEnabled) {
-                        console.log(`应用仿生到: ${element.tagName}`)
-                        observeElementNode(element)
-                }
-        }
+        // 触发新元素钩子，让模块自行处理
+        triggerNewElements(elements)
 
         console.log(`完成处理 ${elements.length} 个元素`)
 }
@@ -247,13 +194,12 @@ function updateTextNodesMap(element: Element) {
 /**
  * 延迟重新应用高亮
  */
-function scheduleHighlightUpdate(
-        highlightManager: ReturnType<typeof getHighlightManager>
-) {
+function scheduleHighlightUpdate() {
         // 使用防抖避免频繁重绘，并暂时关闭观察器避免循环触发
         window.setTimeout(() => {
                 domMutationObserver.disconnect()
-                highlightManager.highlightAll()
+                // 触发 DOM 稳定钩子，让模块自行处理（例如高亮）
+                triggerDomStable()
                 // 重新开启观察器
                 domMutationObserver.observe(document.body, {
                         childList: true,

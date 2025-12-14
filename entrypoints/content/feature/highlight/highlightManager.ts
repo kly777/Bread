@@ -5,6 +5,7 @@ import { highlightWordsInDocument, removeHighlights } from './highlightNode'
 import { getHighlightStyle } from './highlightConfig'
 import { manageMutationObserver } from '../../observer/domMutationObserver'
 import { getWordsManager, HighlightWord } from './wordsManager'
+import { registerDomStableHook } from '../../observer/observerHooks'
 
 /**
  * 高亮管理器
@@ -32,6 +33,12 @@ export class HighlightManager {
                 this.loadConfig()
                 // 注册词更新回调
                 this.wordsManager.onWordsUpdate(() => {
+                        if (this.isActive) {
+                                this.highlightAll()
+                        }
+                })
+                // 注册 DOM 稳定钩子，用于延迟重新应用高亮
+                registerDomStableHook(() => {
                         if (this.isActive) {
                                 this.highlightAll()
                         }

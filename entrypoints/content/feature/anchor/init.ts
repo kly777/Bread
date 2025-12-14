@@ -1,4 +1,4 @@
-import {initAnchorApp} from './pin'
+import { initAnchorApp } from './pin'
 
 export function pin() {
         if (document.readyState === 'loading') {

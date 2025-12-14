@@ -6,7 +6,7 @@ import tsParser from '@typescript-eslint/parser'
 export default defineConfig([
         // 全局配置
         {
-                ignores: ['**/.output/**/*', '.wxt/**/*', 'dev/**/*'],
+                ignores: ['**/.output/**/*', 'dist/**/*', 'dev/**/*'],
                 languageOptions: {
                         globals: {
                                 browser: 'readonly',

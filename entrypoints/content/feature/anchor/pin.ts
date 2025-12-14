@@ -3,7 +3,6 @@ import './anchor.css'
 // import { getAnchorsInfo } from './anchor'
 import { manageMutationObserver } from '../../observer/domMutationObserver'
 
-
 export function initAnchorApp() {
         const target = document.querySelector('body')
         if (target) {

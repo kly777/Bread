@@ -177,7 +177,6 @@ export async function batchTranslateTexts(
  * @returns 翻译容器元素
  */
 export function createTranslationContainer(
-
         translatedText: string,
         shouldWrap: boolean
 ): HTMLElement {

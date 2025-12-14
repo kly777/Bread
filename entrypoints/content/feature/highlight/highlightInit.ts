@@ -76,8 +76,10 @@ function setupStorageListeners(): void {
         browser.storage.onChanged.addListener((changes, area) => {
                 if (area === 'local' && changes.persistent_highlight_keywords) {
                         console.log('🔄 检测到持久高亮关键词变化，更新高亮词')
-                        const newKeywords =
-                                changes.persistent_highlight_keywords.newValue as string | undefined
+                        const newKeywords = changes
+                                .persistent_highlight_keywords.newValue as
+                                | string
+                                | undefined
                         handlePersistentKeywordsChange(newKeywords)
                 }
         })

@@ -1,9 +1,11 @@
 import {
         initializeTranslateObserver,
         stopTranslatorObserver,
+        observeTranslateElements,
 } from '../../observer/intersectionObserver/translateObserver'
 import { Feature } from '../Feature'
 import { pageLang } from '../../utils/page/info'
+import { registerNewElementsHook } from '../../observer/observerHooks'
 
 export type Translator = 'MS' | 'G'
 
@@ -21,6 +23,14 @@ export class TranslateFeature extends Feature {
 
         async init() {
                 await this.initTranslator()
+                // 注册新元素钩子
+                registerNewElementsHook((elements) => {
+                        if (this.isActive) {
+                                elements.forEach((element) => {
+                                        observeTranslateElements(element)
+                                })
+                        }
+                })
         }
 
         async on() {

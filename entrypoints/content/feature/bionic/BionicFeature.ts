@@ -4,8 +4,10 @@ import {
         parentToTextNodesMap,
         initializeSingleUseObserver,
         bionicTextObserver,
+        observeElementNode,
 } from '../../observer/intersectionObserver/bionicObserver'
 import { Feature } from '../Feature'
+import { registerNewElementsHook } from '../../observer/observerHooks'
 
 /**
  * 仿生阅读功能
@@ -17,6 +19,15 @@ export class BionicFeature extends Feature {
         private isActive = false
 
         async init() {
+                // 注册新元素钩子
+                registerNewElementsHook((elements) => {
+                        if (this.isActive) {
+                                elements.forEach((element) => {
+                                        observeElementNode(element)
+                                })
+                        }
+                })
+
                 // 特殊处理：bionic的DOM加载逻辑
                 if (document.readyState === 'loading') {
                         document.addEventListener('DOMContentLoaded', () => {
