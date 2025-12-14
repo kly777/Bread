@@ -26,7 +26,6 @@
         "include": [
                 "types/**/*.d.ts",
                 "entrypoints/**/*.ts",
-                "entrypoints/**/*.vue",
                 "entrypoints/**/*.tsx",
                 "entrypoints/**/*.js",
                 "entrypoints/**/*.jsx"

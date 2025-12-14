@@ -6,7 +6,13 @@ import replace from '@rollup/plugin-replace'
 import terser from '@rollup/plugin-terser'
 
 import copy from 'rollup-plugin-copy'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import {
+        readFileSync,
+        writeFileSync,
+        existsSync,
+        mkdirSync,
+        statSync,
+} from 'fs'
 import { join } from 'path'
 import postcss from 'postcss'
 import csso from 'postcss-csso'
@@ -94,13 +100,13 @@ export default {
                 }),
                 nodeResolve({
                         browser: true,
-                        extensions: ['.js', '.ts', '.vue', '.css'],
+                        extensions: ['.js', '.ts', '.css'],
                 }),
                 typescript({
                         tsconfig: './tsconfig.json',
                         sourceMap: !isProduction,
                         inlineSources: !isProduction,
-                        include: ['**/*.ts', '**/*.vue'],
+                        include: ['**/*.ts'],
                         exclude: ['**/*.css'],
                 }),
                 commonjs(),
@@ -203,7 +209,7 @@ export default {
                         targets: [
                                 {
                                         src: 'entrypoints/popup/index.html',
-                                        dest: `dist/${browser}`,
+                                        dest: `dist/${browser}/popup`,
                                 },
                                 {
                                         src: 'public/icon/*',
@@ -211,14 +217,20 @@ export default {
                                 },
                         ],
                 }),
-                // 更新popup.html中的脚本引用
+                // 更新popup/index.html中的脚本引用
                 {
                         name: 'update-popup-html',
                         writeBundle() {
                                 const distDir = `dist/${browser}`
-                                const htmlPath = join(distDir, 'popup.html')
+                                const htmlPath = join(distDir, 'popup', 'index.html')
 
                                 if (!existsSync(htmlPath)) {
+                                        return
+                                }
+
+                                // 确保是文件而不是目录
+                                const stats = statSync(htmlPath)
+                                if (!stats.isFile()) {
                                         return
                                 }
 
@@ -226,13 +238,15 @@ export default {
                                 const popupEntryFile = outputFiles.get('popup')
 
                                 if (popupEntryFile) {
+                                        // 计算相对路径：从popup/index.html到assets/popup-[hash].js
+                                        const relativePath = `../${popupEntryFile}`
                                         html = html.replace(
                                                 /<script type="module" src="\.\/main\.ts"><\/script>/,
-                                                `<script type="module" src="./${popupEntryFile}"></script>`
+                                                `<script type="module" src="${relativePath}"></script>`
                                         )
                                         writeFileSync(htmlPath, html)
                                         console.log(
-                                                `Updated popup.html to reference ${popupEntryFile}`
+                                                `Updated popup/index.html to reference ${relativePath}`
                                         )
                                 }
                         },

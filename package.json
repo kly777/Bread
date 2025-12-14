@@ -15,7 +15,7 @@
                 "zip": "node scripts/zip.js",
                 "zip:firefox": "BROWSER=firefox node scripts/zip.js",
                 "zip:chrome": "BROWSER=chrome node scripts/zip.js",
-                "compile": "vue-tsc --noEmit",
+                "compile": "tsc --noEmit",
                 "fmt": "prettier --write .",
                 "lint": "eslint .",
                 "lint:fix": "eslint . --fix",
