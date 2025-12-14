@@ -7,9 +7,13 @@
         "type": "module",
         "scripts": {
                 "dev": "rollup -c --environment NODE_ENV:development",
+                "dev:watch": "rollup -c --environment NODE_ENV:development --watch",
                 "dev:firefox": "rollup -c --environment NODE_ENV:development,BROWSER:firefox && web-ext run --source-dir=dist/firefox --firefox=firefoxdeveloperedition",
+                "dev:firefox:watch": "rollup -c --environment NODE_ENV:development,BROWSER:firefox --watch",
                 "dev:firefox:only": "web-ext run --source-dir=dist/firefox --firefox=firefox",
+                "dev:firefox:watch-ext": "web-ext run --source-dir=dist/firefox --firefox=firefoxdeveloperedition --watch",
                 "dev:chrome": "rollup -c --environment NODE_ENV:development,BROWSER:chrome",
+                "dev:chrome:watch": "rollup -c --environment NODE_ENV:development,BROWSER:chrome --watch",
                 "build": "rollup -c --environment NODE_ENV:production",
                 "build:firefox": "rollup -c --environment NODE_ENV:production,BROWSER:firefox",
                 "build:chrome": "rollup -c --environment NODE_ENV:production,BROWSER:chrome",
