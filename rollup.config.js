@@ -6,9 +6,10 @@ import replace from '@rollup/plugin-replace'
 import terser from '@rollup/plugin-terser'
 
 import copy from 'rollup-plugin-copy'
-import postcss from 'rollup-plugin-postcss'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join } from 'path'
+import postcss from 'postcss'
+import csso from 'postcss-csso'
 
 const isProduction = process.env.NODE_ENV === 'production'
 const browser = process.env.BROWSER || 'firefox'
@@ -99,14 +100,26 @@ export default {
                         sourceMap: !isProduction,
                         inlineSources: !isProduction,
                         include: ['**/*.ts', '**/*.vue'],
+                        exclude: ['**/*.css'],
                 }),
                 commonjs(),
-                // 处理CSS文件
-                postcss({
-                        extract: true,
-                        minimize: isProduction,
-                        extensions: ['.css'],
-                }),
+                // 处理CSS导入
+                {
+                        name: 'css-import',
+                        resolveId(source) {
+                                if (source.endsWith('.css')) {
+                                        return { id: source, external: false }
+                                }
+                                return null
+                        },
+                        load(id) {
+                                if (id.endsWith('.css')) {
+                                        // 返回空内容，因为CSS会被合并到单独的文件中
+                                        return ''
+                                }
+                                return null
+                        },
+                },
 
                 replace({
                         'process.env.NODE_ENV': JSON.stringify(
@@ -115,6 +128,58 @@ export default {
                         'process.env.BROWSER': JSON.stringify(browser),
                         preventAssignment: true,
                 }),
+                // 自定义CSS合并插件（使用postcss处理）
+                {
+                        name: 'merge-css',
+                        async buildStart() {
+                                // 收集所有CSS文件
+                                const cssFiles = [
+                                        'entrypoints/content/style.css',
+                                        'entrypoints/content/feature/anchor/anchor.css',
+                                        'entrypoints/content/feature/downloadLink/downloadLink.css',
+                                        'entrypoints/content/feature/linkTarget/linkTarget.css',
+                                        'entrypoints/content/feature/translate/translate.css',
+                                ]
+
+                                let combinedCss = ''
+                                for (const cssFile of cssFiles) {
+                                        if (existsSync(cssFile)) {
+                                                const cssContent = readFileSync(
+                                                        cssFile,
+                                                        'utf-8'
+                                                )
+                                                combinedCss += `/* ${cssFile} */\n${cssContent}\n\n`
+                                        }
+                                }
+
+                                // 使用postcss处理CSS
+                                let processedCss = combinedCss
+                                if (isProduction) {
+                                        // 生产环境：压缩CSS
+                                        try {
+                                                const result = await postcss([
+                                                        csso,
+                                                ]).process(combinedCss, {
+                                                        from: undefined,
+                                                })
+                                                processedCss = result.css
+                                        } catch (error) {
+                                                console.warn(
+                                                        'CSS压缩失败:',
+                                                        error
+                                                )
+                                                processedCss = combinedCss
+                                        }
+                                }
+
+                                // 保存合并后的CSS
+                                this.emitFile({
+                                        type: 'asset',
+                                        fileName: 'content-scripts/content.css',
+                                        source: processedCss,
+                                })
+                        },
+                },
                 isProduction &&
                         terser({
                                 format: {

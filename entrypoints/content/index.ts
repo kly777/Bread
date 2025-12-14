@@ -1,4 +1,10 @@
 import './style.css'
+// 导入所有功能CSS文件
+import './feature/anchor/anchor.css'
+import './feature/downloadLink/downloadLink.css'
+import './feature/linkTarget/linkTarget.css'
+import './feature/translate/translate.css'
+
 import { initFunctions } from './initFunctions'
 import { pin } from './feature/anchor/pin'
 
