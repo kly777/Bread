@@ -228,7 +228,11 @@ export default {
                         name: 'update-popup-html',
                         writeBundle() {
                                 const distDir = `dist/${browser}`
-                                const htmlPath = join(distDir, 'popup', 'index.html')
+                                const htmlPath = join(
+                                        distDir,
+                                        'popup',
+                                        'index.html'
+                                )
 
                                 if (!existsSync(htmlPath)) {
                                         return

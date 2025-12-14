@@ -4,5 +4,5 @@ import App from './App'
 
 const appContainer = document.getElementById('app')
 if (appContainer) {
-  render(() => <App />, appContainer)
+        render(() => <App />, appContainer)
 }
