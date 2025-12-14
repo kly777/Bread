@@ -20,4 +20,5 @@ browser.runtime.onMessage.addListener((message, _, sendResponse) => {
                 )
                 return true // 保持消息通道开放
         }
+        return false
 })

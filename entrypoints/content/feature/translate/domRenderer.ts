@@ -1,3 +1,4 @@
+import { getSetting } from '../../settingManager'
 import {
         hasVerticalAlign,
         isInFlexContext,
@@ -136,6 +137,9 @@ function scheduleDomOperation(
  * 处理批量DOM操作队列
  */
 function processDomOperationQueue(): void {
+        if (getSetting()['translate'] === false) {
+                return
+        }
         domOperationScheduled = false
 
         const operations = [...domOperationQueue]

@@ -77,7 +77,7 @@ function setupStorageListeners(): void {
                 if (area === 'local' && changes.persistent_highlight_keywords) {
                         console.log('🔄 检测到持久高亮关键词变化，更新高亮词')
                         const newKeywords =
-                                changes.persistent_highlight_keywords.newValue
+                                changes.persistent_highlight_keywords.newValue as string | undefined
                         handlePersistentKeywordsChange(newKeywords)
                 }
         })
