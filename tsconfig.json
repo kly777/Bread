@@ -17,7 +17,8 @@
                 "allowSyntheticDefaultImports": true,
                 "forceConsistentCasingInFileNames": true,
                 "jsx": "preserve",
-                "types": ["@types/chrome"],
+                "jsxImportSource": "solid-js",
+                "types": ["@types/chrome", "solid-js"],
                 "baseUrl": ".",
                 "paths": {
                         "@/*": ["./*"]

@@ -4,6 +4,7 @@ import typescript from '@rollup/plugin-typescript'
 import alias from '@rollup/plugin-alias'
 import replace from '@rollup/plugin-replace'
 import terser from '@rollup/plugin-terser'
+import babel from '@rollup/plugin-babel'
 
 import copy from 'rollup-plugin-copy'
 import {
@@ -71,7 +72,7 @@ export default {
         input: {
                 background: 'entrypoints/background/index.ts',
                 content: 'entrypoints/content/index.ts',
-                popup: 'entrypoints/popup/main.ts',
+                popup: 'entrypoints/popup/main.tsx',
         },
         output: {
                 dir: `dist/${browser}`,
@@ -100,14 +101,19 @@ export default {
                 }),
                 nodeResolve({
                         browser: true,
-                        extensions: ['.js', '.ts', '.css'],
+                        extensions: ['.js', '.ts', '.tsx', '.jsx', '.css'],
                 }),
                 typescript({
                         tsconfig: './tsconfig.json',
                         sourceMap: !isProduction,
                         inlineSources: !isProduction,
-                        include: ['**/*.ts'],
+                        include: ['**/*.ts', '**/*.tsx'],
                         exclude: ['**/*.css'],
+                }),
+                babel({
+                        babelHelpers: 'bundled',
+                        extensions: ['.ts', '.tsx', '.js', '.jsx'],
+                        presets: ['solid'],
                 }),
                 commonjs(),
                 // 处理CSS导入
@@ -241,7 +247,7 @@ export default {
                                         // 计算相对路径：从popup/index.html到assets/popup-[hash].js
                                         const relativePath = `../${popupEntryFile}`
                                         html = html.replace(
-                                                /<script type="module" src="\.\/main\.ts"><\/script>/,
+                                                /<script type="module" src="\.\/main\.tsx"><\/script>/,
                                                 `<script type="module" src="${relativePath}"></script>`
                                         )
                                         writeFileSync(htmlPath, html)
