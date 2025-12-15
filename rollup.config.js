@@ -219,7 +219,7 @@ const backgroundPopupConfig = {
                         return 'assets/[name]-[hash].js'
                 },
                 chunkFileNames: 'assets/[name]-[hash].js',
-                assetFileNames: (assetInfo) => {
+                assetFileNames: () => {
                         return 'assets/[name]-[hash][extname]'
                 },
         },

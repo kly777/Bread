@@ -44,7 +44,7 @@ export default defineConfig([
         },
         // TypeScript配置
         {
-                files: ['**/*.ts'],
+                files: ['**/*.ts', '**/*.tsx'],
                 languageOptions: {
                         parser: tsParser,
                 },
