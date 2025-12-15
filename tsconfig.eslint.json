@@ -4,6 +4,10 @@
                 "entrypoints/**/*.ts",
                 "entrypoints/**/*.vue",
                 "src/**/*.ts",
-                "src/**/*.vue"
+                "src/**/*.vue",
+                "entrypoints/**/*.tsx",
+                "entrypoints/**/*.jsx",
+                "src/**/*.tsx",
+                "src/**/*.jsx"
         ]
 }

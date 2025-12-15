@@ -47,9 +47,6 @@ export default defineConfig([
                 files: ['**/*.ts'],
                 languageOptions: {
                         parser: tsParser,
-                        parserOptions: {
-                                project: './tsconfig.json',
-                        },
                 },
         },
 ])
