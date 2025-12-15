@@ -32,6 +32,7 @@ class SimpleBatchTranslator {
         private queue: Array<{
                 originalText: string
                 targetLang: string
+                translator: string
                 resolve: (value: string) => void
                 reject: (reason?: unknown) => void
         }> = []
@@ -41,12 +42,14 @@ class SimpleBatchTranslator {
 
         async addToBatch(
                 originalText: string,
-                targetLang: string
+                targetLang: string,
+                translator: string
         ): Promise<string> {
                 return new Promise((resolve, reject) => {
                         this.queue.push({
                                 originalText,
                                 targetLang,
+                                translator,
                                 resolve,
                                 reject,
                         })
@@ -72,7 +75,8 @@ class SimpleBatchTranslator {
                 const promises = batch.map((item) =>
                         this.performSingleTranslation(
                                 item.originalText,
-                                item.targetLang
+                                item.targetLang,
+                                item.translator
                         )
                                 .then((result) => ({ item, result }))
                                 .catch((error) => ({ item, error }))
@@ -99,10 +103,10 @@ class SimpleBatchTranslator {
 
         private async performSingleTranslation(
                 originalText: string,
-                targetLang: string
+                targetLang: string,
+                translator: string
         ): Promise<string> {
-                const currentTranslator = 'MS'
-                const cacheKey = `${originalText}:${targetLang}:${currentTranslator}`
+                const cacheKey = `${originalText}:${targetLang}:${translator}`
 
                 // 检查缓存
                 const cachedResult = cache.get(cacheKey)
@@ -117,13 +121,13 @@ class SimpleBatchTranslator {
 
                 let result: string = ''
                 try {
-                        if (currentTranslator === 'MS') {
+                        if (translator === 'MS') {
                                 result = await translateMS(
                                         originalText,
                                         undefined,
                                         targetLang
                                 )
-                        } else if (currentTranslator === 'G') {
+                        } else if (translator === 'G') {
                                 result = await translateG(
                                         originalText,
                                         undefined,
@@ -157,9 +161,9 @@ const batchTranslator = new SimpleBatchTranslator()
  * 翻译操作
  */
 export async function performTranslation(
-        _translator: string,
+        translator: string,
         originalText: string,
         targetLang: string
 ): Promise<string> {
-        return batchTranslator.addToBatch(originalText, targetLang)
+        return batchTranslator.addToBatch(originalText, targetLang, translator)
 }

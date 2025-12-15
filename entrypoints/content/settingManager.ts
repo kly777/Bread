@@ -49,6 +49,11 @@ async function initFeature(key: string) {
         if (!feature) return
 
         try {
+                // 调用功能初始化方法
+                if (feature.init) {
+                        await feature.init()
+                }
+
                 const domainKey = getKeyWithDomain(key) // 生成域名键
                 const result = await browser.storage.local.get(domainKey)
                 const value = result[domainKey] as boolean | undefined

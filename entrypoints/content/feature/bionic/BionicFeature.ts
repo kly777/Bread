@@ -28,18 +28,7 @@ export class BionicFeature extends Feature {
                         }
                 })
 
-                // 特殊处理：bionic的DOM加载逻辑
-                if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', () => {
-                                this.on()
-                                console.log('DOM 就绪时执行')
-                        })
-                } else {
-                        window.requestIdleCallback(() => {
-                                this.on()
-                                console.log('延迟到窗口加载完成')
-                        })
-                }
+                // 特殊处理：bionic的DOM加载逻辑已移除自动调用this.on()
         }
 
         async on() {
