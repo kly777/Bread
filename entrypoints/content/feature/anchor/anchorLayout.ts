@@ -66,9 +66,9 @@ export function createAnchorLayout(): HTMLElement {
                 if (pageWordCount > 0) {
                         pageStatsSpan.textContent = `pw: ${(
                                 pageWordCount / 1000
-                        ).toFixed(1)}k | pc: ${(pageCharCount / 1000).toFixed(
+                        ).toFixed(
                                 1
-                        )}k |`
+                        )}k | pc: ${(pageCharCount / 1000).toFixed(1)}k |`
                         pageStatsSpan.style.display = 'inline-block'
                 } else {
                         pageStatsSpan.style.display = 'none'

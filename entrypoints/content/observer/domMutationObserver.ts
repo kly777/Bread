@@ -121,11 +121,9 @@ function processAddedNodes(
 
                         if (isInternalExtensionElement(element)) {
                                 console.log(
-                                        `跳过内部元素: ${
-                                                element.tagName
-                                        }.${Array.from(element.classList).join(
-                                                '.'
-                                        )}`
+                                        `跳过内部元素: ${element.tagName}.${Array.from(
+                                                element.classList
+                                        ).join('.')}`
                                 )
                                 skippedCount++
                                 continue
