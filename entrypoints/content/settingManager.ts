@@ -180,14 +180,14 @@ async function syncSettings(): Promise<void> {
                 const domainKey = getKeyWithDomain(key)
 
                 // 获取域名专属配置
-                let domainResult = await browser.storage.local.get(domainKey)
+                const domainResult = await browser.storage.local.get(domainKey)
                 let value = domainResult[domainKey] as boolean | undefined
                 let isDefault = false
 
                 if (value === undefined) {
                         // 降级使用全局配置
                         const globalKey = `local:${key}`
-                        let globalResult =
+                        const globalResult =
                                 await browser.storage.local.get(globalKey)
                         value = globalResult[globalKey] as boolean | undefined
                         if (value === undefined) {
