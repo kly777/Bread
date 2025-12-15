@@ -4,6 +4,7 @@ import { manageMutationObserver } from '../domMutationObserver'
 import { getTextContainerElement } from '../../utils/dom/traversal'
 import { translateElement } from '../../feature/translate/translateElement'
 import { preprocessExcludedElements } from '../../feature/translate/textExtractor'
+import { registerNewElementsHook } from '../observerHooks'
 
 // 跟踪每个元素的待处理翻译和计时器
 const pendingTranslations = new Map<
@@ -29,7 +30,11 @@ function handleIntersection(entry: IntersectionObserverEntry) {
         const now = Date.now()
         let data = pendingTranslations.get(element)
         if (!data) {
-                data = { timer: null, isIntersecting: false, lastEntryTime: 0 }
+                data = {
+                        timer: null,
+                        isIntersecting: entry.isIntersecting,
+                        lastEntryTime: now,
+                }
                 pendingTranslations.set(element, data)
         }
         data.isIntersecting = entry.isIntersecting
@@ -60,6 +65,7 @@ function scheduleTranslation(element: HTMLElement) {
                 const currentData = pendingTranslations.get(element)
                 if (!currentData || !currentData.isIntersecting) {
                         // 元素已离开视口，跳过翻译
+                        console.log('Element left viewport')
                         pendingTranslations.delete(element)
                         return
                 }
@@ -112,7 +118,12 @@ export function observeTranslateElements(root: Element) {
                 translateObserver.observe(el)
         )
 }
-
+registerNewElementsHook((elements) => {
+        console.log('New elements detected')
+        elements.forEach((element) => {
+                observeTranslateElements(element)
+        })
+})
 export function stopTranslatorObserver() {
         translateObserver.disconnect()
         // 清理所有待处理计时器

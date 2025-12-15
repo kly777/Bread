@@ -4,7 +4,7 @@ import './anchor.css'
 import { manageMutationObserver } from '../../observer/domMutationObserver'
 
 export function initAnchorApp() {
-        const target = document.querySelector('body')
+        const target = document.querySelector('html')
         if (target) {
                 const container = document.createElement('div')
                 container.classList.add('anchor-container', 'no-translate')

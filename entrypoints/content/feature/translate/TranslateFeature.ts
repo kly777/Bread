@@ -26,6 +26,7 @@ export class TranslateFeature extends Feature {
                 // 注册新元素钩子
                 registerNewElementsHook((elements) => {
                         if (this.isActive) {
+                                console.log('New elements detected')
                                 elements.forEach((element) => {
                                         observeTranslateElements(element)
                                 })

@@ -19,8 +19,8 @@ export function manageMutationObserver(shouldObserve: boolean) {
                 domMutationObserver.observe(document.body, {
                         childList: true,
                         subtree: true,
-                        attributes: true,
-                        attributeFilter: ['target'],
+                        attributes: false,
+                        // attributeFilter: ['target'],
                 })
         } else {
                 domMutationObserver.disconnect()
@@ -43,6 +43,7 @@ const domMutationObserver: MutationObserver = new MutationObserver(
         (mutations: MutationRecord[]) => {
                 console.group('DOM Mutation Observer')
                 console.log(`检测到 ${mutations.length} 个DOM变更`)
+                console.log(mutations)
 
                 // 处理属性变化（链接目标样式）
                 processAttributeChanges(mutations)
@@ -202,6 +203,7 @@ function scheduleHighlightUpdate() {
                 domMutationObserver.observe(document.body, {
                         childList: true,
                         subtree: true,
+                        attributes: false,
                 })
         }, 300)
 }
