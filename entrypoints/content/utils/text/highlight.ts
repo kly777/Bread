@@ -24,7 +24,7 @@ export interface HighlightWord {
  */
 export function createHighlightWord(
         text: string,
-        enabled: boolean = true
+        enabled = true
 ): HighlightWord {
         return {
                 text,
@@ -60,12 +60,12 @@ export function shouldHighlightNode(
 export function getHighlightMatches(
         node: Text,
         highlightWords: HighlightWord[]
-): Array<{ word: HighlightWord; matches: RegExpMatchArray[] }> {
+): { word: HighlightWord; matches: RegExpMatchArray[] }[] {
         const text = node.textContent || ''
-        const matches: Array<{
+        const matches: {
                 word: HighlightWord
                 matches: RegExpMatchArray[]
-        }> = []
+        }[] = []
 
         for (const word of highlightWords) {
                 if (!word.enabled) continue

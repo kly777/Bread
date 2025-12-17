@@ -18,7 +18,7 @@ import {
 export const translateElement = async (
         element: HTMLElement,
         targetLang = 'zh-CN',
-        translator: string = 'MS'
+        translator = 'MS'
 ): Promise<void> => {
         // 提前检查是否应该跳过翻译
         if (shouldSkipElementTranslation(element)) {

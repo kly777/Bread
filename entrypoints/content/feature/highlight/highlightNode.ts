@@ -63,8 +63,8 @@ function getTexts(
 export function highlightTextInNode(
         text: string,
         root: Node = document.body,
-        excludeSelection: boolean = true,
-        colorIndex: number = 0
+        excludeSelection = true,
+        colorIndex = 0
 ) {
         // console.log("highlightTextInNode", root);
 
@@ -242,7 +242,7 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
 function highlightMatches(
         texts: TextNodeEntry[],
         matches: MatchRange[],
-        colorIndex: number = 0
+        colorIndex = 0
 ): void {
         // 预处理：将匹配项按起始位置排序
         const sortedMatches = [...matches].sort((a, b) => a.start - b.start)
@@ -345,7 +345,7 @@ function mergeRanges(ranges: MatchRange[]): MatchRange[] {
  *
  * @returns 返回一个带有高亮样式的span元素
  */
-function createMarkElement(colorIndex: number = 0): HTMLElement {
+function createMarkElement(colorIndex = 0): HTMLElement {
         const span = document.createElement('mark')
         span.className = `bread-highlight bread-highlight-color-${colorIndex}`
         return span

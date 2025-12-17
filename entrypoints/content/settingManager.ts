@@ -12,7 +12,7 @@ interface SettingState {
         isDefault: boolean
 }
 
-const setting: { [key: string]: SettingState } = {
+const setting: Record<string, SettingState> = {
         highlight: { value: false, isDefault: true },
         stripe: { value: false, isDefault: true },
         translate: { value: false, isDefault: true },
@@ -21,8 +21,8 @@ const setting: { [key: string]: SettingState } = {
 }
 
 // 导出只读的 setting 副本
-export function getSetting(): { [key: string]: boolean } {
-        const result: { [key: string]: boolean } = {}
+export function getSetting(): Record<string, boolean> {
+        const result: Record<string, boolean> = {}
         Object.keys(setting).forEach((key) => {
                 result[key] = setting[key].value
         })
@@ -30,12 +30,12 @@ export function getSetting(): { [key: string]: boolean } {
 }
 
 // 导出设置状态（包含默认值信息）
-export function getSettingState(): { [key: string]: SettingState } {
+export function getSettingState(): Record<string, SettingState> {
         return { ...setting }
 }
 
 // 创建功能实例
-const featureInstances: { [key: string]: IFeature } = {
+const featureInstances: Record<string, IFeature> = {
         bionic: new BionicFeature(),
         highlight: new HighlightFeature(),
         translate: new TranslateFeature(),
@@ -76,7 +76,7 @@ async function initFeature(key: string) {
 async function switchFeature(
         key: string,
         newValue: boolean | null,
-        isDefault: boolean = false
+        isDefault = false
 ) {
         const feature = featureInstances[key]
         if (!feature) return

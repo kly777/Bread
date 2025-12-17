@@ -135,9 +135,7 @@ function isEligibleElementV2(element: Element): boolean {
         const childNodes = element.childNodes
 
         if (childNodes.length === 0) return false
-        for (let i = 0; i < childNodes.length; i++) {
-                const node = childNodes[i]
-
+        for (const node of childNodes) {
                 // 处理文本节点
                 if (node.nodeType === Node.TEXT_NODE) {
                         const text = node.nodeValue?.trim()

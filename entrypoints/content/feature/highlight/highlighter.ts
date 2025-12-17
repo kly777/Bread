@@ -7,7 +7,7 @@ import { highlightWordsInDocument, removeHighlights } from './highlightNode'
 import { getWordsManager, HighlightWord } from './wordsManager'
 
 export class Highlighter {
-        private isActive: boolean = false
+        private isActive = false
 
         /**
          * 启动高亮器

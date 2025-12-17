@@ -202,7 +202,7 @@ export const DEFAULT_CONFIG: HighlightConfig = {
  */
 export function createHighlightWord(
         text: string,
-        enabled: boolean = true
+        enabled = true
 ): HighlightWord {
         return {
                 text,
@@ -218,7 +218,7 @@ export function createHighlightWord(
  * @param colorScheme 颜色方案索引，默认为0
  * @returns 包含所有高亮颜色的CSS样式字符串
  */
-export function getHighlightStyle(colorScheme: number = 0): string {
+export function getHighlightStyle(colorScheme = 0): string {
         const colors = STYLE_COLORS[colorScheme] || STYLE_COLORS[0]
         const borderColors = BORDER_COLORS[colorScheme] || BORDER_COLORS[0]
 

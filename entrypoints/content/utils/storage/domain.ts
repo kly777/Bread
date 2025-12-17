@@ -13,7 +13,7 @@
  */
 export function getKeyWithDomain(
         key: string,
-        domain: string = 'default'
+        domain = 'default'
 ): string {
         // 如果域名是默认值，则不添加域名前缀
         if (domain === 'default') {

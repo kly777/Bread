@@ -126,9 +126,11 @@ function observeTextNode(text: Text) {
  */
 function linkTextToElement(parent: Element, text: Text) {
         if (parentToTextNodesMap.has(parent)) {
-                const setTexts = parentToTextNodesMap.get(parent)!
-                if (!setTexts.has(text)) {
-                        setTexts.add(text)
+                const setTexts = parentToTextNodesMap.get(parent)
+                if (setTexts) {
+                        if (!setTexts.has(text)) {
+                                setTexts.add(text)
+                        }
                 }
         } else {
                 const setTexts = new Set<Text>([text])

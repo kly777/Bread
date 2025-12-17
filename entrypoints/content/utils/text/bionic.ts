@@ -23,13 +23,13 @@ export function shouldApplyBionic(node: Text): boolean {
  */
 export function analyzeBionicText(node: Text): {
         text: string
-        words: Array<{
+        words: {
                 word: string
                 isChinese: boolean
                 boldLength: number
                 boldPart: string
                 normalPart: string
-        }>
+        }[]
 } {
         const text = node.textContent || ''
         const words = text.split(/(\s+)/)

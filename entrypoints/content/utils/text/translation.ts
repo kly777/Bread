@@ -14,14 +14,14 @@ export function shouldSkipTranslation(text: string): boolean {
         if (!text || text.length < 2) return true
 
         // 检查是否为纯数字或符号
-        if (/^[\d\s\-\+\.\,]+$/.test(text)) return true
+        if (/^[\d\s+.,-]+$/.test(text)) return true
 
         // 检查是否为 URL 或文件路径
-        if (/^(https?:\/\/|ftp:\/\/|file:\/\/|www\.|\/[\w\/])/i.test(text))
+        if (/^(https?:\/\/|ftp:\/\/|file:\/\/|www\.|\/[\w/])/i.test(text))
                 return true
 
         // 检查是否为邮箱地址
-        if (/^[\w\.\-]+@[\w\.\-]+\.\w+$/.test(text)) return true
+        if (/^[\w.-]+@[\w.-]+\.\w+$/.test(text)) return true
 
         return false
 }
@@ -247,7 +247,7 @@ const fetchTranslation = async (url: string, init: RequestInit) => {
 // 谷歌翻译函数
 export const translateContentGoogle = async (
         text: string,
-        from: string = 'en',
+        from = 'en',
         to: string
 ) => {
         const { input, init } = genGoogle({ text, from, to })

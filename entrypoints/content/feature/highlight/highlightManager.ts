@@ -21,7 +21,7 @@ declare const storage: {
 export class HighlightManager {
         private extractor: KeywordExtractor
         private config: HighlightConfig
-        private isActive: boolean = false
+        private isActive = false
         private styleElement: HTMLStyleElement | null = null
         private wordsManager = getWordsManager()
 

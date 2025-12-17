@@ -29,13 +29,13 @@ class SimpleTranslationCache {
 const cache = new SimpleTranslationCache()
 
 class SimpleBatchTranslator {
-        private queue: Array<{
+        private queue: {
                 originalText: string
                 targetLang: string
                 translator: string
                 resolve: (value: string) => void
                 reject: (reason?: unknown) => void
-        }> = []
+        }[] = []
         private processing = false
         private readonly BATCH_DELAY = 10 // 固定延迟10ms
         private readonly BATCH_SIZE = 5 // 固定批量大小
@@ -119,7 +119,7 @@ class SimpleBatchTranslator {
                         return originalText
                 }
 
-                let result: string = ''
+                let result = ''
                 try {
                         if (translator === 'MS') {
                                 result = await translateMS(

@@ -179,7 +179,9 @@ export class KeywordExtractor {
 
                 try {
                         processed = decodeURIComponent(processed)
-                } catch {}
+                } catch {
+                        // 解码失败，使用原始字符串
+                }
 
                 const keywords = this.splitKeywords(processed)
                 return this.filterKeywords(keywords)

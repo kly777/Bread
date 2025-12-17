@@ -115,8 +115,7 @@ function processAddedNodes(
         newElementsSet: Set<Element>
 ): number {
         let skippedCount = 0
-        for (let i = 0; i < addedNodes.length; i++) {
-                const node = addedNodes[i]
+        for (const node of addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                         const element = node as Element
 

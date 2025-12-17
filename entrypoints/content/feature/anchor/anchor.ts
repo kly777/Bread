@@ -2,7 +2,7 @@ function findAnchor(): NodeListOf<HTMLAnchorElement> {
         return document.querySelectorAll('a')
 }
 
-type anchorInfo = { title: string; link: string; isExternal: boolean }
+interface anchorInfo { title: string; link: string; isExternal: boolean }
 function getInfo(anchorElement: HTMLAnchorElement): anchorInfo {
         const rawText = anchorElement.textContent
         // 移除零宽空格并trim
