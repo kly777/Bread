@@ -1,5 +1,6 @@
 import { Component, createSignal, onMount, createEffect, For } from 'solid-js'
 import FeatureSetting from './FeatureSetting'
+import { getKeyWithDomainPop } from '../content/utils/storage/storage'
 
 type SettingState = 'default' | 'enabled' | 'disabled'
 type SettingType = 'string' | 'number' | 'boolean'
@@ -48,10 +49,7 @@ const FeatureSwitch: Component<FeatureSwitchProps> = (props) => {
 
         const getKeyWithDomain = (key: string) => {
                 const d = domain()
-                if (d === 'default') {
-                        return `local:${key}`
-                }
-                return `local:${d}:${key}`
+                return getKeyWithDomainPop(key)
         }
 
         createEffect(() => {

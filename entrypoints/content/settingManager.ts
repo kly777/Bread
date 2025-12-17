@@ -5,6 +5,7 @@ import { HighlightFeature } from './feature/highlight/HighlightFeature'
 import { TranslateFeature } from './feature/translate/TranslateFeature'
 import { StripeFeature } from './feature/stripe/StripeFeature'
 import { LinkTargetFeature } from './feature/linkTarget/LinkTargetFeature'
+import { AIFeature } from './feature/ai/AIFeature'
 
 // 设置状态类型定义
 interface SettingState {
@@ -18,6 +19,7 @@ const setting: Record<string, SettingState> = {
         translate: { value: false, isDefault: true },
         bionic: { value: false, isDefault: true },
         linkTarget: { value: false, isDefault: true },
+        ai: { value: false, isDefault: true },
 }
 
 // 导出只读的 setting 副本
@@ -41,6 +43,7 @@ const featureInstances: Record<string, IFeature> = {
         translate: new TranslateFeature(),
         stripe: new StripeFeature(),
         linkTarget: new LinkTargetFeature(),
+        ai: new AIFeature(),
 }
 
 // 通用初始化函数
@@ -55,8 +58,19 @@ async function initFeature(key: string) {
                 }
 
                 const domainKey = getKeyWithDomain(key) // 生成域名键
-                const result = await browser.storage.local.get(domainKey)
-                const value = result[domainKey] as boolean | undefined
+                const globalKey = `local:${key}` // 全局键（不带域名）
+
+                // 先检查域名专属配置
+                const domainResult = await browser.storage.local.get(domainKey)
+                let value = domainResult[domainKey] as boolean | undefined
+
+                // 如果域名专属配置不存在，检查全局配置
+                if (value === undefined) {
+                        const globalResult =
+                                await browser.storage.local.get(globalKey)
+                        value = globalResult[globalKey] as boolean | undefined
+                }
+
                 await switchFeature(
                         key,
                         value !== undefined ? value : feature.default
