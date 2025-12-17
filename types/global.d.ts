@@ -20,7 +20,11 @@ interface StorageInterface {
         getAll(): Promise<Record<string, unknown>>
 }
 
-// 声明全局storage对象
-declare const storage: StorageInterface
+// 声明全局breadStorage对象，避免与标准Storage API冲突
+declare const breadStorage: StorageInterface
 
 const browser: typeof chrome
+
+interface Window {
+        breadStorage: StorageInterface
+}

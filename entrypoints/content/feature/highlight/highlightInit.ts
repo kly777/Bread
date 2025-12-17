@@ -123,15 +123,15 @@ function handlePersistentKeywordsChange(newKeywords: string | undefined): void {
  */
 async function applyPersistentHighlightOnLoad(): Promise<void> {
         try {
-                const persistentKeywords = await storage.getItem<string>(
+                const persistentKeywords = await breadStorage.getItem<string>(
                         'local:persistent_highlight_keywords'
                 )
                 if (persistentKeywords && persistentKeywords.trim()) {
                         console.log('页面加载时自动应用持久高亮')
                         const keywords = persistentKeywords
                                 .split('\n')
-                                .map((word) => word.trim())
-                                .filter((word) => word.length > 0)
+                                .map((word: string) => word.trim())
+                                .filter((word: string) => word.length > 0)
                         const wordsManager = getWordsManager()
                         wordsManager.updatePersistentWords(keywords)
                 }

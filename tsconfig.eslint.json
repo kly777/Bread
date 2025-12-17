@@ -8,6 +8,8 @@
                 "entrypoints/**/*.tsx",
                 "entrypoints/**/*.jsx",
                 "src/**/*.tsx",
-                "src/**/*.jsx"
+                "src/**/*.jsx",
+                "types/**/*.d.ts",
+                "types/global.d.ts"
         ]
 }

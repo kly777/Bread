@@ -1,31 +1,43 @@
-import { defineConfig } from 'eslint/config'
-import js from '@eslint/js'
-import ts from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
+import { defineConfig, globalIgnores } from 'eslint/config'
+import eslint from '@eslint/js'
+import tseslint from 'typescript-eslint'
+import globals from 'globals'
 
 export default defineConfig([
-        // 全局配置
+        globalIgnores(
+                [
+                        '**/.output/**/*',
+                        'dist/**',
+                        'dist-signed/**',
+                        'dev/**',
+                        'node_modules/**',
+                ],
+                '忽略文件'
+        ),
+        eslint.configs.recommended,
         {
-                ignores: ['**/.output/**/*', 'dist/**/*', 'dev/**/*'],
+                ignores: [
+                        '**/.output/**/*',
+                        'dist/**',
+                        'dist-signed/**',
+                        'dev/**',
+                        'node_modules/**',
+                ],
                 languageOptions: {
                         globals: {
+                                ...globals.browser,
+                                ...globals.es2020,
                                 browser: 'readonly',
-                                document: 'readonly',
-                                window: 'readonly',
-                                console: 'readonly',
-                                storage: 'readonly',
+                                chrome: 'readonly',
+                                breadStorage: 'readonly',
                                 defineBackground: 'readonly',
                                 defineContentScript: 'readonly',
-                                fetch: 'readonly',
-                                atob: 'readonly',
                                 onUnmounted: 'readonly',
                                 createApp: 'readonly',
-                                getComputedStyle: 'readonly',
                         },
                 },
                 plugins: {
-                        js,
-                        '@typescript-eslint': ts,
+                        js: eslint,
                 },
                 rules: {
                         'no-unused-vars': 'warn',
@@ -37,16 +49,21 @@ export default defineConfig([
                         eqeqeq: 'warn',
                         'no-var': 'warn',
                         'prefer-const': 'warn',
-
-                        ...ts.configs['recommended'].rules,
-                        ...ts.configs['eslint-recommended'].rules,
                 },
         },
-        // TypeScript配置
+        // Node.js配置文件
         {
-                files: ['**/*.ts', '**/*.tsx'],
+                files: [
+                        'eslint.config.js',
+                        'rollup.config.js',
+                        'scripts/**/*.js',
+                ],
                 languageOptions: {
-                        parser: tsParser,
+                        globals: {
+                                ...globals.node,
+                        },
                 },
         },
+        tseslint.configs.strict,
+        tseslint.configs.stylistic, // 全局配置
 ])
