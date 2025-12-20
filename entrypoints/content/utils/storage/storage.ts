@@ -6,7 +6,6 @@
 
 type StorageKey = `local:${string}`
 
-
 /**
  * 生成带域名的存储键名
  *

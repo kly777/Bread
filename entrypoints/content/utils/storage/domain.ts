@@ -11,10 +11,7 @@
  * @param domain - 域名，如果为 'default' 则不添加域名前缀
  * @returns 完整的存储键名
  */
-export function getKeyWithDomain(
-        key: string,
-        domain = 'default'
-): string {
+export function getKeyWithDomain(key: string, domain = 'default'): string {
         // 如果域名是默认值，则不添加域名前缀
         if (domain === 'default') {
                 return `local:${key}`

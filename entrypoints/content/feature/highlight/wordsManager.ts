@@ -140,7 +140,10 @@ class WordsManager {
          * 获取所有高亮词统计
          */
         getAllStats(): Record<string, { count: number; word: HighlightWord }> {
-                const stats: Record<string, { count: number; word: HighlightWord }> = {}
+                const stats: Record<
+                        string,
+                        { count: number; word: HighlightWord }
+                > = {}
 
                 for (const word of this.getAllWords()) {
                         if (word.enabled) {

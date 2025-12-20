@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount,  For } from 'solid-js'
+import { Component, createSignal, onMount, For } from 'solid-js'
 import FeatureSetting from './FeatureSetting'
 import { featureSettingStorage } from '../common/storage'
 import { domain } from './main'
@@ -41,7 +41,7 @@ const FeatureSwitch: Component<FeatureSwitchProps> = (props) => {
         })
 
         const handleRadioChange = async (value: SettingState) => {
-          console.log('handleRadioChange', value)
+                console.log('handleRadioChange', value)
                 setSettingState(value)
                 try {
                         const featureStorage = getFeatureStorage()

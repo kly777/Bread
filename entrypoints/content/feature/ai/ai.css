@@ -1,257 +1,259 @@
 .bread-ai-window {
-    width: 400px;
-    max-height: 600px;
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    transition: box-shadow 0.2s ease;
+        width: 400px;
+        max-height: 600px;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        font-family:
+                -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                sans-serif;
+        transition: box-shadow 0.2s ease;
 }
 
 .bread-ai-window.dragging {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    cursor: grabbing;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        cursor: grabbing;
 }
 
 .bread-ai-titlebar {
-    padding: 16px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: move;
-    user-select: none;
-    transition: background-color 0.2s ease;
+        padding: 16px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: move;
+        user-select: none;
+        transition: background-color 0.2s ease;
 }
 
 .bread-ai-titlebar:hover {
-    background: #f1f3f4;
+        background: #f1f3f4;
 }
 
 .bread-ai-title {
-    font-weight: 600;
-    color: #1a1a1a;
-    font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+        font-size: 16px;
 }
 
 .bread-ai-controls {
-    display: flex;
-    gap: 8px;
+        display: flex;
+        gap: 8px;
 }
 
 .bread-ai-control-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    color: #666;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        color: #666;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
 }
 
 .bread-ai-control-btn:hover {
-    background: #e8eaed;
-    color: #1a1a1a;
+        background: #e8eaed;
+        color: #1a1a1a;
 }
 
 .bread-ai-content {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background: white;
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: white;
 }
 
 .bread-ai-section {
-    margin-bottom: 24px;
+        margin-bottom: 24px;
 }
 
 .bread-ai-section:last-child {
-    margin-bottom: 0;
+        margin-bottom: 0;
 }
 
 .bread-ai-section-title {
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #333;
-    font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 15px;
 }
 
 .bread-ai-section-description {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 12px;
-    line-height: 1.4;
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 12px;
+        line-height: 1.4;
 }
 
 .bread-ai-btn {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 120px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
 }
 
 .bread-ai-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .bread-ai-btn:active {
-    transform: translateY(0);
+        transform: translateY(0);
 }
 
 .bread-ai-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
 }
 
 .bread-ai-btn-primary {
-    background: #3b82f6;
-    color: white;
+        background: #3b82f6;
+        color: white;
 }
 
 .bread-ai-btn-primary:hover:not(:disabled) {
-    background: #2563eb;
+        background: #2563eb;
 }
 
 .bread-ai-btn-success {
-    background: #10b981;
-    color: white;
+        background: #10b981;
+        color: white;
 }
 
 .bread-ai-btn-success:hover:not(:disabled) {
-    background: #059669;
+        background: #059669;
 }
 
 .bread-ai-result {
-    margin-top: 16px;
-    padding: 16px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #333;
-    line-height: 1.6;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
+        margin-top: 16px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #333;
+        line-height: 1.6;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
 }
 
 .bread-ai-result-error {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #dc2626;
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
 }
 
 .bread-ai-result-loading {
-    background: #f8fafc;
-    border-color: #e2e8f0;
+        background: #f8fafc;
+        border-color: #e2e8f0;
 }
 
 .bread-ai-loading {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
 }
 
 .bread-ai-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #e2e8f0;
-    border-top-color: #3b82f6;
-    border-radius: 50%;
-    animation: bread-ai-spin 1s linear infinite;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e2e8f0;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: bread-ai-spin 1s linear infinite;
 }
 
 @keyframes bread-ai-spin {
-    to {
-        transform: rotate(360deg);
-    }
+        to {
+                transform: rotate(360deg);
+        }
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-    .bread-ai-window {
-        width: 320px;
-        max-height: 500px;
-        right: 10px;
-        left: 10px;
-        margin: 0 auto;
-    }
+        .bread-ai-window {
+                width: 320px;
+                max-height: 500px;
+                right: 10px;
+                left: 10px;
+                margin: 0 auto;
+        }
 }
 
 /* 暗色模式支持 */
 @media (prefers-color-scheme: dark) {
-    .bread-ai-window {
-        background: #1e1e1e;
-        border-color: #333;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
+        .bread-ai-window {
+                background: #1e1e1e;
+                border-color: #333;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
 
-    .bread-ai-titlebar {
-        background: #2d2d2d;
-        border-color: #333;
-    }
+        .bread-ai-titlebar {
+                background: #2d2d2d;
+                border-color: #333;
+        }
 
-    .bread-ai-title {
-        color: #e0e0e0;
-    }
+        .bread-ai-title {
+                color: #e0e0e0;
+        }
 
-    .bread-ai-control-btn {
-        color: #999;
-    }
+        .bread-ai-control-btn {
+                color: #999;
+        }
 
-    .bread-ai-control-btn:hover {
-        background: #3d3d3d;
-        color: #e0e0e0;
-    }
+        .bread-ai-control-btn:hover {
+                background: #3d3d3d;
+                color: #e0e0e0;
+        }
 
-    .bread-ai-content {
-        background: #1e1e1e;
-    }
+        .bread-ai-content {
+                background: #1e1e1e;
+        }
 
-    .bread-ai-section-title {
-        color: #e0e0e0;
-    }
+        .bread-ai-section-title {
+                color: #e0e0e0;
+        }
 
-    .bread-ai-section-description {
-        color: #999;
-    }
+        .bread-ai-section-description {
+                color: #999;
+        }
 
-    .bread-ai-result {
-        background: #2d2d2d;
-        color: #e0e0e0;
-    }
+        .bread-ai-result {
+                background: #2d2d2d;
+                color: #e0e0e0;
+        }
 
-    .bread-ai-result-error {
-        background: #3d1e1e;
-        border-color: #5c2c2c;
-        color: #f87171;
-    }
+        .bread-ai-result-error {
+                background: #3d1e1e;
+                border-color: #5c2c2c;
+                color: #f87171;
+        }
 
-    .bread-ai-result-loading {
-        background: #2d2d2d;
-        border-color: #3d3d3d;
-    }
+        .bread-ai-result-loading {
+                background: #2d2d2d;
+                border-color: #3d3d3d;
+        }
 
-    .bread-ai-spinner {
-        border-color: #3d3d3d;
-        border-top-color: #60a5fa;
-    }
+        .bread-ai-spinner {
+                border-color: #3d3d3d;
+                border-top-color: #60a5fa;
+        }
 }
