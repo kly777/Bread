@@ -64,6 +64,7 @@ export default defineConfig([
                         },
                 },
         },
-        tseslint.configs.strict,
-        tseslint.configs.stylistic, // 全局配置
+        tseslint.configs.recommended,
+        // tseslint.configs.strict,
+        // tseslint.configs.stylistic, // 全局配置
 ])

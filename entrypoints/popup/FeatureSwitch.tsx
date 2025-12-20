@@ -1,6 +1,7 @@
 import { Component, createSignal, onMount, createEffect, For } from 'solid-js'
 import FeatureSetting from './FeatureSetting'
-import { getKeyWithDomainPop } from '../content/utils/storage/storage'
+import { featureSettingStorage } from '../common/storage'
+import { settingStorage } from './main'
 
 type SettingState = 'default' | 'enabled' | 'disabled'
 type SettingType = 'string' | 'number' | 'boolean'
@@ -13,30 +14,34 @@ interface FeatureSwitchProps {
 const FeatureSwitch: Component<FeatureSwitchProps> = (props) => {
         const [settingState, setSettingState] =
                 createSignal<SettingState>('default')
-        const [domain, setDomain] = createSignal('default')
+
+        // 获取 domain 并创建 featureSettingStorage 实例
+        const getFeatureStorage = () => {
+                const domain = settingStorage.getDomain()
+                return new featureSettingStorage(props.featureName, domain)
+        }
 
         onMount(async () => {
-                // 获取域名
-                await new Promise<void>((resolve) => {
-                        browser.runtime.sendMessage(
-                                { action: 'getDomain' },
-                                (response: { domain?: string }) => {
-                                        setDomain(response.domain || 'default')
-                                        resolve()
-                                }
-                        )
-                })
-
                 // 加载设置
                 try {
-                        const key = getKeyWithDomain(props.featureName)
-                        const storedConfig =
-                                await browser.storage.local.get(key)
-                        const value = storedConfig[key]
+                        const featureStorage = getFeatureStorage()
+                        const value = await featureStorage.get()
 
-                        if (value !== undefined && value !== null) {
-                                setSettingState(value ? 'enabled' : 'disabled')
+                        if (value === 'enabled' || value === 'disabled') {
+                                setSettingState(value)
+                                console.log(
+                                        'FeatureSwitch.tsx: Feature',
+                                        props.featureName,
+                                        ':',
+                                        settingState()
+                                )
                         } else {
+                                console.log(
+                                        'FeatureSwitch.tsx: Feature',
+                                        props.featureName,
+                                        ':',
+                                        value
+                                )
                                 setSettingState('default')
                         }
                 } catch (error) {
@@ -47,30 +52,17 @@ const FeatureSwitch: Component<FeatureSwitchProps> = (props) => {
                 }
         })
 
-        const getKeyWithDomain = (key: string) => {
-                const d = domain()
-                return getKeyWithDomainPop(key)
-        }
-
         createEffect(() => {
-                const state = settingState()
-                const key = getKeyWithDomain(props.featureName)
+                console.log('FeatureSwitch.tsx: Feature', props.featureName)
+                const currentState = settingState()
+                const featureStorage = getFeatureStorage()
 
-                if (state === 'default') {
-                        browser.storage.local.remove(key).catch((error) => {
-                                console.error(`删除${key}配置失败`, error)
-                        })
-                } else {
-                        const value = state === 'enabled'
-                        browser.storage.local
-                                .set({ [key]: value })
-                                .catch((error) => {
-                                        console.error(
-                                                `保存${key}配置失败`,
-                                                error
-                                        )
-                                })
-                }
+                featureStorage.set(currentState).catch((error) => {
+                        console.warn(
+                                `写入${props.featureName}存储配置失败`,
+                                error
+                        )
+                })
         })
 
         const handleRadioChange = (value: SettingState) => {

@@ -13,7 +13,10 @@ import {
         existsSync,
         mkdirSync,
         statSync,
+        readdirSync,
+        unlinkSync,
 } from 'fs'
+
 import { join } from 'path'
 import postcss from 'postcss'
 import csso from 'postcss-csso'
@@ -224,7 +227,48 @@ const backgroundPopupConfig = {
                 },
         },
         plugins: [
-                ...sharedPlugins,
+                ...sharedPlugins, // 清理 assets 目录中的旧哈希文件
+                {
+                        name: 'clean-assets',
+                        buildStart() {
+                                const assetsDir = join(
+                                        `dist/${browser}`,
+                                        'assets'
+                                )
+                                if (existsSync(assetsDir)) {
+                                        const files = readdirSync(assetsDir)
+                                        let removedCount = 0
+                                        for (const file of files) {
+                                                // 只删除 .js 哈希文件（保留 popup.css 等固定名称文件）
+                                                if (
+                                                        file.endsWith('.js') &&
+                                                        file.includes('-')
+                                                ) {
+                                                        const filePath = join(
+                                                                assetsDir,
+                                                                file
+                                                        )
+                                                        if (
+                                                                statSync(
+                                                                        filePath
+                                                                ).isFile()
+                                                        ) {
+                                                                unlinkSync(
+                                                                        filePath
+                                                                )
+                                                                removedCount++
+                                                        }
+                                                }
+                                        }
+                                        if (removedCount > 0) {
+                                                console.log(
+                                                        `Cleaned ${removedCount} old hashed files in ${assetsDir}`
+                                                )
+                                        }
+                                }
+                        },
+                },
+
                 // 自定义CSS合并插件（使用postcss处理）- 用于 popup
                 {
                         name: 'merge-popup-css',
