@@ -180,14 +180,14 @@ const contentScriptConfig = {
                                         allCssContent,
                                         {
                                                 from: 'entrypoints/content/style.css',
-                                                to: 'content-scripts/content.css',
+                                                to: 'content.css',
                                         }
                                 )
 
                                 // 保存处理后的CSS
                                 this.emitFile({
                                         type: 'asset',
-                                        fileName: 'content-scripts/content.css',
+                                        fileName: 'content.css',
                                         source: result.css,
                                 })
                         },

@@ -4,7 +4,7 @@
 export interface IFeature {
         /** 功能名称 */
         readonly name: string
-        /** 默认启用状态 */
+        /** 功能默认状态 */
         readonly default: boolean
         /** 初始化功能（可选） */
         init?(): void | Promise<void>

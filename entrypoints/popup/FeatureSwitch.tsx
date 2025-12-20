@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, createEffect, For } from 'solid-js'
+import { Component, createSignal, onMount,  For } from 'solid-js'
 import FeatureSetting from './FeatureSetting'
 import { featureSettingStorage } from '../common/storage'
 import { settingStorage } from './main'
@@ -18,6 +18,7 @@ const FeatureSwitch: Component<FeatureSwitchProps> = (props) => {
         // 获取 domain 并创建 featureSettingStorage 实例
         const getFeatureStorage = () => {
                 const domain = settingStorage.getDomain()
+                console.log('domain:', domain)
                 return new featureSettingStorage(props.featureName, domain)
         }
 
