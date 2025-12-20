@@ -16,6 +16,7 @@ const App: Component = () => {
                         <FeatureSwitch featureName="stripe" />
                         <FeatureSwitch featureName="bionic" />
                         <FeatureSwitch featureName="translate" />
+                        <FeatureSwitch featureName="ai" />
                 </div>
         )
 }
