@@ -29,19 +29,7 @@ const FeatureSwitch: Component<FeatureSwitchProps> = (props) => {
 
                         if (value === 'enabled' || value === 'disabled') {
                                 setSettingState(value)
-                                console.log(
-                                        'FeatureSwitch.tsx: Feature',
-                                        props.featureName,
-                                        ':',
-                                        settingState()
-                                )
                         } else {
-                                console.log(
-                                        'FeatureSwitch.tsx: Feature',
-                                        props.featureName,
-                                        ':',
-                                        value
-                                )
                                 setSettingState('default')
                         }
                 } catch (error) {
@@ -52,21 +40,18 @@ const FeatureSwitch: Component<FeatureSwitchProps> = (props) => {
                 }
         })
 
-        createEffect(() => {
-                console.log('FeatureSwitch.tsx: Feature', props.featureName)
-                const currentState = settingState()
-                const featureStorage = getFeatureStorage()
-
-                featureStorage.set(currentState).catch((error) => {
+        const handleRadioChange = async (value: SettingState) => {
+          console.log('handleRadioChange', value)
+                setSettingState(value)
+                try {
+                        const featureStorage = getFeatureStorage()
+                        await featureStorage.set(value)
+                } catch (error) {
                         console.warn(
                                 `写入${props.featureName}存储配置失败`,
                                 error
                         )
-                })
-        })
-
-        const handleRadioChange = (value: SettingState) => {
-                setSettingState(value)
+                }
         }
 
         return (

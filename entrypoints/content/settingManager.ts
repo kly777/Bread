@@ -1,4 +1,3 @@
-import { getKeyWithDomain } from './utils/storage/storage'
 import { IFeature } from './feature/Feature'
 import { BionicFeature } from './feature/bionic/BionicFeature'
 import { HighlightFeature } from './feature/highlight/HighlightFeature'
@@ -6,6 +5,7 @@ import { TranslateFeature } from './feature/translate/TranslateFeature'
 import { StripeFeature } from './feature/stripe/StripeFeature'
 import { LinkTargetFeature } from './feature/linkTarget/LinkTargetFeature'
 import { AIFeature } from './feature/ai/AIFeature'
+import { featureSettingStorage } from '../common/storage'
 
 // 设置状态类型定义
 interface SettingState {
@@ -57,36 +57,35 @@ async function initFeature(key: string) {
                         await feature.init()
                 }
 
-                const domainKey = getKeyWithDomain(key) // 生成域名键
-                const globalKey = `local:${key}` // 全局键（不带域名）
+                // 获取当前域名
+                const domain = getCurrentDomain()
+                const featureStorage = new featureSettingStorage(key, domain)
+                const storedValue = await featureStorage.get()
 
-                // 先检查域名专属配置
-                const domainResult = await browser.storage.local.get(domainKey)
-                let value = domainResult[domainKey] as boolean | undefined
-
-                // 如果域名专属配置不存在，检查全局配置
-                if (value === undefined) {
-                        const globalResult =
-                                await browser.storage.local.get(globalKey)
-                        value = globalResult[globalKey] as boolean | undefined
+                let value: boolean | null = null
+                if (storedValue === 'enabled') {
+                        value = true
+                } else if (storedValue === 'disabled') {
+                        value = false
                 }
 
-                await switchFeature(
-                        key,
-                        value !== undefined ? value : feature.default
-                )
+                await switchFeature(key, value)
         } catch (err) {
                 console.error(`初始化${key}失败`, err)
         }
 }
 
 /**
- * 切换指定功能键的特性状态。
- * @param key - 功能键标识符
- * @param newValue - 新的布尔值或null，若为null则使用默认值
- * @param isDefault - 是否为默认值
- * @returns void
+ * 获取当前域名
+ * @returns 当前域名
  */
+function getCurrentDomain(): string {
+        if (typeof window !== 'undefined') {
+                return window.location.hostname
+        }
+        return 'default'
+}
+
 async function switchFeature(
         key: string,
         newValue: boolean | null,
@@ -144,35 +143,49 @@ export function initSettingManager() {
          * @param key - 功能配置项唯一标识
          * @returns void
          * @internal
-         * 使用带域名前缀的存储键进行监听，变化时调用switchFeature处理
+         * 使用featureSettingStorage进行监听，变化时调用switchFeature处理
          */
         Object.keys(featureInstances).forEach((key) => {
-                const storageKey = getKeyWithDomain(key)
-                const listener = (
-                        changes: Record<string, unknown>,
-                        area: string
-                ) => {
-                        if (area === 'local' && changes[storageKey]) {
-                                const change = changes[storageKey] as {
-                                        newValue?: boolean
-                                        oldValue?: boolean
-                                }
-                                const newValue = change.newValue ?? null
-                                try {
-                                        switchFeature(key, newValue).catch(
-                                                (err) =>
+                const domain = getCurrentDomain()
+                const featureStorage = new featureSettingStorage(key, domain)
+
+                featureStorage.listen((changes, areaName) => {
+                        const settingsKey = `settings:${domain}`
+                        if (areaName === 'local' && changes[settingsKey]) {
+                                const change = changes[settingsKey]
+                                if (change.newValue && change.newValue[key]) {
+                                        const storedValue = change.newValue[
+                                                key
+                                        ] as string
+                                        let newValue: boolean | null = null
+
+                                        if (storedValue === 'enabled') {
+                                                newValue = true
+                                        } else if (storedValue === 'disabled') {
+                                                newValue = false
+                                        } else if (storedValue === 'default') {
+                                                newValue = null
+                                        }
+
+                                        try {
+                                                switchFeature(
+                                                        key,
+                                                        newValue
+                                                ).catch((err) =>
                                                         console.error(
                                                                 `更新${key}失败`,
                                                                 err
                                                         )
-                                        )
-                                } catch (err) {
-                                        console.error(`更新${key}失败`, err)
+                                                )
+                                        } catch (err) {
+                                                console.error(
+                                                        `更新${key}失败`,
+                                                        err
+                                                )
+                                        }
                                 }
                         }
-                }
-
-                browser.storage.onChanged.addListener(listener)
+                })
         })
 
         initShortcuts()
@@ -188,35 +201,33 @@ function initShortcuts() {
 
 /**
  * 从存储中同步功能配置设置到全局setting对象
- * 优先读取域名专属配置，降级使用全局配置，最终回退到默认值
+ * 使用featureSettingStorage读取配置，最终回退到默认值
  *
  * @returns {Promise<void>} 无返回值，但会修改全局setting对象
  */
 async function syncSettings(): Promise<void> {
         const keys = Object.keys(featureInstances)
+        const domain = getCurrentDomain()
+
         for (const key of keys) {
                 const feature = featureInstances[key]
-                const domainKey = getKeyWithDomain(key)
+                const featureStorage = new featureSettingStorage(key, domain)
+                const storedValue = await featureStorage.get()
 
-                // 获取域名专属配置
-                const domainResult = await browser.storage.local.get(domainKey)
-                let value = domainResult[domainKey] as boolean | undefined
+                let value: boolean
                 let isDefault = false
 
-                if (value === undefined) {
-                        // 降级使用全局配置
-                        const globalKey = `local:${key}`
-                        const globalResult =
-                                await browser.storage.local.get(globalKey)
-                        value = globalResult[globalKey] as boolean | undefined
-                        if (value === undefined) {
-                                value = feature.default
-                                isDefault = true
-                        }
+                if (storedValue === 'enabled') {
+                        value = true
+                } else if (storedValue === 'disabled') {
+                        value = false
+                } else {
+                        value = feature.default
+                        isDefault = true
                 }
 
                 setting[key] = {
-                        value: value as boolean,
+                        value: value,
                         isDefault: isDefault,
                 }
         }

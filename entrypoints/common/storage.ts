@@ -32,9 +32,9 @@ export class domainSettingStorage {
                 this.storage = new settingStorage()
         }
         async get() {
-                return (await this.storage.get(this.domain)[
-                        this.domain
-                ]) as Record<string, string>
+                const result = await this.storage.get(this.domain);
+                const fullKey = 'setting:' + this.domain;
+                return (result[fullKey] || {}) as Record<string, string>;
         }
         async set(value: Record<string, string>) {
                 await this.storage.set(this.domain, value)
@@ -57,6 +57,7 @@ export class domainSettingStorage {
         }
 }
 
+type SettingState = 'default' | 'enabled' | 'disabled'
 export class featureSettingStorage {
         private feature: string
         private domain: string
@@ -64,11 +65,11 @@ export class featureSettingStorage {
                 this.feature = feature
                 this.domain = domain
         }
-        async get(): Promise<string | undefined> {
+        async get(): Promise<SettingState | undefined> {
                 const key = 'settings:' + this.domain
                 const result = (await browser.storage.local.get(key)) as Record<
                         string,
-                        Record<string, string>
+                        Record<string, SettingState>
                 >
                 const domainSettings = result[key]
                 if (!domainSettings) {
@@ -76,11 +77,11 @@ export class featureSettingStorage {
                 }
                 return domainSettings[this.feature]
         }
-        async set(value: string) {
+        async set(value: SettingState) {
                 const key = 'settings:' + this.domain
                 const settingsRecord = (await browser.storage.local.get(
                         key
-                )) as Record<string, Record<string, string> | undefined>
+                )) as Record<string, Record<string, SettingState> | undefined>
                 const settings = settingsRecord[key]
                 if (!settings) {
                         await browser.storage.local.set({
