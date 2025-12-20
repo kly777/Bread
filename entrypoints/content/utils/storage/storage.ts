@@ -6,19 +6,6 @@
 
 type StorageKey = `local:${string}`
 
-/**
- * 生成带域名的存储键名（用于popup场景）
- *
- * @param key - 基础键名
- * @returns 完整的存储键名
- */
-export function getKeyWithDomainPop(key: string): StorageKey {
-        let domain = 'default'
-        browser.runtime.sendMessage({ action: 'getDomain' }, (response) => {
-                domain = response.domain
-        })
-        return generateStorageKey(domain, key)
-}
 
 /**
  * 生成带域名的存储键名
