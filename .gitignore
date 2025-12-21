@@ -21,6 +21,7 @@ pnpm-workspace.yaml
 .vscode/*
 !.vscode/extensions.json
 .idea
+.zed
 .DS_Store
 *.suo
 *.ntvs*
