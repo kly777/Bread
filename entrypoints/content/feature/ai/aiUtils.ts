@@ -7,28 +7,30 @@
  * 检查元素是否可见
  */
 function isElementVisible(element: Element): boolean {
-    const style = window.getComputedStyle(element)
-    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
-        return false
-    }
+        const style = window.getComputedStyle(element)
+        if (
+                style.display === 'none' ||
+                style.visibility === 'hidden' ||
+                style.opacity === '0'
+        ) {
+                return false
+        }
 
-    const rect = element.getBoundingClientRect()
-    if (rect.width === 0 || rect.height === 0) {
-        return false
-    }
+        const rect = element.getBoundingClientRect()
+        if (rect.width === 0 || rect.height === 0) {
+                return false
+        }
 
-    // 检查是否在视口内
-    const viewportHeight = window.innerHeight
-    const viewportWidth = window.innerWidth
-    return (
-        rect.top < viewportHeight &&
-        rect.bottom > 0 &&
-        rect.left < viewportWidth &&
-        rect.right > 0
-    )
+        // 检查是否在视口内
+        const viewportHeight = window.innerHeight
+        const viewportWidth = window.innerWidth
+        return (
+                rect.top < viewportHeight &&
+                rect.bottom > 0 &&
+                rect.left < viewportWidth &&
+                rect.right > 0
+        )
 }
-
-
 
 /**
  * 获取视口附近的内容
@@ -329,377 +331,435 @@ export function getPageStructure(): {
  * @returns 提取的文本内容
  */
 export function getChatPageContent(maxTokens = 2000): string {
-    // 1. 获取所有可见的文本节点
-    const visibleTextNodes = collectVisibleTextNodes()
-    
-    // 2. 按DOM顺序排序，保持内容连贯性
-    const sortedNodes = sortNodesByDOMOrder(visibleTextNodes)
-    
-    // 3. 从中心（视口中心）开始收集内容
-    const centerIndex = findViewportCenterIndex(sortedNodes)
-    const collectedContent = collectContentFromCenter(sortedNodes, centerIndex, maxTokens)
-    
-    // 4. 如果内容不足，扩展收集范围
-    let finalContent = collectedContent.content
-    let collectedTokens = collectedContent.tokens
-    
-    if (collectedTokens < maxTokens * 0.7) {
-        // 扩展收集相邻节点
-        const expandedContent = expandContentCollection(
-            sortedNodes, 
-            collectedContent.startIndex, 
-            collectedContent.endIndex, 
-            maxTokens - collectedTokens
+        // 1. 获取所有可见的文本节点
+        const visibleTextNodes = collectVisibleTextNodes()
+
+        // 2. 按DOM顺序排序，保持内容连贯性
+        const sortedNodes = sortNodesByDOMOrder(visibleTextNodes)
+
+        // 3. 从中心（视口中心）开始收集内容
+        const centerIndex = findViewportCenterIndex(sortedNodes)
+        const collectedContent = collectContentFromCenter(
+                sortedNodes,
+                centerIndex,
+                maxTokens
         )
-        finalContent += '\n\n' + expandedContent.content
-        collectedTokens += expandedContent.tokens
-    }
-    
-    // 5. 清理和格式化最终内容
-    return cleanAndFormatContent(finalContent, maxTokens)
+
+        // 4. 如果内容不足，扩展收集范围
+        let finalContent = collectedContent.content
+        let collectedTokens = collectedContent.tokens
+
+        if (collectedTokens < maxTokens * 0.7) {
+                // 扩展收集相邻节点
+                const expandedContent = expandContentCollection(
+                        sortedNodes,
+                        collectedContent.startIndex,
+                        collectedContent.endIndex,
+                        maxTokens - collectedTokens
+                )
+                finalContent += '\n\n' + expandedContent.content
+                collectedTokens += expandedContent.tokens
+        }
+
+        // 5. 清理和格式化最终内容
+        return cleanAndFormatContent(finalContent, maxTokens)
 }
 
 /**
  * 收集所有可见的文本节点
  */
-function collectVisibleTextNodes(): Array<{node: Node, element: Element, rect: DOMRect}> {
-    const textNodes: Array<{node: Node, element: Element, rect: DOMRect}> = []
-    
-    // 创建TreeWalker遍历所有文本节点
-    const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-        {
-            acceptNode: (node) => {
-                const parentElement = node.parentElement
-                if (!parentElement) {
-                    return NodeFilter.FILTER_REJECT
+function collectVisibleTextNodes(): Array<{
+        node: Node
+        element: Element
+        rect: DOMRect
+}> {
+        const textNodes: Array<{
+                node: Node
+                element: Element
+                rect: DOMRect
+        }> = []
+
+        // 创建TreeWalker遍历所有文本节点
+        const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                {
+                        acceptNode: (node) => {
+                                const parentElement = node.parentElement
+                                if (!parentElement) {
+                                        return NodeFilter.FILTER_REJECT
+                                }
+
+                                // 排除脚本、样式等元素
+                                const tagName =
+                                        parentElement.tagName.toLowerCase()
+                                if (
+                                        [
+                                                'script',
+                                                'style',
+                                                'noscript',
+                                                'iframe',
+                                                'object',
+                                                'embed',
+                                                'svg',
+                                                'canvas',
+                                        ].includes(tagName)
+                                ) {
+                                        return NodeFilter.FILTER_REJECT
+                                }
+
+                                // 排除扩展自己的元素
+                                if (isExtensionElement(parentElement)) {
+                                        return NodeFilter.FILTER_REJECT
+                                }
+
+                                // 检查元素是否可见
+                                if (!isElementVisible(parentElement)) {
+                                        return NodeFilter.FILTER_REJECT
+                                }
+
+                                // 检查文本是否有意义
+                                const text = node.textContent?.trim()
+                                if (!text || text.length < 3) {
+                                        return NodeFilter.FILTER_REJECT
+                                }
+
+                                // 过滤掉只有符号或数字的文本
+                                const meaningfulText = text
+                                        .replace(/[^\p{L}\p{N}\s]/gu, '')
+                                        .trim()
+                                if (meaningfulText.length < 3) {
+                                        return NodeFilter.FILTER_REJECT
+                                }
+
+                                return NodeFilter.FILTER_ACCEPT
+                        },
                 }
-                
-                // 排除脚本、样式等元素
-                const tagName = parentElement.tagName.toLowerCase()
-                if (['script', 'style', 'noscript', 'iframe', 'object', 'embed', 'svg', 'canvas'].includes(tagName)) {
-                    return NodeFilter.FILTER_REJECT
-                }
-                
-                // 排除扩展自己的元素
-                if (isExtensionElement(parentElement)) {
-                    return NodeFilter.FILTER_REJECT
-                }
-                
-                // 检查元素是否可见
-                if (!isElementVisible(parentElement)) {
-                    return NodeFilter.FILTER_REJECT
-                }
-                
-                // 检查文本是否有意义
-                const text = node.textContent?.trim()
-                if (!text || text.length < 3) {
-                    return NodeFilter.FILTER_REJECT
-                }
-                
-                // 过滤掉只有符号或数字的文本
-                const meaningfulText = text.replace(/[^\p{L}\p{N}\s]/gu, '').trim()
-                if (meaningfulText.length < 3) {
-                    return NodeFilter.FILTER_REJECT
-                }
-                
-                return NodeFilter.FILTER_ACCEPT
-            }
+        )
+
+        let node: Node | null
+        while ((node = walker.nextNode())) {
+                const parentElement = node.parentElement!
+                const rect = parentElement.getBoundingClientRect()
+                textNodes.push({ node, element: parentElement, rect })
         }
-    )
-    
-    let node: Node | null
-    while ((node = walker.nextNode())) {
-        const parentElement = node.parentElement!
-        const rect = parentElement.getBoundingClientRect()
-        textNodes.push({node, element: parentElement, rect})
-    }
-    
-    return textNodes
+
+        return textNodes
 }
 
 /**
  * 按DOM顺序对节点进行排序
  */
-function sortNodesByDOMOrder(nodes: Array<{node: Node, element: Element, rect: DOMRect}>): 
-    Array<{node: Node, element: Element, rect: DOMRect}> {
-    
-    return nodes.sort((a, b) => {
-        // 比较DOM位置
-        const position = a.element.compareDocumentPosition(b.element)
-        
-        if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
-            return -1 // a在b之前
-        } else if (position & Node.DOCUMENT_POSITION_PRECEDING) {
-            return 1 // a在b之后
-        }
-        
-        // 如果无法比较DOM位置，按坐标排序
-        if (a.rect.top !== b.rect.top) {
-            return a.rect.top - b.rect.top
-        }
-        return a.rect.left - b.rect.left
-    })
+function sortNodesByDOMOrder(
+        nodes: Array<{ node: Node; element: Element; rect: DOMRect }>
+): Array<{ node: Node; element: Element; rect: DOMRect }> {
+        return nodes.sort((a, b) => {
+                // 比较DOM位置
+                const position = a.element.compareDocumentPosition(b.element)
+
+                if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+                        return -1 // a在b之前
+                } else if (position & Node.DOCUMENT_POSITION_PRECEDING) {
+                        return 1 // a在b之后
+                }
+
+                // 如果无法比较DOM位置，按坐标排序
+                if (a.rect.top !== b.rect.top) {
+                        return a.rect.top - b.rect.top
+                }
+                return a.rect.left - b.rect.left
+        })
 }
 
 /**
  * 找到视口中心的节点索引
  */
-function findViewportCenterIndex(nodes: Array<{node: Node, element: Element, rect: DOMRect}>): number {
-    const viewportCenterY = window.innerHeight / 2
-    const viewportCenterX = window.innerWidth / 2
-    
-    let closestIndex = 0
-    let minDistance = Infinity
-    
-    for (let i = 0; i < nodes.length; i++) {
-        const rect = nodes[i].rect
-        const centerY = rect.top + rect.height / 2
-        const centerX = rect.left + rect.width / 2
-        
-        // 计算到视口中心的距离
-        const distance = Math.sqrt(
-            Math.pow(centerX - viewportCenterX, 2) + 
-            Math.pow(centerY - viewportCenterY, 2)
-        )
-        
-        if (distance < minDistance) {
-            minDistance = distance
-            closestIndex = i
+function findViewportCenterIndex(
+        nodes: Array<{ node: Node; element: Element; rect: DOMRect }>
+): number {
+        const viewportCenterY = window.innerHeight / 2
+        const viewportCenterX = window.innerWidth / 2
+
+        let closestIndex = 0
+        let minDistance = Infinity
+
+        for (let i = 0; i < nodes.length; i++) {
+                const rect = nodes[i].rect
+                const centerY = rect.top + rect.height / 2
+                const centerX = rect.left + rect.width / 2
+
+                // 计算到视口中心的距离
+                const distance = Math.sqrt(
+                        Math.pow(centerX - viewportCenterX, 2) +
+                                Math.pow(centerY - viewportCenterY, 2)
+                )
+
+                if (distance < minDistance) {
+                        minDistance = distance
+                        closestIndex = i
+                }
         }
-    }
-    
-    return closestIndex
+
+        return closestIndex
 }
 
 /**
  * 从中心开始收集内容
  */
 function collectContentFromCenter(
-    nodes: Array<{node: Node, element: Element, rect: DOMRect}>, 
-    centerIndex: number, 
-    maxTokens: number
-): {content: string, tokens: number, startIndex: number, endIndex: number} {
-    let content = ''
-    let tokens = 0
-    let startIndex = centerIndex
-    let endIndex = centerIndex
-    
-    // 先添加中心节点
-    const centerNode = nodes[centerIndex]
-    const centerText = centerNode.node.textContent?.trim() || ''
-    if (centerText) {
-        const cleanedText = cleanTextForAI(centerText)
-        const textTokens = estimateTokens(cleanedText)
-        
-        if (textTokens <= maxTokens) {
-            content = cleanedText
-            tokens = textTokens
-        }
-    }
-    
-    // 向两边扩展，直到达到token限制或没有更多节点
-    while (tokens < maxTokens) {
-        let expanded = false
-        
-        // 尝试向前扩展（DOM顺序更早的节点）
-        if (startIndex > 0) {
-            const prevIndex = startIndex - 1
-            const prevNode = nodes[prevIndex]
-            const prevText = prevNode.node.textContent?.trim() || ''
-            
-            if (prevText) {
-                const cleanedText = cleanTextForAI(prevText)
+        nodes: Array<{ node: Node; element: Element; rect: DOMRect }>,
+        centerIndex: number,
+        maxTokens: number
+): { content: string; tokens: number; startIndex: number; endIndex: number } {
+        let content = ''
+        let tokens = 0
+        let startIndex = centerIndex
+        let endIndex = centerIndex
+
+        // 先添加中心节点
+        const centerNode = nodes[centerIndex]
+        const centerText = centerNode.node.textContent?.trim() || ''
+        if (centerText) {
+                const cleanedText = cleanTextForAI(centerText)
                 const textTokens = estimateTokens(cleanedText)
-                
-                if (tokens + textTokens <= maxTokens) {
-                    content = cleanedText + '\n\n' + content
-                    tokens += textTokens
-                    startIndex = prevIndex
-                    expanded = true
+
+                if (textTokens <= maxTokens) {
+                        content = cleanedText
+                        tokens = textTokens
                 }
-            }
         }
-        
-        // 尝试向后扩展（DOM顺序更晚的节点）
-        if (endIndex < nodes.length - 1) {
-            const nextIndex = endIndex + 1
-            const nextNode = nodes[nextIndex]
-            const nextText = nextNode.node.textContent?.trim() || ''
-            
-            if (nextText) {
-                const cleanedText = cleanTextForAI(nextText)
-                const textTokens = estimateTokens(cleanedText)
-                
-                if (tokens + textTokens <= maxTokens) {
-                    content = content + '\n\n' + cleanedText
-                    tokens += textTokens
-                    endIndex = nextIndex
-                    expanded = true
+
+        // 向两边扩展，直到达到token限制或没有更多节点
+        while (tokens < maxTokens) {
+                let expanded = false
+
+                // 尝试向前扩展（DOM顺序更早的节点）
+                if (startIndex > 0) {
+                        const prevIndex = startIndex - 1
+                        const prevNode = nodes[prevIndex]
+                        const prevText = prevNode.node.textContent?.trim() || ''
+
+                        if (prevText) {
+                                const cleanedText = cleanTextForAI(prevText)
+                                const textTokens = estimateTokens(cleanedText)
+
+                                if (tokens + textTokens <= maxTokens) {
+                                        content = cleanedText + '\n\n' + content
+                                        tokens += textTokens
+                                        startIndex = prevIndex
+                                        expanded = true
+                                }
+                        }
                 }
-            }
+
+                // 尝试向后扩展（DOM顺序更晚的节点）
+                if (endIndex < nodes.length - 1) {
+                        const nextIndex = endIndex + 1
+                        const nextNode = nodes[nextIndex]
+                        const nextText = nextNode.node.textContent?.trim() || ''
+
+                        if (nextText) {
+                                const cleanedText = cleanTextForAI(nextText)
+                                const textTokens = estimateTokens(cleanedText)
+
+                                if (tokens + textTokens <= maxTokens) {
+                                        content = content + '\n\n' + cleanedText
+                                        tokens += textTokens
+                                        endIndex = nextIndex
+                                        expanded = true
+                                }
+                        }
+                }
+
+                // 如果两边都无法扩展，退出循环
+                if (!expanded) {
+                        break
+                }
         }
-        
-        // 如果两边都无法扩展，退出循环
-        if (!expanded) {
-            break
-        }
-    }
-    
-    return {content, tokens, startIndex, endIndex}
+
+        return { content, tokens, startIndex, endIndex }
 }
 
 /**
  * 扩展内容收集范围
  */
 function expandContentCollection(
-    nodes: Array<{node: Node, element: Element, rect: DOMRect}>, 
-    startIndex: number, 
-    endIndex: number, 
-    remainingTokens: number
-): {content: string, tokens: number} {
-    let content = ''
-    let tokens = 0
-    
-    // 继续向两边扩展，但优先级较低
-    let leftIndex = startIndex - 1
-    let rightIndex = endIndex + 1
-    
-    while (tokens < remainingTokens && (leftIndex >= 0 || rightIndex < nodes.length)) {
-        // 交替从两边扩展，保持内容平衡
-        if (leftIndex >= 0) {
-            const leftNode = nodes[leftIndex]
-            const leftText = leftNode.node.textContent?.trim() || ''
-            
-            if (leftText) {
-                const cleanedText = cleanTextForAI(leftText)
-                const textTokens = estimateTokens(cleanedText)
-                
-                if (tokens + textTokens <= remainingTokens) {
-                    content = cleanedText + '\n\n' + content
-                    tokens += textTokens
-                    leftIndex--
-                } else {
-                    // 如果token不够，尝试截断
-                    const truncatedText = truncateTextByTokens(cleanedText, remainingTokens - tokens)
-                    if (truncatedText) {
-                        content = truncatedText + '\n\n' + content
-                        tokens += estimateTokens(truncatedText)
-                    }
-                    break
+        nodes: Array<{ node: Node; element: Element; rect: DOMRect }>,
+        startIndex: number,
+        endIndex: number,
+        remainingTokens: number
+): { content: string; tokens: number } {
+        let content = ''
+        let tokens = 0
+
+        // 继续向两边扩展，但优先级较低
+        let leftIndex = startIndex - 1
+        let rightIndex = endIndex + 1
+
+        while (
+                tokens < remainingTokens &&
+                (leftIndex >= 0 || rightIndex < nodes.length)
+        ) {
+                // 交替从两边扩展，保持内容平衡
+                if (leftIndex >= 0) {
+                        const leftNode = nodes[leftIndex]
+                        const leftText = leftNode.node.textContent?.trim() || ''
+
+                        if (leftText) {
+                                const cleanedText = cleanTextForAI(leftText)
+                                const textTokens = estimateTokens(cleanedText)
+
+                                if (tokens + textTokens <= remainingTokens) {
+                                        content = cleanedText + '\n\n' + content
+                                        tokens += textTokens
+                                        leftIndex--
+                                } else {
+                                        // 如果token不够，尝试截断
+                                        const truncatedText =
+                                                truncateTextByTokens(
+                                                        cleanedText,
+                                                        remainingTokens - tokens
+                                                )
+                                        if (truncatedText) {
+                                                content =
+                                                        truncatedText +
+                                                        '\n\n' +
+                                                        content
+                                                tokens +=
+                                                        estimateTokens(
+                                                                truncatedText
+                                                        )
+                                        }
+                                        break
+                                }
+                        } else {
+                                leftIndex--
+                        }
                 }
-            } else {
-                leftIndex--
-            }
-        }
-        
-        if (rightIndex < nodes.length && tokens < remainingTokens) {
-            const rightNode = nodes[rightIndex]
-            const rightText = rightNode.node.textContent?.trim() || ''
-            
-            if (rightText) {
-                const cleanedText = cleanTextForAI(rightText)
-                const textTokens = estimateTokens(cleanedText)
-                
-                if (tokens + textTokens <= remainingTokens) {
-                    content = content + '\n\n' + cleanedText
-                    tokens += textTokens
-                    rightIndex++
-                } else {
-                    // 如果token不够，尝试截断
-                    const truncatedText = truncateTextByTokens(cleanedText, remainingTokens - tokens)
-                    if (truncatedText) {
-                        content = content + '\n\n' + truncatedText
-                        tokens += estimateTokens(truncatedText)
-                    }
-                    break
+
+                if (rightIndex < nodes.length && tokens < remainingTokens) {
+                        const rightNode = nodes[rightIndex]
+                        const rightText =
+                                rightNode.node.textContent?.trim() || ''
+
+                        if (rightText) {
+                                const cleanedText = cleanTextForAI(rightText)
+                                const textTokens = estimateTokens(cleanedText)
+
+                                if (tokens + textTokens <= remainingTokens) {
+                                        content = content + '\n\n' + cleanedText
+                                        tokens += textTokens
+                                        rightIndex++
+                                } else {
+                                        // 如果token不够，尝试截断
+                                        const truncatedText =
+                                                truncateTextByTokens(
+                                                        cleanedText,
+                                                        remainingTokens - tokens
+                                                )
+                                        if (truncatedText) {
+                                                content =
+                                                        content +
+                                                        '\n\n' +
+                                                        truncatedText
+                                                tokens +=
+                                                        estimateTokens(
+                                                                truncatedText
+                                                        )
+                                        }
+                                        break
+                                }
+                        } else {
+                                rightIndex++
+                        }
                 }
-            } else {
-                rightIndex++
-            }
         }
-    }
-    
-    return {content, tokens}
+
+        return { content, tokens }
 }
 
 /**
  * 清理和格式化最终内容
  */
 function cleanAndFormatContent(content: string, maxTokens: number): string {
-    // 分割成段落
-    const paragraphs = content.split('\n\n').filter(p => p.trim().length > 0)
-    
-    // 去重
-    const uniqueParagraphs = Array.from(new Set(paragraphs))
-    
-    // 确保不超过token限制
-    let finalContent = ''
-    let totalTokens = 0
-    
-    for (const paragraph of uniqueParagraphs) {
-        const paragraphTokens = estimateTokens(paragraph)
-        
-        if (totalTokens + paragraphTokens <= maxTokens) {
-            finalContent += (finalContent ? '\n\n' : '') + paragraph
-            totalTokens += paragraphTokens
-        } else {
-            // 如果超出限制，截断最后一个段落
-            const remainingTokens = maxTokens - totalTokens
-            if (remainingTokens > 10) { // 至少保留10个token
-                const truncatedParagraph = truncateTextByTokens(paragraph, remainingTokens)
-                if (truncatedParagraph) {
-                    finalContent += (finalContent ? '\n\n' : '') + truncatedParagraph
+        // 分割成段落
+        const paragraphs = content
+                .split('\n\n')
+                .filter((p) => p.trim().length > 0)
+
+        // 去重
+        const uniqueParagraphs = Array.from(new Set(paragraphs))
+
+        // 确保不超过token限制
+        let finalContent = ''
+        let totalTokens = 0
+
+        for (const paragraph of uniqueParagraphs) {
+                const paragraphTokens = estimateTokens(paragraph)
+
+                if (totalTokens + paragraphTokens <= maxTokens) {
+                        finalContent += (finalContent ? '\n\n' : '') + paragraph
+                        totalTokens += paragraphTokens
+                } else {
+                        // 如果超出限制，截断最后一个段落
+                        const remainingTokens = maxTokens - totalTokens
+                        if (remainingTokens > 10) {
+                                // 至少保留10个token
+                                const truncatedParagraph = truncateTextByTokens(
+                                        paragraph,
+                                        remainingTokens
+                                )
+                                if (truncatedParagraph) {
+                                        finalContent +=
+                                                (finalContent ? '\n\n' : '') +
+                                                truncatedParagraph
+                                }
+                        }
+                        break
                 }
-            }
-            break
         }
-    }
-    
-    return finalContent.trim()
+
+        return finalContent.trim()
 }
-
-
 
 /**
  * 清理文本，移除不必要的字符
  */
 function cleanTextForAI(text: string): string {
-    // 移除多余的空格和换行
-    let cleaned = text.replace(/\s+/g, ' ').trim()
+        // 移除多余的空格和换行
+        let cleaned = text.replace(/\s+/g, ' ').trim()
 
-    // 移除常见的无关字符
-    cleaned = cleaned.replace(/[\u200B-\u200D\uFEFF]/g, '')
+        // 移除常见的无关字符
+        cleaned = cleaned.replace(/[\u200B-\u200D\uFEFF]/g, '')
 
-    // 移除重复的标点
-    cleaned = cleaned.replace(/([.,!?])\1+/g, '$1')
+        // 移除重复的标点
+        cleaned = cleaned.replace(/([.,!?])\1+/g, '$1')
 
-    // 移除URL和邮箱
-    cleaned = cleaned.replace(/https?:\/\/\S+/g, '')
-    cleaned = cleaned.replace(/\S+@\S+\.\S+/g, '')
+        // 移除URL和邮箱
+        cleaned = cleaned.replace(/https?:\/\/\S+/g, '')
+        cleaned = cleaned.replace(/\S+@\S+\.\S+/g, '')
 
-    return cleaned.trim()
+        return cleaned.trim()
 }
 
 /**
  * 按token数量截断文本
  */
 function truncateTextByTokens(text: string, maxTokens: number): string {
-    const words = text.split(/\s+/)
-    let result = ''
-    let currentTokens = 0
+        const words = text.split(/\s+/)
+        let result = ''
+        let currentTokens = 0
 
-    for (const word of words) {
-        const wordTokens = estimateTokens(word)
-        if (currentTokens + wordTokens > maxTokens) {
-            break
+        for (const word of words) {
+                const wordTokens = estimateTokens(word)
+                if (currentTokens + wordTokens > maxTokens) {
+                        break
+                }
+                result += (result ? ' ' : '') + word
+                currentTokens += wordTokens
         }
-        result += (result ? ' ' : '') + word
-        currentTokens += wordTokens
-    }
 
-    return result
+        return result
 }
 
 /**

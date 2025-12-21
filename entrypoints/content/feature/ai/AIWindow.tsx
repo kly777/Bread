@@ -10,7 +10,11 @@ interface AIWindowProps {
         isError: boolean
         onSendMessage?: (message: string) => Promise<string>
         onGetPageContent?: () => string
-        initialChatMessages?: Array<{ role: 'user' | 'assistant'; content: string; timestamp: Date }>
+        initialChatMessages?: Array<{
+                role: 'user' | 'assistant'
+                content: string
+                timestamp: Date
+        }>
 }
 
 const AIWindow: Component<AIWindowProps> = (props) => {
@@ -18,8 +22,16 @@ const AIWindow: Component<AIWindowProps> = (props) => {
         const [position, setPosition] = createSignal({ x: 20, y: 100 })
         const [isDragging, setIsDragging] = createSignal(false)
         const [dragOffset, setDragOffset] = createSignal({ x: 0, y: 0 })
-        const [activeTab, setActiveTab] = createSignal<'analysis' | 'chat'>('analysis')
-        const [chatMessages, setChatMessages] = createSignal<Array<{ role: 'user' | 'assistant'; content: string; timestamp: Date }>>([])
+        const [activeTab, setActiveTab] = createSignal<'analysis' | 'chat'>(
+                'analysis'
+        )
+        const [chatMessages, setChatMessages] = createSignal<
+                Array<{
+                        role: 'user' | 'assistant'
+                        content: string
+                        timestamp: Date
+                }>
+        >([])
         const [chatInput, setChatInput] = createSignal('')
         const [isSending, setIsSending] = createSignal(false)
 
@@ -117,40 +129,47 @@ const AIWindow: Component<AIWindowProps> = (props) => {
                 const userMessage = {
                         role: 'user' as const,
                         content: message,
-                        timestamp: new Date()
+                        timestamp: new Date(),
                 }
-                setChatMessages(prev => [...prev, userMessage])
+                setChatMessages((prev) => [...prev, userMessage])
                 setChatInput('')
 
                 try {
                         // 如果有发送消息回调，调用它
                         if (props.onSendMessage) {
-                                const aiResponse = await props.onSendMessage(message)
+                                const aiResponse =
+                                        await props.onSendMessage(message)
 
                                 // 添加AI回复
                                 const assistantMessage = {
                                         role: 'assistant' as const,
                                         content: aiResponse,
-                                        timestamp: new Date()
+                                        timestamp: new Date(),
                                 }
-                                setChatMessages(prev => [...prev, assistantMessage])
+                                setChatMessages((prev) => [
+                                        ...prev,
+                                        assistantMessage,
+                                ])
                         } else {
                                 // 模拟回复
                                 const assistantMessage = {
                                         role: 'assistant' as const,
                                         content: '这是模拟回复。请配置AI服务以获得真实响应。',
-                                        timestamp: new Date()
+                                        timestamp: new Date(),
                                 }
-                                setChatMessages(prev => [...prev, assistantMessage])
+                                setChatMessages((prev) => [
+                                        ...prev,
+                                        assistantMessage,
+                                ])
                         }
                 } catch (error) {
                         console.error('发送消息失败:', error)
                         const errorMessage = {
                                 role: 'assistant' as const,
                                 content: `抱歉，发送消息时出错: ${error instanceof Error ? error.message : '未知错误'}`,
-                                timestamp: new Date()
+                                timestamp: new Date(),
                         }
-                        setChatMessages(prev => [...prev, errorMessage])
+                        setChatMessages((prev) => [...prev, errorMessage])
                 } finally {
                         setIsSending(false)
                 }
@@ -204,15 +223,31 @@ const AIWindow: Component<AIWindowProps> = (props) => {
                                         <div class="bread-ai-tabs">
                                                 <button
                                                         class="bread-ai-tab"
-                                                        classList={{ active: activeTab() === 'analysis' }}
-                                                        onClick={() => setActiveTab('analysis')}
+                                                        classList={{
+                                                                active:
+                                                                        activeTab() ===
+                                                                        'analysis',
+                                                        }}
+                                                        onClick={() =>
+                                                                setActiveTab(
+                                                                        'analysis'
+                                                                )
+                                                        }
                                                 >
                                                         网页分析
                                                 </button>
                                                 <button
                                                         class="bread-ai-tab"
-                                                        classList={{ active: activeTab() === 'chat' }}
-                                                        onClick={() => setActiveTab('chat')}
+                                                        classList={{
+                                                                active:
+                                                                        activeTab() ===
+                                                                        'chat',
+                                                        }}
+                                                        onClick={() =>
+                                                                setActiveTab(
+                                                                        'chat'
+                                                                )
+                                                        }
                                                 >
                                                         对话聊天
                                                 </button>
@@ -263,7 +298,8 @@ const AIWindow: Component<AIWindowProps> = (props) => {
                                                         </div>
 
                                                         {/* 分析结果 */}
-                                                        {(props.result || props.isLoading) && (
+                                                        {(props.result ||
+                                                                props.isLoading) && (
                                                                 <div class="bread-ai-section">
                                                                         <div class="bread-ai-section-title">
                                                                                 AI分析结果
@@ -298,30 +334,51 @@ const AIWindow: Component<AIWindowProps> = (props) => {
                                                 <div class="bread-ai-chat-container">
                                                         {/* 聊天消息列表 */}
                                                         <div class="bread-ai-chat-messages">
-                                                                {chatMessages().length === 0 ? (
+                                                                {chatMessages()
+                                                                        .length ===
+                                                                0 ? (
                                                                         <div class="bread-ai-chat-empty">
                                                                                 开始与AI助手对话，或者点击"插入网页内容"按钮来基于当前页面进行讨论。
                                                                         </div>
                                                                 ) : (
-                                                                        chatMessages().map((msg) => (
-                                                                                <div
-                                                                                        class="bread-ai-chat-message"
-                                                                                        classList={{
-                                                                                                'bread-ai-chat-message-user': msg.role === 'user',
-                                                                                                'bread-ai-chat-message-assistant': msg.role === 'assistant',
-                                                                                        }}
-                                                                                >
-                                                                                        <div class="bread-ai-chat-message-role">
-                                                                                                {msg.role === 'user' ? '你' : 'AI助手'}
+                                                                        chatMessages().map(
+                                                                                (
+                                                                                        msg
+                                                                                ) => (
+                                                                                        <div
+                                                                                                class="bread-ai-chat-message"
+                                                                                                classList={{
+                                                                                                        'bread-ai-chat-message-user':
+                                                                                                                msg.role ===
+                                                                                                                'user',
+                                                                                                        'bread-ai-chat-message-assistant':
+                                                                                                                msg.role ===
+                                                                                                                'assistant',
+                                                                                                }}
+                                                                                        >
+                                                                                                <div class="bread-ai-chat-message-role">
+                                                                                                        {msg.role ===
+                                                                                                        'user'
+                                                                                                                ? '你'
+                                                                                                                : 'AI助手'}
+                                                                                                </div>
+                                                                                                <div class="bread-ai-chat-message-content">
+                                                                                                        {
+                                                                                                                msg.content
+                                                                                                        }
+                                                                                                </div>
+                                                                                                <div class="bread-ai-chat-message-time">
+                                                                                                        {msg.timestamp.toLocaleTimeString(
+                                                                                                                [],
+                                                                                                                {
+                                                                                                                        hour: '2-digit',
+                                                                                                                        minute: '2-digit',
+                                                                                                                }
+                                                                                                        )}
+                                                                                                </div>
                                                                                         </div>
-                                                                                        <div class="bread-ai-chat-message-content">
-                                                                                                {msg.content}
-                                                                                        </div>
-                                                                                        <div class="bread-ai-chat-message-time">
-                                                                                                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                                        </div>
-                                                                                </div>
-                                                                        ))
+                                                                                )
+                                                                        )
                                                                 )}
                                                         </div>
 
@@ -332,23 +389,49 @@ const AIWindow: Component<AIWindowProps> = (props) => {
                                                                                 class="bread-ai-chat-action-btn"
                                                                                 title="插入网页内容"
                                                                                 onClick={() => {
-                                                                                        if (props.onGetPageContent) {
-                                                                                                const pageContent = props.onGetPageContent()
-                                                                                                setChatInput(prev => prev + '\n' + pageContent)
+                                                                                        if (
+                                                                                                props.onGetPageContent
+                                                                                        ) {
+                                                                                                const pageContent =
+                                                                                                        props.onGetPageContent()
+                                                                                                setChatInput(
+                                                                                                        (
+                                                                                                                prev
+                                                                                                        ) =>
+                                                                                                                prev +
+                                                                                                                '\n' +
+                                                                                                                pageContent
+                                                                                                )
                                                                                         } else {
-                                                                                                setChatInput(prev => prev + '\n[页面内容加载失败，请刷新页面后重试]')
+                                                                                                setChatInput(
+                                                                                                        (
+                                                                                                                prev
+                                                                                                        ) =>
+                                                                                                                prev +
+                                                                                                                '\n[页面内容加载失败，请刷新页面后重试]'
+                                                                                                )
                                                                                         }
                                                                                 }}
                                                                         >
-                                                                                📄 插入当前页面内容
+                                                                                📄
+                                                                                插入当前页面内容
                                                                         </button>
                                                                         <button
                                                                                 class="bread-ai-chat-action-btn"
                                                                                 title="清除聊天记录"
-                                                                                onClick={() => setChatMessages([])}
-                                                                                disabled={chatMessages().length === 0}
+                                                                                onClick={() =>
+                                                                                        setChatMessages(
+                                                                                                []
+                                                                                        )
+                                                                                }
+                                                                                disabled={
+                                                                                        chatMessages()
+                                                                                                .length ===
+                                                                                        0
+                                                                                }
                                                                         >
-                                                                                🗑️ 清除聊天
+                                                                                🗑️
+                                                                                清除聊天
                                                                         </button>
                                                                 </div>
                                                                 <div class="bread-ai-chat-input-wrapper">
@@ -356,22 +439,46 @@ const AIWindow: Component<AIWindowProps> = (props) => {
                                                                                 class="bread-ai-chat-input"
                                                                                 placeholder="输入消息... (按 Ctrl+Enter 发送)"
                                                                                 value={chatInput()}
-                                                                                onInput={(e) => setChatInput(e.currentTarget.value)}
-                                                                                onKeyDown={(e) => {
-                                                                                        if (e.ctrlKey && e.key === 'Enter' && chatInput().trim()) {
+                                                                                onInput={(
+                                                                                        e
+                                                                                ) =>
+                                                                                        setChatInput(
+                                                                                                e
+                                                                                                        .currentTarget
+                                                                                                        .value
+                                                                                        )
+                                                                                }
+                                                                                onKeyDown={(
+                                                                                        e
+                                                                                ) => {
+                                                                                        if (
+                                                                                                e.ctrlKey &&
+                                                                                                e.key ===
+                                                                                                        'Enter' &&
+                                                                                                chatInput().trim()
+                                                                                        ) {
                                                                                                 e.preventDefault()
                                                                                                 handleSendMessage()
                                                                                         }
                                                                                 }}
                                                                                 disabled={isSending()}
-                                                                                rows={3}
+                                                                                rows={
+                                                                                        3
+                                                                                }
                                                                         />
                                                                         <button
                                                                                 class="bread-ai-chat-send-btn"
-                                                                                onClick={handleSendMessage}
-                                                                                disabled={!chatInput().trim() || isSending()}
+                                                                                onClick={
+                                                                                        handleSendMessage
+                                                                                }
+                                                                                disabled={
+                                                                                        !chatInput().trim() ||
+                                                                                        isSending()
+                                                                                }
                                                                         >
-                                                                                {isSending() ? '发送中...' : '发送'}
+                                                                                {isSending()
+                                                                                        ? '发送中...'
+                                                                                        : '发送'}
                                                                         </button>
                                                                 </div>
                                                         </div>

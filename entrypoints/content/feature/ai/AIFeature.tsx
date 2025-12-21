@@ -11,7 +11,6 @@ import {
 import { AIServiceFactory } from './aiServiceFactory'
 import { PageAnalysis } from './aiServiceBase'
 
-
 /**
  * AI功能
  * 提供网页内容总结、重点标记等AI功能
@@ -66,7 +65,13 @@ export class AIFeature extends Feature {
                 const [result, setResult] = createSignal('')
                 const [isLoading, setIsLoading] = createSignal(false)
                 const [isError, setIsError] = createSignal(false)
-                const [chatMessages] = createSignal<Array<{ role: 'user' | 'assistant'; content: string; timestamp: Date }>>([])
+                const [chatMessages] = createSignal<
+                        Array<{
+                                role: 'user' | 'assistant'
+                                content: string
+                                timestamp: Date
+                        }>
+                >([])
 
                 const handleClose = () => {
                         this.off()
@@ -83,15 +88,25 @@ export class AIFeature extends Feature {
                                 console.log('页面内容长度:', pageContent.length)
 
                                 // 加载AI配置并创建服务
-                                const aiConfig = await AIServiceFactory.loadConfigFromStorage()
-                                const aiService = AIServiceFactory.createService(aiConfig.provider, aiConfig.config)
+                                const aiConfig =
+                                        await AIServiceFactory.loadConfigFromStorage()
+                                const aiService =
+                                        AIServiceFactory.createService(
+                                                aiConfig.provider,
+                                                aiConfig.config
+                                        )
 
                                 // 分析页面内容
-                                const analysis = await aiService.analyzePage(pageContent)
+                                const analysis =
+                                        await aiService.analyzePage(pageContent)
 
                                 // 格式化结果
                                 const pageStructure = getPageStructure()
-                                const formattedResult = this.formatAnalysisResult(analysis, pageStructure)
+                                const formattedResult =
+                                        this.formatAnalysisResult(
+                                                analysis,
+                                                pageStructure
+                                        )
                                 setResult(formattedResult)
                                 setIsError(false)
                         } catch (error) {
@@ -108,91 +123,161 @@ export class AIFeature extends Feature {
                 const handleHighlight = () => {
                         const success = highlightSelectedText()
                         if (success) {
-                                setResult('已成功标记选中内容！\n\nAI助手可以使用这些标记来更好地理解页面内容。')
+                                setResult(
+                                        '已成功标记选中内容！\n\nAI助手可以使用这些标记来更好地理解页面内容。'
+                                )
                                 setIsError(false)
                         } else {
-                                setResult('请先选择要标记的文本或元素。\n\n标记的内容将帮助AI更好地分析页面。')
+                                setResult(
+                                        '请先选择要标记的文本或元素。\n\n标记的内容将帮助AI更好地分析页面。'
+                                )
                                 setIsError(true)
                         }
                 }
 
-                const handleSendMessage = async (message: string): Promise<string> => {
+                const handleSendMessage = async (
+                        message: string
+                ): Promise<string> => {
                         try {
-                                const aiConfig = await AIServiceFactory.loadConfigFromStorage()
-                                const aiService = AIServiceFactory.createService(aiConfig.provider, aiConfig.config)
+                                const aiConfig =
+                                        await AIServiceFactory.loadConfigFromStorage()
+                                const aiService =
+                                        AIServiceFactory.createService(
+                                                aiConfig.provider,
+                                                aiConfig.config
+                                        )
 
                                 // 检查消息中是否包含页面内容
-                                const hasPageContent = message.includes('当前页面内容:')
+                                const hasPageContent =
+                                        message.includes('当前页面内容:')
 
                                 if (hasPageContent) {
                                         // 如果有页面内容，使用analyzePage进行分析
-                                        const pageContentMatch = message.match(/当前页面内容:\n([\s\S]*)/)
+                                        const pageContentMatch =
+                                                message.match(
+                                                        /当前页面内容:\n([\s\S]*)/
+                                                )
                                         if (pageContentMatch) {
-                                                const pageContent = pageContentMatch[1]
-                                                const analysis = await aiService.analyzePage(pageContent)
+                                                const pageContent =
+                                                        pageContentMatch[1]
+                                                const analysis =
+                                                        await aiService.analyzePage(
+                                                                pageContent
+                                                        )
 
                                                 // 格式化分析结果
                                                 let response = `📊 **基于页面内容的分析结果**\n\n`
                                                 response += `**总结**: ${analysis.summary}\n\n`
 
-                                                if (analysis.keyPoints.length > 0) {
+                                                if (
+                                                        analysis.keyPoints
+                                                                .length > 0
+                                                ) {
                                                         response += `**关键点**:\n`
-                                                        analysis.keyPoints.forEach((point, index) => {
-                                                                response += `${index + 1}. ${point}\n`
-                                                        })
+                                                        analysis.keyPoints.forEach(
+                                                                (
+                                                                        point,
+                                                                        index
+                                                                ) => {
+                                                                        response += `${index + 1}. ${point}\n`
+                                                                }
+                                                        )
                                                         response += `\n`
                                                 }
 
-                                                if (analysis.suggestedHighlights.length > 0) {
+                                                if (
+                                                        analysis
+                                                                .suggestedHighlights
+                                                                .length > 0
+                                                ) {
                                                         response += `**建议标记的内容**:\n`
-                                                        analysis.suggestedHighlights.forEach((highlight) => {
-                                                                const importanceIcon = highlight.importance === 'high' ? '🔴' :
-                                                                                       highlight.importance === 'medium' ? '🟡' : '🟢'
-                                                                response += `${importanceIcon} **${highlight.text}**\n`
-                                                                response += `   📝 ${highlight.reason}\n`
-                                                        })
+                                                        analysis.suggestedHighlights.forEach(
+                                                                (highlight) => {
+                                                                        const importanceIcon =
+                                                                                highlight.importance ===
+                                                                                'high'
+                                                                                        ? '🔴'
+                                                                                        : highlight.importance ===
+                                                                                            'medium'
+                                                                                          ? '🟡'
+                                                                                          : '🟢'
+                                                                        response += `${importanceIcon} **${highlight.text}**\n`
+                                                                        response += `   📝 ${highlight.reason}\n`
+                                                                }
+                                                        )
                                                 }
 
                                                 response += `\n**阅读时间**: ${analysis.readingTime}分钟\n`
-                                                response += `**复杂度**: ${analysis.complexity === 'simple' ? '简单' :
-                                                                         analysis.complexity === 'medium' ? '中等' : '复杂'}\n`
+                                                response += `**复杂度**: ${
+                                                        analysis.complexity ===
+                                                        'simple'
+                                                                ? '简单'
+                                                                : analysis.complexity ===
+                                                                    'medium'
+                                                                  ? '中等'
+                                                                  : '复杂'
+                                                }\n`
 
                                                 return response
                                         }
                                 }
 
                                 // 检查消息是否请求页面分析
-                                const isPageAnalysisRequest = message.toLowerCase().includes('分析页面') || 
-                                                              message.toLowerCase().includes('总结页面') ||
-                                                              message.toLowerCase().includes('page analysis') ||
-                                                              message.toLowerCase().includes('summarize')
-                                
+                                const isPageAnalysisRequest =
+                                        message
+                                                .toLowerCase()
+                                                .includes('分析页面') ||
+                                        message
+                                                .toLowerCase()
+                                                .includes('总结页面') ||
+                                        message
+                                                .toLowerCase()
+                                                .includes('page analysis') ||
+                                        message
+                                                .toLowerCase()
+                                                .includes('summarize')
+
                                 if (isPageAnalysisRequest) {
                                         // 获取高质量的页面内容并分析
-                                        const pageContent = getChatPageContent(4000)
-                                        const analysis = await aiService.analyzePage(pageContent)
-                                        
+                                        const pageContent =
+                                                getChatPageContent(4000)
+                                        const analysis =
+                                                await aiService.analyzePage(
+                                                        pageContent
+                                                )
+
                                         // 格式化分析结果
                                         let response = `📊 **页面分析结果**\n\n`
                                         response += `**总结**: ${analysis.summary}\n\n`
-                                        
+
                                         if (analysis.keyPoints.length > 0) {
                                                 response += `**关键点**:\n`
-                                                analysis.keyPoints.forEach((point, index) => {
-                                                        response += `${index + 1}. ${point}\n`
-                                                })
+                                                analysis.keyPoints.forEach(
+                                                        (point, index) => {
+                                                                response += `${index + 1}. ${point}\n`
+                                                        }
+                                                )
                                                 response += `\n`
                                         }
-                                        
+
                                         response += `**阅读时间**: ${analysis.readingTime}分钟\n`
-                                        response += `**复杂度**: ${analysis.complexity === 'simple' ? '简单' : 
-                                                                 analysis.complexity === 'medium' ? '中等' : '复杂'}\n`
-                                        
+                                        response += `**复杂度**: ${
+                                                analysis.complexity === 'simple'
+                                                        ? '简单'
+                                                        : analysis.complexity ===
+                                                            'medium'
+                                                          ? '中等'
+                                                          : '复杂'
+                                        }\n`
+
                                         return response
                                 }
-                                
+
                                 // 普通对话，使用summarizeText
-                                const response = await aiService.summarizeText(message, 500)
+                                const response = await aiService.summarizeText(
+                                        message,
+                                        500
+                                )
                                 return response
                         } catch (error) {
                                 console.error('AI对话失败:', error)
@@ -204,7 +289,7 @@ export class AIFeature extends Feature {
                         // 获取高质量的页面内容，限制token数量
                         const pageContent = getChatPageContent(2000)
                         const pageStructure = getPageStructure()
-                        
+
                         let content = `当前页面内容:\n`
                         content += `页面标题: ${pageStructure.title}\n`
                         content += `页面URL: ${pageStructure.url}\n`
@@ -213,7 +298,7 @@ export class AIFeature extends Feature {
                         }
                         content += `提取内容长度: ${estimateTokens(pageContent)} tokens\n\n`
                         content += `页面主要内容:\n${pageContent}`
-                        
+
                         return content
                 }
 
@@ -262,8 +347,6 @@ export class AIFeature extends Feature {
                         console.warn('加载AI配置失败:', error)
                 }
         }
-
-
 
         /**
          * 格式化分析结果
