@@ -23,50 +23,27 @@ import csso from 'postcss-csso'
 import postcss_import from 'postcss-import'
 
 const isProduction = process.env.NODE_ENV === 'production'
-const browser = process.env.BROWSER || 'firefox'
-
-// 用于存储构建输出的文件映射
-const outputFiles = new Map()
 
 // 生成manifest的函数
 function generateManifest() {
         const baseManifest = JSON.parse(readFileSync('manifest.json', 'utf-8'))
         const manifest = { ...baseManifest }
 
-        if (browser === 'chrome') {
-                manifest.manifest_version = 3
-                manifest.background = {
-                        service_worker: 'background.js',
-                }
-                manifest.action = manifest.browser_action
-                delete manifest.browser_action
-
-                manifest.host_permissions = manifest.permissions.filter(
-                        (p) => p.startsWith('http') || p === '<all_urls>'
-                )
-                manifest.permissions = manifest.permissions.filter(
-                        (p) => !p.startsWith('http') && p !== '<all_urls>'
-                )
-
-                delete manifest.browser_specific_settings
-        } else {
-                manifest.manifest_version = 2
-        }
+        // 只支持Firefox，manifest_version为2
+        manifest.manifest_version = 2
 
         if (!isProduction) {
                 manifest.name = `[DEV] ${manifest.name}`
         }
 
-        const distDir = join('dist', browser)
+        const distDir = 'dist'
         if (!existsSync(distDir)) {
                 mkdirSync(distDir, { recursive: true })
         }
 
         const manifestPath = join(distDir, 'manifest.json')
         writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
-        console.log(
-                `Generated manifest for ${browser} (MV${manifest.manifest_version})`
-        )
+        console.log(`Generated manifest for Firefox (MV${manifest.manifest_version})`)
 
         return manifestPath
 }
@@ -100,7 +77,7 @@ const sharedPlugins = [
                 presets: ['solid'],
         }),
         commonjs(),
-        // 处理CSS导入
+        // 处理CSS导入，防止rollup解析CSS文件
         {
                 name: 'css-import',
                 resolveId(source) {
@@ -111,78 +88,53 @@ const sharedPlugins = [
                 },
                 load(id) {
                         if (id.endsWith('.css')) {
-                                // 返回空内容，因为CSS会被合并到单独的文件中
+                                // 返回空内容，CSS会被单独处理
                                 return ''
                         }
                         return null
                 },
         },
         replace({
-                'process.env.NODE_ENV': JSON.stringify(
-                        isProduction ? 'production' : 'development'
-                ),
-                'process.env.BROWSER': JSON.stringify(browser),
                 preventAssignment: true,
+                values: {
+                        'process.env.NODE_ENV': JSON.stringify(
+                                isProduction ? 'production' : 'development'
+                        ),
+                },
         }),
 ]
 
-// Content script 构建配置 - 构建为独立的 IIFE 文件
+// 内容脚本配置
 const contentScriptConfig = {
         input: 'entrypoints/content/index.ts',
         output: {
-                file: `dist/${browser}/content-scripts/content.js`,
-                format: 'iife', // 使用 IIFE 格式，适合 content script
-                name: 'contentScript', // 全局变量名
-                sourcemap: isProduction ? false : 'inline',
-                // 禁用代码分割，所有代码打包到一个文件
+                file: 'dist/content-scripts/content.js',
+                format: 'iife',
+                name: 'contentScript',
+                sourcemap: !isProduction,
                 inlineDynamicImports: true,
         },
         plugins: [
                 ...sharedPlugins,
-                // 自定义CSS合并插件（使用postcss处理）- 仅用于 content script
                 {
-                        name: 'merge-content-css',
+                        name: 'content-css',
                         async buildStart() {
-                                // 处理content CSS
+                                // 读取主CSS文件
                                 const contentCssContent = readFileSync(
                                         'entrypoints/content/style.css',
                                         'utf-8'
                                 )
 
-                                // 导入所有功能CSS文件
-                                const featureCssFiles = [
-                                        'entrypoints/content/feature/anchor/anchor.css',
-                                        'entrypoints/content/feature/downloadLink/downloadLink.css',
-                                        'entrypoints/content/feature/linkTarget/linkTarget.css',
-                                        'entrypoints/content/feature/translate/translate.css',
-                                ]
-
-                                let allCssContent = contentCssContent
-                                for (const cssFile of featureCssFiles) {
-                                        if (existsSync(cssFile)) {
-                                                allCssContent +=
-                                                        '\n' +
-                                                        readFileSync(
-                                                                cssFile,
-                                                                'utf-8'
-                                                        )
-                                        }
-                                }
-
-                                // 配置PostCSS插件链
-                                const plugins = [
-                                        postcss_import,
-                                        ...(isProduction ? [csso] : []),
-                                ]
-
-                                // 处理合并后的CSS
-                                const result = await postcss(plugins).process(
-                                        allCssContent,
-                                        {
-                                                from: 'entrypoints/content/style.css',
-                                                to: 'content.css',
-                                        }
-                                )
+                                // 使用postcss处理CSS导入
+                                const result = await postcss([
+                                        postcss_import({
+                                                root: 'entrypoints/content'
+                                        }),
+                                        ...(isProduction ? [csso()] : []),
+                                ]).process(contentCssContent, {
+                                        from: 'entrypoints/content/style.css',
+                                        to: 'dist/content-scripts/content.css',
+                                })
 
                                 // 保存处理后的CSS
                                 this.emitFile({
@@ -192,251 +144,256 @@ const contentScriptConfig = {
                                 })
                         },
                 },
-                isProduction &&
-                        terser({
-                                format: {
-                                        comments: false,
-                                },
-                                compress: {
-                                        drop_console: true,
-                                        drop_debugger: true,
-                                },
-                        }),
+                ...(isProduction
+                        ? [
+                                terser({
+                                        format: {
+                                                comments: false,
+                                        },
+                                        compress: {
+                                                drop_console: true,
+                                                drop_debugger: true,
+                                        },
+                                }),
+                          ]
+                        : []),
         ],
 }
 
-// Background 和 Popup 构建配置 - 保持原有 ES 模块格式
+// 背景脚本和弹窗配置
 const backgroundPopupConfig = {
         input: {
                 background: 'entrypoints/background/index.ts',
                 popup: 'entrypoints/popup/main.tsx',
         },
         output: {
-                dir: `dist/${browser}`,
+                dir: 'dist',
                 format: 'es',
-                sourcemap: isProduction ? false : 'inline',
+                sourcemap: !isProduction,
                 entryFileNames: (chunkInfo) => {
-                        if (chunkInfo.name === 'background') {
-                                return 'background.js'
+                        if (chunkInfo.name === 'popup') {
+                                return 'popup/index-[hash].js'
                         }
-                        return 'assets/[name]-[hash].js'
+                        return '[name].js'
                 },
-                chunkFileNames: 'assets/[name]-[hash].js',
-                assetFileNames: () => {
-                        return 'assets/[name]-[hash][extname]'
+                chunkFileNames: 'chunks/[name]-[hash].js',
+                assetFileNames: (assetInfo) => {
+                        if (assetInfo.name === 'style.css') {
+                                return 'popup/index-[hash].css'
+                        }
+                        return 'assets/[name][extname]'
                 },
         },
         plugins: [
-                ...sharedPlugins, // 清理 assets 目录中的旧哈希文件
+                ...sharedPlugins,
                 {
-                        name: 'clean-assets',
+                        name: 'clean-dist',
                         buildStart() {
-                                const assetsDir = join(
-                                        `dist/${browser}`,
-                                        'assets'
-                                )
+                                const assetsDir = 'dist/assets'
                                 if (existsSync(assetsDir)) {
                                         const files = readdirSync(assetsDir)
                                         let removedCount = 0
                                         for (const file of files) {
-                                                // 只删除 .js 哈希文件（保留 popup.css 等固定名称文件）
-                                                if (
-                                                        file.endsWith('.js') &&
-                                                        file.includes('-')
-                                                ) {
-                                                        const filePath = join(
-                                                                assetsDir,
-                                                                file
-                                                        )
-                                                        if (
-                                                                statSync(
-                                                                        filePath
-                                                                ).isFile()
-                                                        ) {
-                                                                unlinkSync(
-                                                                        filePath
-                                                                )
-                                                                removedCount++
-                                                        }
+                                                const filePath = join(assetsDir, file)
+                                                if (statSync(filePath).isFile()) {
+                                                        unlinkSync(filePath)
+                                                        removedCount++
                                                 }
                                         }
                                         if (removedCount > 0) {
                                                 console.log(
-                                                        `Cleaned ${removedCount} old hashed files in ${assetsDir}`
+                                                        `Cleaned up ${removedCount} old asset files`
                                                 )
                                         }
                                 }
                         },
                 },
-
-                // 自定义CSS合并插件（使用postcss处理）- 用于 popup
                 {
-                        name: 'merge-popup-css',
+                        name: 'popup-css',
                         async buildStart() {
-                                // 处理popup CSS
                                 const popupCssContent = readFileSync(
                                         'entrypoints/popup/style.css',
                                         'utf-8'
                                 )
 
-                                // 配置PostCSS插件链
-                                const plugins = [
-                                        postcss_import,
-                                        ...(isProduction ? [csso] : []),
-                                ]
-
-                                // 处理popup CSS
-                                const popupResult = await postcss(
-                                        plugins
-                                ).process(popupCssContent, {
+                                // 使用postcss处理CSS导入
+                                const result = await postcss([
+                                        postcss_import({
+                                                root: 'entrypoints/popup'
+                                        }),
+                                        ...(isProduction ? [csso()] : []),
+                                ]).process(popupCssContent, {
                                         from: 'entrypoints/popup/style.css',
-                                        to: 'assets/popup.css',
                                 })
 
-                                // 保存处理后的CSS
+                                // 保存处理后的CSS，使用源文件名作为name
                                 this.emitFile({
                                         type: 'asset',
-                                        fileName: 'assets/popup.css',
-                                        source: popupResult.css,
+                                        name: 'style.css',
+                                        source: result.css,
                                 })
                         },
                 },
-                isProduction &&
-                        terser({
-                                format: {
-                                        comments: false,
+                ...(isProduction
+                        ? [
+                                terser({
+                                        format: {
+                                                comments: false,
+                                        },
+                                        compress: {
+                                                drop_console: true,
+                                                drop_debugger: true,
+                                        },
+                                }),
+                          ]
+                        : []),
+                copy({
+                        targets: [
+                                {
+                                        src: 'public/icon/*',
+                                        dest: 'dist/icon',
                                 },
-                                compress: {
-                                        drop_console: true,
-                                        drop_debugger: true,
+                                {
+                                        src: 'entrypoints/popup/index.html',
+                                        dest: 'dist/popup',
                                 },
-                        }),
-                // 记录输出文件
-                {
-                        name: 'record-output-files',
-                        generateBundle(options, bundle) {
-                                for (const [
-                                        fileName,
-                                        fileInfo,
-                                ] of Object.entries(bundle)) {
-                                        if (
-                                                fileInfo.type === 'chunk' &&
-                                                fileInfo.isEntry
-                                        ) {
-                                                outputFiles.set(
-                                                        fileInfo.name,
-                                                        fileName
-                                                )
-                                        }
-                                }
-                        },
-                },
-                // 生成manifest
+                        ],
+                }),
                 {
                         name: 'generate-manifest',
                         buildStart() {
                                 generateManifest()
                         },
                 },
-                copy({
-                        targets: [
-                                {
-                                        src: 'entrypoints/popup/index.html',
-                                        dest: `dist/${browser}/popup`,
-                                },
-                                {
-                                        src: 'public/icon/*',
-                                        dest: `dist/${browser}/icon`,
-                                },
-                        ],
-                }),
-                // 自动处理HTML中的资源引用
                 {
-                        name: 'auto-html-references',
+                        name: 'inject-popup-assets',
                         writeBundle(options, bundle) {
-                                const distDir = `dist/${browser}`
-                                const htmlPath = join(
-                                        distDir,
-                                        'popup',
-                                        'index.html'
-                                )
+                                const distDir = 'dist'
+                                const htmlPath = join(distDir, 'popup', 'index.html')
 
                                 if (!existsSync(htmlPath)) {
-                                        return
-                                }
-
-                                // 确保是文件而不是目录
-                                const stats = statSync(htmlPath)
-                                if (!stats.isFile()) {
+                                        console.warn('Popup HTML not found:', htmlPath)
                                         return
                                 }
 
                                 let html = readFileSync(htmlPath, 'utf-8')
 
-                                // 1. 更新JS脚本引用
-                                const popupEntryFile = outputFiles.get('popup')
-                                if (popupEntryFile) {
-                                        const jsRelativePath = `../${popupEntryFile}`
-                                        html = html.replace(
-                                                /<script\s+type="module"\s+src="[^"]*main\.tsx"[^>]*><\/script>/,
-                                                `<script type="module" src="${jsRelativePath}"></script>`
-                                        )
+                                // 1. 解析HTML，找出所有引用的源文件
+                                const sourceRefs = {
+                                        js: [],
+                                        css: []
                                 }
 
-                                // 2. 更新CSS引用 - 查找bundle中的CSS文件
-                                const cssFiles = Object.entries(bundle)
-                                        .filter(
-                                                ([fileName, fileInfo]) =>
-                                                        fileInfo.type ===
-                                                                'asset' &&
-                                                        fileName.endsWith(
-                                                                '.css'
-                                                        ) &&
-                                                        fileName.includes(
-                                                                'popup'
-                                                        )
-                                        )
-                                        .map(([fileName]) => fileName)
-
-                                if (cssFiles.length > 0) {
-                                        const cssFile = cssFiles[0]
-                                        const cssRelativePath = `../${cssFile}`
-
-                                        // 替换或添加CSS链接
-                                        if (html.includes('rel="stylesheet"')) {
-                                                // 替换现有的CSS链接
-                                                html = html.replace(
-                                                        /<link\s+rel="stylesheet"\s+href="[^"]*"[^>]*>/,
-                                                        `<link rel="stylesheet" href="${cssRelativePath}" />`
-                                                )
-                                        } else {
-                                                // 添加新的CSS链接（在title标签后）
-                                                html = html.replace(
-                                                        /<title>Bread<\/title>/,
-                                                        `<title>Bread</title>\n                <link rel="stylesheet" href="${cssRelativePath}" />`
-                                                )
+                                // 查找所有script标签（支持相对路径）
+                                const scriptRegex = /<script\s+[^>]*src="([^"]+)"[^>]*><\/script>/gi
+                                let match
+                                while ((match = scriptRegex.exec(html)) !== null) {
+                                        const src = match[1]
+                                        // 只处理本地文件，忽略外部URL
+                                        if (!src.startsWith('http') && !src.startsWith('//')) {
+                                                sourceRefs.js.push(src)
                                         }
                                 }
 
-                                // 3. 更新其他资源引用（如图标、图片等）
-                                // 这里可以扩展以处理更多类型的资源
-
-                                writeFileSync(htmlPath, html)
-                                console.log(
-                                        `Updated HTML references in popup/index.html`
-                                )
-
-                                // 输出更新信息
-                                if (popupEntryFile) {
-                                        console.log(`  JS: ${popupEntryFile}`)
+                                // 查找所有link标签（支持相对路径）
+                                const linkRegex = /<link\s+[^>]*href="([^"]+)"[^>]*>/gi
+                                while ((match = linkRegex.exec(html)) !== null) {
+                                        const href = match[1]
+                                        // 只处理本地CSS文件，忽略外部URL
+                                        if (!href.startsWith('http') && !href.startsWith('//') && href.endsWith('.css')) {
+                                                sourceRefs.css.push(href)
+                                        }
                                 }
-                                if (cssFiles.length > 0) {
-                                        console.log(`  CSS: ${cssFiles[0]}`)
+
+                                // 2. 构建源文件到构建产物的映射
+                                const sourceToOutputMap = new Map()
+
+                                // 遍历bundle，构建映射
+                                for (const [outputFile, fileInfo] of Object.entries(bundle)) {
+                                        if (fileInfo.type === 'chunk' && fileInfo.isEntry) {
+                                                // 入口chunk：映射入口文件到输出文件
+                                                const entryFile = fileInfo.facadeModuleId
+                                                if (entryFile) {
+                                                        // 获取入口文件的basename（如main.tsx）
+                                                        const entryBasename = entryFile.replace(/^.*[\\\/]/, '')
+                                                        // 映射源文件到输出文件
+                                                        sourceToOutputMap.set(entryBasename, outputFile)
+                                                        // 同时映射.js版本（因为.tsx会被编译为.js）
+                                                        const jsBasename = entryBasename.replace(/\.(tsx?|jsx?)$/, '.js')
+                                                        sourceToOutputMap.set(jsBasename, outputFile)
+                                                }
+                                        } else if (fileInfo.type === 'asset' && fileInfo.name) {
+                                                // asset文件：映射asset名称到输出文件
+                                                // 对于CSS文件，我们需要将源文件名映射到输出文件
+                                                if (fileInfo.name === 'style.css') {
+                                                        sourceToOutputMap.set('style.css', outputFile)
+                                                }
+                                        }
+                                }
+
+                                // 3. 替换HTML中的引用
+                                let updated = false
+
+                                // 替换script标签
+                                for (const sourceJs of sourceRefs.js) {
+                                        // 获取源文件的basename（如./main.tsx -> main.tsx）
+                                        const sourceBasename = sourceJs.replace(/^.*[\\\/]/, '').replace(/^\.\//, '')
+                                        // 尝试查找映射
+                                        let outputFile = sourceToOutputMap.get(sourceBasename)
+
+                                        // 如果没有直接匹配，尝试.js版本（因为.tsx会被编译为.js）
+                                        if (!outputFile && sourceBasename.endsWith('.tsx')) {
+                                                const jsBasename = sourceBasename.replace(/\.tsx$/, '.js')
+                                                outputFile = sourceToOutputMap.get(jsBasename)
+                                        }
+                                        if (!outputFile && sourceBasename.endsWith('.ts')) {
+                                                const jsBasename = sourceBasename.replace(/\.ts$/, '.js')
+                                                outputFile = sourceToOutputMap.get(jsBasename)
+                                        }
+
+                                        if (outputFile) {
+                                                // 提取文件名部分（如 index-VS98NWwv.js）
+                                                const fileName = outputFile.replace(/^.*[\\\/]/, '')
+                                                const outputRelativePath = `./${fileName}`
+                                                const oldScriptRegex = new RegExp(`<script\\s+[^>]*src="${sourceJs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*><\\/script>`)
+                                                const newScriptTag = `<script type="module" src="${outputRelativePath}"></script>`
+
+                                                html = html.replace(oldScriptRegex, newScriptTag)
+                                                updated = true
+                                                console.log(`Replaced ${sourceJs} -> ${outputRelativePath}`)
+                                        } else {
+                                                console.warn(`Could not find output file for source: ${sourceJs}`)
+                                        }
+                                }
+
+                                // 替换link标签
+                                for (const sourceCss of sourceRefs.css) {
+                                        // 获取源文件的basename（如./style.css -> style.css）
+                                        const sourceBasename = sourceCss.replace(/^.*[\\\/]/, '').replace(/^\.\//, '')
+                                        const outputFile = sourceToOutputMap.get(sourceBasename)
+                                        
+                                        if (outputFile) {
+                                                // 提取文件名部分（如 index-DI4Kpopc.css）
+                                                const fileName = outputFile.replace(/^.*[\\\/]/, '')
+                                                const outputRelativePath = `./${fileName}`
+                                                const oldLinkRegex = new RegExp(`<link\\s+[^>]*href="${sourceCss.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`)
+                                                const newLinkTag = `<link rel="stylesheet" href="${outputRelativePath}">`
+                                                
+                                                html = html.replace(oldLinkRegex, newLinkTag)
+                                                updated = true
+                                                console.log(`Replaced ${sourceCss} -> ${outputRelativePath}`)
+                                        } else {
+                                                console.warn(`Could not find output file for source: ${sourceCss}`)
+                                        }
+                                }
+
+                                if (updated) {
+                                        writeFileSync(htmlPath, html)
+                                        console.log('Updated popup HTML with dynamic asset references')
                                 }
                         },
                 },
         ],
 }
 
-// 导出两个构建配置
 export default [contentScriptConfig, backgroundPopupConfig]

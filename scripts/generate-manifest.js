@@ -1,7 +1,6 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import packageJson from '../package.json'
-const browser = process.env.BROWSER || 'firefox'
 const isDev = process.env.NODE_ENV === 'development'
 
 function generateManifest() {
@@ -13,29 +12,8 @@ function generateManifest() {
         manifest.version = packageJson.version
         manifest.summary = packageJson.summary
 
-        if (browser === 'chrome') {
-                // Chrome使用MV3
-                manifest.manifest_version = 3
-                manifest.background = {
-                        service_worker: 'background.js',
-                }
-                manifest.action = manifest.browser_action
-                delete manifest.browser_action
-
-                // 调整permissions格式
-                manifest.host_permissions = manifest.permissions.filter(
-                        (p) => p.startsWith('http') || p === '<all_urls>'
-                )
-                manifest.permissions = manifest.permissions.filter(
-                        (p) => !p.startsWith('http') && p !== '<all_urls>'
-                )
-
-                // 移除Firefox特定设置
-                delete manifest.browser_specific_settings
-        } else {
-                // Firefox使用MV2
-                manifest.manifest_version = 2
-        }
+        // Firefox使用MV2
+        manifest.manifest_version = 2
 
         // 开发模式添加标识
         if (isDev) {
@@ -43,7 +21,7 @@ function generateManifest() {
         }
 
         // 确保输出目录存在
-        const distDir = join('dist', browser)
+        const distDir = 'dist'
         if (!existsSync(distDir)) {
                 mkdirSync(distDir, { recursive: true })
         }
@@ -52,7 +30,7 @@ function generateManifest() {
         const manifestPath = join(distDir, 'manifest.json')
         writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
         console.log(
-                `Generated manifest for ${browser} (MV${manifest.manifest_version}) at ${manifestPath}`
+                `Generated manifest for Firefox (MV${manifest.manifest_version}) at ${manifestPath}`
         )
 
         return manifestPath
