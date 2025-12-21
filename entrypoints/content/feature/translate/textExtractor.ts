@@ -146,7 +146,7 @@ export async function extractTextFragments(
          */
         let currentNode: Node | null = walker.nextNode()
         while (currentNode) {
-                const text = currentNode.textContent?.replace(/\n/g, '').trim()
+                const text = currentNode.textContent?.replace(/\n/g, '')
                 if (text) {
                         textFragments.push(text)
                 }
