@@ -354,7 +354,7 @@ const backgroundPopupConfig = {
                                                         // 获取入口文件的basename（如main.tsx）
                                                         const entryBasename =
                                                                 entryFile.replace(
-                                                                        /^.*[\\\/]/,
+                                                                        /^.*[\\/]/,
                                                                         ''
                                                                 )
                                                         // 映射源文件到输出文件
@@ -398,7 +398,7 @@ const backgroundPopupConfig = {
                                 for (const sourceJs of sourceRefs.js) {
                                         // 获取源文件的basename（如./main.tsx -> main.tsx）
                                         const sourceBasename = sourceJs
-                                                .replace(/^.*[\\\/]/, '')
+                                                .replace(/^.*[\\/]/, '')
                                                 .replace(/^\.\//, '')
                                         // 尝试查找映射
                                         let outputFile =
@@ -440,7 +440,7 @@ const backgroundPopupConfig = {
                                                 // 提取文件名部分（如 index-VS98NWwv.js）
                                                 const fileName =
                                                         outputFile.replace(
-                                                                /^.*[\\\/]/,
+                                                                /^.*[\\/]/,
                                                                 ''
                                                         )
                                                 const outputRelativePath = `./${fileName}`
@@ -469,7 +469,7 @@ const backgroundPopupConfig = {
                                 for (const sourceCss of sourceRefs.css) {
                                         // 获取源文件的basename（如./style.css -> style.css）
                                         const sourceBasename = sourceCss
-                                                .replace(/^.*[\\\/]/, '')
+                                                .replace(/^.*[\\/]/, '')
                                                 .replace(/^\.\//, '')
                                         const outputFile =
                                                 sourceToOutputMap.get(
@@ -480,7 +480,7 @@ const backgroundPopupConfig = {
                                                 // 提取文件名部分（如 index-DI4Kpopc.css）
                                                 const fileName =
                                                         outputFile.replace(
-                                                                /^.*[\\\/]/,
+                                                                /^.*[\\/]/,
                                                                 ''
                                                         )
                                                 const outputRelativePath = `./${fileName}`

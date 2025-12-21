@@ -1,6 +1,6 @@
 console.log('Hello background!', { id: browser.runtime.id })
 
-browser.runtime.onMessage.addListener(async (message, _) => {
+browser.runtime.onMessage.addListener(async (message) => {
         if (message.action === 'getDomain') {
                 try {
                         const tabs = await browser.tabs.query({
