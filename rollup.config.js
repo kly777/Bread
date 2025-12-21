@@ -43,7 +43,9 @@ function generateManifest() {
 
         const manifestPath = join(distDir, 'manifest.json')
         writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
-        console.log(`Generated manifest for Firefox (MV${manifest.manifest_version})`)
+        console.log(
+                `Generated manifest for Firefox (MV${manifest.manifest_version})`
+        )
 
         return manifestPath
 }
@@ -128,7 +130,7 @@ const contentScriptConfig = {
                                 // 使用postcss处理CSS导入
                                 const result = await postcss([
                                         postcss_import({
-                                                root: 'entrypoints/content'
+                                                root: 'entrypoints/content',
                                         }),
                                         ...(isProduction ? [csso()] : []),
                                 ]).process(contentCssContent, {
@@ -146,15 +148,15 @@ const contentScriptConfig = {
                 },
                 ...(isProduction
                         ? [
-                                terser({
-                                        format: {
-                                                comments: false,
-                                        },
-                                        compress: {
-                                                drop_console: true,
-                                                drop_debugger: true,
-                                        },
-                                }),
+                                  terser({
+                                          format: {
+                                                  comments: false,
+                                          },
+                                          compress: {
+                                                  drop_console: true,
+                                                  drop_debugger: true,
+                                          },
+                                  }),
                           ]
                         : []),
         ],
@@ -194,8 +196,15 @@ const backgroundPopupConfig = {
                                         const files = readdirSync(assetsDir)
                                         let removedCount = 0
                                         for (const file of files) {
-                                                const filePath = join(assetsDir, file)
-                                                if (statSync(filePath).isFile()) {
+                                                const filePath = join(
+                                                        assetsDir,
+                                                        file
+                                                )
+                                                if (
+                                                        statSync(
+                                                                filePath
+                                                        ).isFile()
+                                                ) {
                                                         unlinkSync(filePath)
                                                         removedCount++
                                                 }
@@ -219,7 +228,7 @@ const backgroundPopupConfig = {
                                 // 使用postcss处理CSS导入
                                 const result = await postcss([
                                         postcss_import({
-                                                root: 'entrypoints/popup'
+                                                root: 'entrypoints/popup',
                                         }),
                                         ...(isProduction ? [csso()] : []),
                                 ]).process(popupCssContent, {
@@ -236,15 +245,15 @@ const backgroundPopupConfig = {
                 },
                 ...(isProduction
                         ? [
-                                terser({
-                                        format: {
-                                                comments: false,
-                                        },
-                                        compress: {
-                                                drop_console: true,
-                                                drop_debugger: true,
-                                        },
-                                }),
+                                  terser({
+                                          format: {
+                                                  comments: false,
+                                          },
+                                          compress: {
+                                                  drop_console: true,
+                                                  drop_debugger: true,
+                                          },
+                                  }),
                           ]
                         : []),
                 copy({
@@ -269,10 +278,17 @@ const backgroundPopupConfig = {
                         name: 'inject-popup-assets',
                         writeBundle(options, bundle) {
                                 const distDir = 'dist'
-                                const htmlPath = join(distDir, 'popup', 'index.html')
+                                const htmlPath = join(
+                                        distDir,
+                                        'popup',
+                                        'index.html'
+                                )
 
                                 if (!existsSync(htmlPath)) {
-                                        console.warn('Popup HTML not found:', htmlPath)
+                                        console.warn(
+                                                'Popup HTML not found:',
+                                                htmlPath
+                                        )
                                         return
                                 }
 
@@ -281,26 +297,40 @@ const backgroundPopupConfig = {
                                 // 1. 解析HTML，找出所有引用的源文件
                                 const sourceRefs = {
                                         js: [],
-                                        css: []
+                                        css: [],
                                 }
 
                                 // 查找所有script标签（支持相对路径）
-                                const scriptRegex = /<script\s+[^>]*src="([^"]+)"[^>]*><\/script>/gi
+                                const scriptRegex =
+                                        /<script\s+[^>]*src="([^"]+)"[^>]*><\/script>/gi
                                 let match
-                                while ((match = scriptRegex.exec(html)) !== null) {
+                                while (
+                                        (match = scriptRegex.exec(html)) !==
+                                        null
+                                ) {
                                         const src = match[1]
                                         // 只处理本地文件，忽略外部URL
-                                        if (!src.startsWith('http') && !src.startsWith('//')) {
+                                        if (
+                                                !src.startsWith('http') &&
+                                                !src.startsWith('//')
+                                        ) {
                                                 sourceRefs.js.push(src)
                                         }
                                 }
 
                                 // 查找所有link标签（支持相对路径）
-                                const linkRegex = /<link\s+[^>]*href="([^"]+)"[^>]*>/gi
-                                while ((match = linkRegex.exec(html)) !== null) {
+                                const linkRegex =
+                                        /<link\s+[^>]*href="([^"]+)"[^>]*>/gi
+                                while (
+                                        (match = linkRegex.exec(html)) !== null
+                                ) {
                                         const href = match[1]
                                         // 只处理本地CSS文件，忽略外部URL
-                                        if (!href.startsWith('http') && !href.startsWith('//') && href.endsWith('.css')) {
+                                        if (
+                                                !href.startsWith('http') &&
+                                                !href.startsWith('//') &&
+                                                href.endsWith('.css')
+                                        ) {
                                                 sourceRefs.css.push(href)
                                         }
                                 }
@@ -309,24 +339,54 @@ const backgroundPopupConfig = {
                                 const sourceToOutputMap = new Map()
 
                                 // 遍历bundle，构建映射
-                                for (const [outputFile, fileInfo] of Object.entries(bundle)) {
-                                        if (fileInfo.type === 'chunk' && fileInfo.isEntry) {
+                                for (const [
+                                        outputFile,
+                                        fileInfo,
+                                ] of Object.entries(bundle)) {
+                                        if (
+                                                fileInfo.type === 'chunk' &&
+                                                fileInfo.isEntry
+                                        ) {
                                                 // 入口chunk：映射入口文件到输出文件
-                                                const entryFile = fileInfo.facadeModuleId
+                                                const entryFile =
+                                                        fileInfo.facadeModuleId
                                                 if (entryFile) {
                                                         // 获取入口文件的basename（如main.tsx）
-                                                        const entryBasename = entryFile.replace(/^.*[\\\/]/, '')
+                                                        const entryBasename =
+                                                                entryFile.replace(
+                                                                        /^.*[\\\/]/,
+                                                                        ''
+                                                                )
                                                         // 映射源文件到输出文件
-                                                        sourceToOutputMap.set(entryBasename, outputFile)
+                                                        sourceToOutputMap.set(
+                                                                entryBasename,
+                                                                outputFile
+                                                        )
                                                         // 同时映射.js版本（因为.tsx会被编译为.js）
-                                                        const jsBasename = entryBasename.replace(/\.(tsx?|jsx?)$/, '.js')
-                                                        sourceToOutputMap.set(jsBasename, outputFile)
+                                                        const jsBasename =
+                                                                entryBasename.replace(
+                                                                        /\.(tsx?|jsx?)$/,
+                                                                        '.js'
+                                                                )
+                                                        sourceToOutputMap.set(
+                                                                jsBasename,
+                                                                outputFile
+                                                        )
                                                 }
-                                        } else if (fileInfo.type === 'asset' && fileInfo.name) {
+                                        } else if (
+                                                fileInfo.type === 'asset' &&
+                                                fileInfo.name
+                                        ) {
                                                 // asset文件：映射asset名称到输出文件
                                                 // 对于CSS文件，我们需要将源文件名映射到输出文件
-                                                if (fileInfo.name === 'style.css') {
-                                                        sourceToOutputMap.set('style.css', outputFile)
+                                                if (
+                                                        fileInfo.name ===
+                                                        'style.css'
+                                                ) {
+                                                        sourceToOutputMap.set(
+                                                                'style.css',
+                                                                outputFile
+                                                        )
                                                 }
                                         }
                                 }
@@ -337,59 +397,118 @@ const backgroundPopupConfig = {
                                 // 替换script标签
                                 for (const sourceJs of sourceRefs.js) {
                                         // 获取源文件的basename（如./main.tsx -> main.tsx）
-                                        const sourceBasename = sourceJs.replace(/^.*[\\\/]/, '').replace(/^\.\//, '')
+                                        const sourceBasename = sourceJs
+                                                .replace(/^.*[\\\/]/, '')
+                                                .replace(/^\.\//, '')
                                         // 尝试查找映射
-                                        let outputFile = sourceToOutputMap.get(sourceBasename)
+                                        let outputFile =
+                                                sourceToOutputMap.get(
+                                                        sourceBasename
+                                                )
 
                                         // 如果没有直接匹配，尝试.js版本（因为.tsx会被编译为.js）
-                                        if (!outputFile && sourceBasename.endsWith('.tsx')) {
-                                                const jsBasename = sourceBasename.replace(/\.tsx$/, '.js')
-                                                outputFile = sourceToOutputMap.get(jsBasename)
+                                        if (
+                                                !outputFile &&
+                                                sourceBasename.endsWith('.tsx')
+                                        ) {
+                                                const jsBasename =
+                                                        sourceBasename.replace(
+                                                                /\.tsx$/,
+                                                                '.js'
+                                                        )
+                                                outputFile =
+                                                        sourceToOutputMap.get(
+                                                                jsBasename
+                                                        )
                                         }
-                                        if (!outputFile && sourceBasename.endsWith('.ts')) {
-                                                const jsBasename = sourceBasename.replace(/\.ts$/, '.js')
-                                                outputFile = sourceToOutputMap.get(jsBasename)
+                                        if (
+                                                !outputFile &&
+                                                sourceBasename.endsWith('.ts')
+                                        ) {
+                                                const jsBasename =
+                                                        sourceBasename.replace(
+                                                                /\.ts$/,
+                                                                '.js'
+                                                        )
+                                                outputFile =
+                                                        sourceToOutputMap.get(
+                                                                jsBasename
+                                                        )
                                         }
 
                                         if (outputFile) {
                                                 // 提取文件名部分（如 index-VS98NWwv.js）
-                                                const fileName = outputFile.replace(/^.*[\\\/]/, '')
+                                                const fileName =
+                                                        outputFile.replace(
+                                                                /^.*[\\\/]/,
+                                                                ''
+                                                        )
                                                 const outputRelativePath = `./${fileName}`
-                                                const oldScriptRegex = new RegExp(`<script\\s+[^>]*src="${sourceJs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*><\\/script>`)
+                                                const oldScriptRegex =
+                                                        new RegExp(
+                                                                `<script\\s+[^>]*src="${sourceJs.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*><\\/script>`
+                                                        )
                                                 const newScriptTag = `<script type="module" src="${outputRelativePath}"></script>`
 
-                                                html = html.replace(oldScriptRegex, newScriptTag)
+                                                html = html.replace(
+                                                        oldScriptRegex,
+                                                        newScriptTag
+                                                )
                                                 updated = true
-                                                console.log(`Replaced ${sourceJs} -> ${outputRelativePath}`)
+                                                console.log(
+                                                        `Replaced ${sourceJs} -> ${outputRelativePath}`
+                                                )
                                         } else {
-                                                console.warn(`Could not find output file for source: ${sourceJs}`)
+                                                console.warn(
+                                                        `Could not find output file for source: ${sourceJs}`
+                                                )
                                         }
                                 }
 
                                 // 替换link标签
                                 for (const sourceCss of sourceRefs.css) {
                                         // 获取源文件的basename（如./style.css -> style.css）
-                                        const sourceBasename = sourceCss.replace(/^.*[\\\/]/, '').replace(/^\.\//, '')
-                                        const outputFile = sourceToOutputMap.get(sourceBasename)
-                                        
+                                        const sourceBasename = sourceCss
+                                                .replace(/^.*[\\\/]/, '')
+                                                .replace(/^\.\//, '')
+                                        const outputFile =
+                                                sourceToOutputMap.get(
+                                                        sourceBasename
+                                                )
+
                                         if (outputFile) {
                                                 // 提取文件名部分（如 index-DI4Kpopc.css）
-                                                const fileName = outputFile.replace(/^.*[\\\/]/, '')
+                                                const fileName =
+                                                        outputFile.replace(
+                                                                /^.*[\\\/]/,
+                                                                ''
+                                                        )
                                                 const outputRelativePath = `./${fileName}`
-                                                const oldLinkRegex = new RegExp(`<link\\s+[^>]*href="${sourceCss.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`)
+                                                const oldLinkRegex = new RegExp(
+                                                        `<link\\s+[^>]*href="${sourceCss.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`
+                                                )
                                                 const newLinkTag = `<link rel="stylesheet" href="${outputRelativePath}">`
-                                                
-                                                html = html.replace(oldLinkRegex, newLinkTag)
+
+                                                html = html.replace(
+                                                        oldLinkRegex,
+                                                        newLinkTag
+                                                )
                                                 updated = true
-                                                console.log(`Replaced ${sourceCss} -> ${outputRelativePath}`)
+                                                console.log(
+                                                        `Replaced ${sourceCss} -> ${outputRelativePath}`
+                                                )
                                         } else {
-                                                console.warn(`Could not find output file for source: ${sourceCss}`)
+                                                console.warn(
+                                                        `Could not find output file for source: ${sourceCss}`
+                                                )
                                         }
                                 }
 
                                 if (updated) {
                                         writeFileSync(htmlPath, html)
-                                        console.log('Updated popup HTML with dynamic asset references')
+                                        console.log(
+                                                'Updated popup HTML with dynamic asset references'
+                                        )
                                 }
                         },
                 },
