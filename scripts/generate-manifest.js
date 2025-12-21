@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join } from 'path'
-
+import packageJson from '../package.json'
 const browser = process.env.BROWSER || 'firefox'
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -10,6 +10,8 @@ function generateManifest() {
 
         // 根据浏览器调整
         const manifest = { ...baseManifest }
+        manifest.version = packageJson.version
+        manifest.summary = packageJson.summary
 
         if (browser === 'chrome') {
                 // Chrome使用MV3
