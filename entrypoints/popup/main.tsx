@@ -1,15 +1,11 @@
 import { render } from 'solid-js/web'
 import './style.css'
 import App from './App'
-let tmp_domain = 'default'
-await browser.runtime
-        .sendMessage({ action: 'getDomain' })
-        .then((response: { domain?: string }) => {
-                console.log('response:', response)
-                tmp_domain = response.domain || 'default'
-        })
+import { initDomain } from './domain'
 
-export const domain = tmp_domain
+// 初始化域名
+await initDomain()
+
 const appContainer = document.getElementById('app')
 if (appContainer) {
         render(() => <App />, appContainer)

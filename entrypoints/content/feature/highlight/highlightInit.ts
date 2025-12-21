@@ -123,9 +123,12 @@ function handlePersistentKeywordsChange(newKeywords: string | undefined): void {
  */
 async function applyPersistentHighlightOnLoad(): Promise<void> {
         try {
-                const persistentKeywords = await breadStorage.getItem<string>(
+                const result = await browser.storage.local.get(
                         'local:persistent_highlight_keywords'
                 )
+                const persistentKeywords = result[
+                        'local:persistent_highlight_keywords'
+                ] as string | undefined
                 if (persistentKeywords && persistentKeywords.trim()) {
                         console.log('页面加载时自动应用持久高亮')
                         const keywords = persistentKeywords

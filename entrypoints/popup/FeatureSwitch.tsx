@@ -1,7 +1,7 @@
 import { Component, createSignal, onMount, For } from 'solid-js'
 import FeatureSetting from './FeatureSetting'
 import { featureSettingStorage } from '../common/storage'
-import { domain } from './main'
+import { getDomain } from './domain'
 
 type SettingState = 'default' | 'enabled' | 'disabled'
 type SettingType = 'string' | 'number' | 'boolean'
@@ -17,8 +17,12 @@ const FeatureSwitch: Component<FeatureSwitchProps> = (props) => {
 
         // 获取 domain 并创建 featureSettingStorage 实例
         const getFeatureStorage = () => {
-                console.log('domain:', domain)
-                return new featureSettingStorage(props.featureName, domain)
+                const currentDomain = getDomain()
+                console.log('domain:', currentDomain)
+                return new featureSettingStorage(
+                        props.featureName,
+                        currentDomain
+                )
         }
 
         onMount(async () => {

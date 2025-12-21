@@ -1,24 +1,30 @@
 console.log('Hello background!', { id: browser.runtime.id })
 
-browser.runtime.onMessage.addListener((message, _, sendResponse) => {
+browser.runtime.onMessage.addListener(async (message, _) => {
         if (message.action === 'getDomain') {
-                browser.tabs.query(
-                        { active: true, currentWindow: true },
-                        (tabs) => {
-                                if (tabs.length > 0 && tabs[0].url) {
-                                        const url = new URL(tabs[0].url)
-                                        const domain = url.hostname
-                                        sendResponse({
-                                                domain: domain,
-                                        })
-                                } else {
-                                        sendResponse({
-                                                domain: null,
-                                        })
+                try {
+                        const tabs = await browser.tabs.query({
+                                active: true,
+                                currentWindow: true,
+                        })
+
+                        if (tabs.length > 0 && tabs[0].url) {
+                                const url = new URL(tabs[0].url)
+                                const domain = url.hostname
+                                return {
+                                        domain: domain,
+                                }
+                        } else {
+                                return {
+                                        domain: null,
                                 }
                         }
-                )
-                return true // 保持消息通道开放
+                } catch (error) {
+                        console.error('获取域名失败:', error)
+                        return {
+                                domain: null,
+                        }
+                }
         }
         return false
 })
