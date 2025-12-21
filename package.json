@@ -2,7 +2,7 @@
         "name": "bread",
         "description": "a extension for reading",
         "private": true,
-        "version": "0.1.29",
+        "version": "0.1.30",
         "license": "Apache-2.0",
         "type": "module",
         "scripts": {

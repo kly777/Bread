@@ -1,5 +1,12 @@
 {
         "version": {
                 "license": "Apache-2.0"
-        }
+        },
+        "summary": {
+                "en-US": "A browser extension for reading enhancement",
+                "zh-CN": "一个用于阅读增强的浏览器扩展"
+        },
+        "categories": [
+                "other"
+        ]
 }
