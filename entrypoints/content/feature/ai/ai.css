@@ -1,6 +1,6 @@
 .bread-ai-window {
-        width: 400px;
-        max-height: 600px;
+        width: 450px;
+        max-height: 700px;
         background: white;
         border: 1px solid #e0e0e0;
         border-radius: 12px;
@@ -187,14 +187,253 @@
         }
 }
 
+/* 标签页样式 */
+.bread-ai-tabs {
+        display: flex;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+}
+
+.bread-ai-tab {
+        flex: 1;
+        padding: 12px 16px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+        transition: all 0.2s ease;
+        text-align: center;
+}
+
+.bread-ai-tab:hover {
+        background: #f1f3f4;
+        color: #333;
+}
+
+.bread-ai-tab.active {
+        color: #3b82f6;
+        border-bottom-color: #3b82f6;
+        background: white;
+}
+
+/* 聊天容器样式 */
+.bread-ai-chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 500px;
+}
+
+.bread-ai-chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        min-height: 300px;
+}
+
+.bread-ai-chat-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #666;
+        font-size: 14px;
+        text-align: center;
+        padding: 40px 20px;
+}
+
+.bread-ai-chat-message {
+        margin-bottom: 16px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        max-width: 85%;
+        word-wrap: break-word;
+        position: relative;
+}
+
+.bread-ai-chat-message-user {
+        background: #3b82f6;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+}
+
+.bread-ai-chat-message-assistant {
+        background: #f1f3f4;
+        color: #333;
+        margin-right: auto;
+        border-bottom-left-radius: 4px;
+}
+
+.bread-ai-chat-message-role {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        opacity: 0.8;
+}
+
+.bread-ai-chat-message-user .bread-ai-chat-message-role {
+        color: rgba(255, 255, 255, 0.9);
+}
+
+.bread-ai-chat-message-assistant .bread-ai-chat-message-role {
+        color: #666;
+}
+
+.bread-ai-chat-message-content {
+        font-size: 14px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+}
+
+.bread-ai-chat-message-time {
+        font-size: 11px;
+        margin-top: 4px;
+        opacity: 0.6;
+        text-align: right;
+}
+
+.bread-ai-chat-message-user .bread-ai-chat-message-time {
+        color: rgba(255, 255, 255, 0.7);
+}
+
+.bread-ai-chat-message-assistant .bread-ai-chat-message-time {
+        color: #666;
+}
+
+/* 聊天输入区域 */
+.bread-ai-chat-input-container {
+        border-top: 1px solid #e0e0e0;
+        padding-top: 16px;
+}
+
+.bread-ai-chat-input-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+}
+
+.bread-ai-chat-action-btn {
+        padding: 8px 12px;
+        background: #f1f3f4;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        color: #666;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+}
+
+.bread-ai-chat-action-btn:hover:not(:disabled) {
+        background: #e8eaed;
+        color: #333;
+}
+
+.bread-ai-chat-action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+}
+
+.bread-ai-chat-input-wrapper {
+        position: relative;
+}
+
+.bread-ai-chat-input {
+        width: 100%;
+        padding: 12px 16px;
+        padding-right: 60px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+        resize: none;
+        background: white;
+        color: #333;
+        transition: border-color 0.2s ease;
+}
+
+.bread-ai-chat-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.bread-ai-chat-input:disabled {
+        background: #f8f9fa;
+        cursor: not-allowed;
+}
+
+.bread-ai-chat-send-btn {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        padding: 6px 16px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+}
+
+.bread-ai-chat-send-btn:hover:not(:disabled) {
+        background: #2563eb;
+        transform: translateY(-1px);
+}
+
+.bread-ai-chat-send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+}
+
+/* 滚动条样式 */
+.bread-ai-chat-messages::-webkit-scrollbar {
+        width: 6px;
+}
+
+.bread-ai-chat-messages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+}
+
+.bread-ai-chat-messages::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+}
+
+.bread-ai-chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
         .bread-ai-window {
-                width: 320px;
-                max-height: 500px;
+                width: 350px;
+                max-height: 550px;
                 right: 10px;
                 left: 10px;
                 margin: 0 auto;
+        }
+
+        .bread-ai-chat-container {
+                height: 400px;
+        }
+
+        .bread-ai-chat-messages {
+                min-height: 250px;
         }
 }
 
@@ -255,5 +494,104 @@
         .bread-ai-spinner {
                 border-color: #3d3d3d;
                 border-top-color: #60a5fa;
+        }
+
+        /* 暗色模式下的标签页 */
+        .bread-ai-tabs {
+                background: #2d2d2d;
+                border-color: #333;
+        }
+
+        .bread-ai-tab {
+                color: #999;
+        }
+
+        .bread-ai-tab:hover {
+                background: #3d3d3d;
+                color: #e0e0e0;
+        }
+
+        .bread-ai-tab.active {
+                color: #60a5fa;
+                border-bottom-color: #60a5fa;
+                background: #1e1e1e;
+        }
+
+        /* 暗色模式下的聊天 */
+        .bread-ai-chat-messages {
+                background: #2d2d2d;
+        }
+
+        .bread-ai-chat-empty {
+                color: #999;
+        }
+
+        .bread-ai-chat-message-user {
+                background: #2563eb;
+                color: white;
+        }
+
+        .bread-ai-chat-message-assistant {
+                background: #3d3d3d;
+                color: #e0e0e0;
+        }
+
+        .bread-ai-chat-message-assistant .bread-ai-chat-message-role {
+                color: #999;
+        }
+
+        .bread-ai-chat-message-assistant .bread-ai-chat-message-time {
+                color: #999;
+        }
+
+        .bread-ai-chat-input-actions {
+                border-color: #333;
+        }
+
+        .bread-ai-chat-action-btn {
+                background: #3d3d3d;
+                border-color: #444;
+                color: #999;
+        }
+
+        .bread-ai-chat-action-btn:hover:not(:disabled) {
+                background: #4d4d4d;
+                color: #e0e0e0;
+        }
+
+        .bread-ai-chat-input {
+                background: #2d2d2d;
+                border-color: #444;
+                color: #e0e0e0;
+        }
+
+        .bread-ai-chat-input:focus {
+                border-color: #60a5fa;
+                box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+        }
+
+        .bread-ai-chat-input:disabled {
+                background: #3d3d3d;
+        }
+
+        .bread-ai-chat-send-btn {
+                background: #2563eb;
+        }
+
+        .bread-ai-chat-send-btn:hover:not(:disabled) {
+                background: #1d4ed8;
+        }
+
+        /* 暗色模式下的滚动条 */
+        .bread-ai-chat-messages::-webkit-scrollbar-track {
+                background: #2d2d2d;
+        }
+
+        .bread-ai-chat-messages::-webkit-scrollbar-thumb {
+                background: #4d4d4d;
+        }
+
+        .bread-ai-chat-messages::-webkit-scrollbar-thumb:hover {
+                background: #5d5d5d;
         }
 }

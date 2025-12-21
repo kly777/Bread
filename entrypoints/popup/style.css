@@ -13,6 +13,348 @@
         -moz-osx-font-smoothing: grayscale;
 }
 
+.ai-config {
+        margin-top: 16px;
+        padding: 16px;
+        background: #2d2d2d;
+        border-radius: 8px;
+        border: 1px solid #444;
+}
+
+.ai-config-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+}
+
+.ai-config-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #e0e0e0;
+}
+
+.ai-config-status {
+        font-size: 12px;
+}
+
+.ai-status-saving {
+        color: #fbbf24;
+}
+
+.ai-status-success {
+        color: #10b981;
+}
+
+.ai-status-error {
+        color: #ef4444;
+}
+
+.ai-config-loading {
+        text-align: center;
+        padding: 20px;
+        color: #999;
+        font-size: 14px;
+}
+
+.ai-config-section {
+        margin-bottom: 16px;
+}
+
+.ai-config-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: #e0e0e0;
+        margin-bottom: 6px;
+}
+
+.ai-config-input {
+        width: 100%;
+        padding: 8px 12px;
+        background: #3d3d3d;
+        border: 1px solid #555;
+        border-radius: 6px;
+        color: #e0e0e0;
+        font-size: 14px;
+        font-family: inherit;
+        transition: border-color 0.2s ease;
+}
+
+.ai-config-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.ai-config-input[type="number"] {
+        width: 100%;
+}
+
+.ai-config-hint {
+        font-size: 11px;
+        color: #999;
+        margin-top: 4px;
+}
+
+.ai-config-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+}
+
+.ai-providers {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+}
+
+.ai-provider {
+        padding: 12px;
+        background: #3d3d3d;
+        border: 1px solid #555;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+}
+
+.ai-provider:hover {
+        background: #4d4d4d;
+        border-color: #666;
+}
+
+.ai-provider-selected {
+        background: #1e3a8a;
+        border-color: #3b82f6;
+}
+
+.ai-provider-selected:hover {
+        background: #1e40af;
+        border-color: #3b82f6;
+}
+
+.ai-provider-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #e0e0e0;
+        margin-bottom: 2px;
+}
+
+.ai-provider-description {
+        font-size: 11px;
+        color: #999;
+        line-height: 1.3;
+}
+
+.ai-config-mock-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        background: #3d3d3d;
+        border-radius: 8px;
+        margin-bottom: 20px;
+}
+
+.ai-config-mock-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+}
+
+.ai-config-mock-text {
+        flex: 1;
+}
+
+.ai-config-mock-text strong {
+        display: block;
+        font-size: 14px;
+        color: #e0e0e0;
+        margin-bottom: 4px;
+}
+
+.ai-config-mock-text p {
+        margin: 0;
+        font-size: 12px;
+        color: #999;
+        line-height: 1.4;
+}
+
+.ai-config-mock-text p + p {
+        margin-top: 4px;
+}
+
+.ai-config-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 20px;
+}
+
+.ai-config-btn {
+        flex: 1;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        text-align: center;
+}
+
+.ai-config-btn-primary {
+        background: #3b82f6;
+        color: white;
+}
+
+.ai-config-btn-primary:hover:not(:disabled) {
+        background: #2563eb;
+}
+
+.ai-config-btn-secondary {
+        background: #6b7280;
+        color: white;
+}
+
+.ai-config-btn-secondary:hover:not(:disabled) {
+        background: #4b5563;
+}
+
+.ai-config-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+}
+
+.ai-config-tip {
+        margin-top: 16px;
+        padding: 12px;
+        background: #1e3a8a;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #e0e0e0;
+}
+
+.ai-config-tip strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #93c5fd;
+}
+
+.ai-config-tip ul {
+        margin: 4px 0 0 0;
+        padding-left: 16px;
+}
+
+.ai-config-tip li {
+        margin-bottom: 2px;
+        line-height: 1.3;
+}
+
+.ai-config-tip a {
+        color: #93c5fd;
+        text-decoration: underline;
+}
+
+.ai-config-tip a:hover {
+        color: #bfdbfe;
+}
+
+/* 浅色模式支持 */
+@media (prefers-color-scheme: light) {
+        .ai-config {
+                background: #f8f9fa;
+                border-color: #e0e0e0;
+        }
+
+        .ai-config-header h3 {
+                color: #333;
+        }
+
+        .ai-config-label {
+                color: #333;
+        }
+
+        .ai-config-input {
+                background: white;
+                border-color: #ddd;
+                color: #333;
+        }
+
+        .ai-config-input:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .ai-config-hint {
+                color: #666;
+        }
+
+        .ai-provider {
+                background: white;
+                border-color: #e0e0e0;
+        }
+
+        .ai-provider:hover {
+                background: #f8f9fa;
+                border-color: #ddd;
+        }
+
+        .ai-provider-selected {
+                background: #eff6ff;
+                border-color: #3b82f6;
+        }
+
+        .ai-provider-selected:hover {
+                background: #dbeafe;
+                border-color: #3b82f6;
+        }
+
+        .ai-provider-name {
+                color: #333;
+        }
+
+        .ai-provider-description {
+                color: #666;
+        }
+
+        .ai-config-mock-info {
+                background: white;
+        }
+
+        .ai-config-mock-text strong {
+                color: #333;
+        }
+
+        .ai-config-mock-text p {
+                color: #666;
+        }
+
+        .ai-config-btn-secondary {
+                background: #9ca3af;
+        }
+
+        .ai-config-btn-secondary:hover:not(:disabled) {
+                background: #6b7280;
+        }
+
+        .ai-config-tip {
+                background: #eff6ff;
+                color: #333;
+        }
+
+        .ai-config-tip strong {
+                color: #1d4ed8;
+        }
+
+        .ai-config-tip a {
+                color: #1d4ed8;
+        }
+
+        .ai-config-tip a:hover {
+                color: #1e40af;
+        }
+}
+
 a {
         font-weight: 500;
         color: #646cff;
