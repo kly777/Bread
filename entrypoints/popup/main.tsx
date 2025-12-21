@@ -1,7 +1,7 @@
 import { render } from 'solid-js/web'
 import './style.css'
 import App from './App'
-let tmp_domain: string = 'default'
+let tmp_domain = 'default'
 await browser.runtime
         .sendMessage({ action: 'getDomain' })
         .then((response: { domain?: string }) => {
