@@ -2,9 +2,7 @@
         "extends": "./tsconfig.json",
         "include": [
                 "entrypoints/**/*.ts",
-                "entrypoints/**/*.vue",
                 "src/**/*.ts",
-                "src/**/*.vue",
                 "entrypoints/**/*.tsx",
                 "entrypoints/**/*.jsx",
                 "src/**/*.tsx",
