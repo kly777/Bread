@@ -41,9 +41,9 @@ export function manageMutationObserver(shouldObserve: boolean) {
  */
 const domMutationObserver: MutationObserver = new MutationObserver(
         (mutations: MutationRecord[]) => {
-                console.group('DOM Mutation Observer')
-                console.log(`检测到 ${mutations.length} 个DOM变更`)
-                console.log(mutations)
+                // console.group('DOM Mutation Observer')
+                // console.log(`检测到 ${mutations.length} 个DOM变更`)
+                // console.log(mutations)
 
                 // 处理属性变化（链接目标样式）
                 processAttributeChanges(mutations)
@@ -51,24 +51,22 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                 // 使用Set避免重复处理同一个元素
                 const newElementsSet = new Set<Element>()
                 const removedNodes: Node[] = []
-                let skippedElements = 0
+                // let skippedElements = 0
 
                 // 优化：批量处理mutation记录，减少循环嵌套
                 mutations.forEach((mutation) => {
-                        console.log(
-                                `Mutation: ${mutation.type}`,
-                                mutation.target
-                        )
+                        // console.log(
+                        //         `Mutation: ${mutation.type}`,
+                        //         mutation.target
+                        // )
 
                         // 优化：使用更高效的新增节点处理
-                        skippedElements += processAddedNodes(
-                                mutation.addedNodes,
-                                newElementsSet
-                        )
+                        // skippedElements +=
+                        processAddedNodes(mutation.addedNodes, newElementsSet)
 
                         // 收集移除节点
                         mutation.removedNodes.forEach((node) => {
-                                console.log(`移除节点: ${node.nodeName}`)
+                                // console.log(`移除节点: ${node.nodeName}`)
                                 removedNodes.push(node)
                                 handleRemovedNode(node)
                         })
@@ -88,21 +86,21 @@ const domMutationObserver: MutationObserver = new MutationObserver(
                 }
 
                 const newElements = Array.from(newElementsSet)
-                console.log(
-                        `统计: ${newElements.length} 个新元素, ${skippedElements} 个跳过元素`
-                )
+                // console.log(
+                //         `统计: ${newElements.length} 个新元素, ${skippedElements} 个跳过元素`
+                // )
 
                 // 处理新增元素的功能应用 - 核心业务逻辑
                 if (newElements.length > 0) {
-                        console.log('开始处理新元素功能')
+                        // console.log('开始处理新元素功能')
                         processNewElements(newElements)
 
                         // 延迟重新应用高亮（由高亮模块通过钩子处理）
-                        console.log('调度高亮更新')
+                        // console.log('调度高亮更新')
                         scheduleHighlightUpdate()
                 }
 
-                console.groupEnd()
+                // console.groupEnd()
         }
 )
 
@@ -170,12 +168,12 @@ function processAttributeChanges(mutations: MutationRecord[]) {
  * 处理新增元素的功能应用
  */
 function processNewElements(elements: Element[]) {
-        console.log(`处理 ${elements.length} 个新元素`)
+        // console.log(`处理 ${elements.length} 个新元素`)
 
         // 触发新元素钩子，让模块自行处理
         triggerNewElements(elements)
 
-        console.log(`完成处理 ${elements.length} 个元素`)
+        // console.log(`完成处理 ${elements.length} 个元素`)
 }
 
 /**

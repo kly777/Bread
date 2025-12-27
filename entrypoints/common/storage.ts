@@ -37,15 +37,4 @@ export class featureSettingStorage {
                         })
                 }
         }
-        async remove() {}
-        listen(
-                callback: (
-                        changes: {
-                                [key: string]: browser.storage.StorageChange
-                        },
-                        areaName: string
-                ) => void
-        ) {
-                browser.storage.onChanged.addListener(callback)
-        }
 }
