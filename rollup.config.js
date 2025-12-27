@@ -22,6 +22,7 @@ import postcss from 'postcss'
 import csso from 'postcss-csso'
 import postcss_import from 'postcss-import'
 
+import packageJson from './package.json' with { type: 'json' }
 const isProduction = process.env.NODE_ENV === 'production'
 
 // 生成manifest的函数
@@ -31,6 +32,7 @@ function generateManifest() {
 
         // 只支持Firefox，manifest_version为2
         manifest.manifest_version = 2
+        manifest.version = packageJson.version
 
         if (!isProduction) {
                 manifest.name = `[DEV] ${manifest.name}`
