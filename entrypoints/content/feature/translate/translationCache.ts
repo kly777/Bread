@@ -15,6 +15,9 @@ class TranslationCacheManager {
         private readonly CLEANUP_THRESHOLD = 1200 // 当缓存超过此值时触发清理
         private memoryCaches = new Map<string, Map<string, CacheEntry>>()
         private initialized = false
+        private saveTimer: number | null = null
+        private readonly SAVE_DELAY = 1000 // 延迟保存时间（毫秒）
+        private pendingSaveDomains = new Set<string>() // 需要保存的域名集合
 
         /**
          * 初始化缓存管理器，从存储中加载缓存数据
@@ -46,7 +49,7 @@ class TranslationCacheManager {
 
                                 this.memoryCaches.set(domain, domainCache)
                                 console.log(
-                                        `✅ 域名 ${domain} 的翻译缓存加载成功，共 ${domainCache.size} 条记录`
+                                        `域名 ${domain} 的翻译缓存加载成功，共 ${domainCache.size} 条记录`
                                 )
                         } else {
                                 // 如果当前域名没有缓存，创建一个空的缓存
@@ -55,11 +58,11 @@ class TranslationCacheManager {
                                         new Map<string, CacheEntry>()
                                 )
                                 console.log(
-                                        `✅ 域名 ${domain} 的翻译缓存初始化完成（无历史缓存）`
+                                        `域名 ${domain} 的翻译缓存初始化完成（无历史缓存）`
                                 )
                         }
                 } catch (error) {
-                        console.warn('❌ 加载翻译缓存失败:', error)
+                        console.warn('加载翻译缓存失败:', error)
                 }
 
                 this.initialized = true
@@ -91,7 +94,7 @@ class TranslationCacheManager {
                         domainCache.set(cacheKey, entry)
 
                         // 异步保存更新后的缓存
-                        this.saveDomainCache(domain)
+                        this.scheduleSave(domain)
 
                         return entry.translation
                 }
@@ -138,7 +141,7 @@ class TranslationCacheManager {
                         await this.cleanupDomainCache(domain)
                 } else {
                         // 异步保存到存储
-                        this.saveDomainCache(domain)
+                        this.scheduleSave(domain)
                 }
         }
 
@@ -163,7 +166,7 @@ class TranslationCacheManager {
                 if (!domainCache) return
 
                 console.log(
-                        `🧹 开始清理域名 ${domain} 的翻译缓存，当前大小: ${domainCache.size}`
+                        `开始清理域名 ${domain} 的翻译缓存，当前大小: ${domainCache.size}`
                 )
 
                 if (domainCache.size <= this.MAX_CACHE_SIZE) {
@@ -199,11 +202,11 @@ class TranslationCacheManager {
                 })
 
                 console.log(
-                        `🧹 域名 ${domain} 的缓存清理完成，移除了 ${entriesToRemove.length} 条记录，剩余 ${domainCache.size} 条`
+                        `域名 ${domain} 的缓存清理完成，移除了 ${entriesToRemove.length} 条记录，剩余 ${domainCache.size} 条`
                 )
 
                 // 保存清理后的缓存
-                await this.saveDomainCache(domain)
+                this.scheduleSave(domain)
         }
 
         /**
@@ -219,6 +222,41 @@ class TranslationCacheManager {
         /**
          * 将指定域名的内存缓存保存到浏览器存储
          */
+        /**
+         * 计划延迟保存缓存
+         */
+        private scheduleSave(domain: string): void {
+                // 将域名添加到待保存集合
+                this.pendingSaveDomains.add(domain)
+
+                // 清除已有的定时器
+                if (this.saveTimer !== null) {
+                        clearTimeout(this.saveTimer)
+                }
+
+                // 创建新的延迟保存定时器
+                this.saveTimer = setTimeout(() => {
+                        this.executePendingSaves()
+                }, this.SAVE_DELAY) as unknown as number
+        }
+
+        /**
+         * 执行待保存的缓存
+         */
+        private async executePendingSaves(): Promise<void> {
+                // 清除定时器引用
+                this.saveTimer = null
+
+                // 复制待保存的域名集合，然后清空原集合
+                const domainsToSave = Array.from(this.pendingSaveDomains)
+                this.pendingSaveDomains.clear()
+
+                // 批量保存所有待保存的域名
+                for (const domain of domainsToSave) {
+                        await this.saveDomainCache(domain)
+                }
+        }
+
         private async saveDomainCache(domain: string): Promise<void> {
                 const domainCache = this.memoryCaches.get(domain)
                 if (!domainCache) return
@@ -236,7 +274,7 @@ class TranslationCacheManager {
                         })
                 } catch (error) {
                         console.warn(
-                                `❌ 保存域名 ${domain} 的翻译缓存失败:`,
+                                `保存域名 ${domain} 的翻译缓存失败:`,
                                 error
                         )
                 }
@@ -284,9 +322,9 @@ class TranslationCacheManager {
 
                         // 从存储中删除当前域名的缓存
                         await browser.storage.local.remove(cacheKey)
-                        console.log(`✅ 域名 ${domain} 的翻译缓存已清空`)
+                        console.log(`域名 ${domain} 的翻译缓存已清空`)
                 } catch (error) {
-                        console.warn('❌ 清空翻译缓存失败:', error)
+                        console.warn('清空翻译缓存失败:', error)
                 }
         }
 
@@ -298,10 +336,10 @@ class TranslationCacheManager {
                 try {
                         const cacheKey = `${this.CACHE_KEY_PREFIX}:${domain}`
                         await browser.storage.local.remove(cacheKey)
-                        console.log(`✅ 域名 ${domain} 的翻译缓存已清空`)
+                        console.log(`域名 ${domain} 的翻译缓存已清空`)
                 } catch (error) {
                         console.warn(
-                                `❌ 清空域名 ${domain} 的翻译缓存失败:`,
+                                `清空域名 ${domain} 的翻译缓存失败:`,
                                 error
                         )
                 }
