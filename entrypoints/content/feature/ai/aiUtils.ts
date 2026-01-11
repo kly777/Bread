@@ -439,7 +439,8 @@ function collectVisibleTextNodes(): Array<{
 
         let node: Node | null
         while ((node = walker.nextNode())) {
-                const parentElement = node.parentElement!
+                const parentElement = node.parentElement
+                if (!parentElement) continue
                 const rect = parentElement.getBoundingClientRect()
                 textNodes.push({ node, element: parentElement, rect })
         }

@@ -66,11 +66,11 @@ export class AIFeature extends Feature {
                 const [isLoading, setIsLoading] = createSignal(false)
                 const [isError, setIsError] = createSignal(false)
                 const [chatMessages] = createSignal<
-                        Array<{
+                        {
                                 role: 'user' | 'assistant'
                                 content: string
                                 timestamp: Date
-                        }>
+                        }[]
                 >([])
 
                 const handleClose = () => {
