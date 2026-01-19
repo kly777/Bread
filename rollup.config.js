@@ -25,7 +25,6 @@ import postcss_import from 'postcss-import'
 import packageJson from './package.json' with { type: 'json' }
 const isProduction = process.env.NODE_ENV === 'production'
 
-// 生成manifest的函数
 function generateManifest() {
         const baseManifest = JSON.parse(readFileSync('manifest.json', 'utf-8'))
         const manifest = { ...baseManifest }
