@@ -6,7 +6,6 @@ import { StripeFeature } from './feature/stripe/StripeFeature'
 import { LinkTargetFeature } from './feature/linkTarget/LinkTargetFeature'
 // import { AIFeature } from './feature/ai/AIFeature'
 
-// 设置状态类型定义
 interface SettingState {
         value: boolean
         isDefault: boolean
@@ -34,7 +33,7 @@ const featureInstances: Record<string, IFeature> = {
 // 跟踪功能初始化状态
 const initializedFeatures = new Set<string>()
 
-// 导出只读的 setting 副本
+// 只读的 setting 副本
 export function getSetting(): Record<string, boolean> {
         const result: Record<string, boolean> = {}
         Object.keys(setting).forEach((key) => {
@@ -43,7 +42,7 @@ export function getSetting(): Record<string, boolean> {
         return result
 }
 
-// 导出设置状态（包含默认值信息）
+// 导出设置状态
 export function getSettingState(): Record<string, SettingState> {
         return { ...setting }
 }
@@ -96,7 +95,6 @@ async function switchFeature(
                 return
         }
 
-        // 更新设置状态
         setting[key] = {
                 value: newValue,
                 isDefault: isDefault,
@@ -124,7 +122,6 @@ async function loadInitialSettings(): Promise<void> {
                         let isDefault = false
 
                         if (domainSettings && domainSettings[key]) {
-                                // 有存储设置
                                 const storedValue = domainSettings[key]
                                 if (storedValue === 'enabled') {
                                         value = true
@@ -152,9 +149,6 @@ async function loadInitialSettings(): Promise<void> {
         }
 }
 
-/**
- * 处理存储变化
- */
 function handleStorageChange(
         changes: Record<string, browser.storage.StorageChange>,
         areaName: string
@@ -197,12 +191,6 @@ function handleStorageChange(
         }
 }
 
-/**
- * 初始化设置管理器
- * 1. 加载初始设置
- * 2. 监听存储变化
- * 3. 初始化快捷键
- */
 export function initSettingManager() {
         // 加载初始设置
         loadInitialSettings()
@@ -220,9 +208,6 @@ export function initSettingManager() {
         initShortcuts()
 }
 
-/**
- * 初始化快捷键
- */
 function initShortcuts() {
         document.addEventListener('keydown', (event) => {
                 if (event.ctrlKey && event.key === 'q') {

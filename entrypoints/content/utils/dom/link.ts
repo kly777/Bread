@@ -1,15 +1,14 @@
 /**
  * 通用链接处理工具
  *
- * 提供链接处理的通用功能，包括排除选择器、DOM监听等
  */
 
 // 排除的链接选择器（避免在某些元素上应用样式）
 export const EXCLUDED_LINK_SELECTORS = [
-        '.bread-exclude', // 手动排除的链接
-        '[data-bread-exclude]', // 数据属性排除
-        '.bread-translation-container a', // 翻译容器内的链接
-        '.bread-highlight a', // 高亮文本内的链接
+        '.bread-exclude', 
+        '[data-bread-exclude]',
+        '.bread-translation-container a',
+        '.bread-highlight a', 
         'nav a', // 导航链接
         'header a', // 头部链接
         'footer a', // 底部链接
@@ -110,6 +109,7 @@ export function createLinkStyleManager(
         // 初始处理所有链接
         processAllLinks(applyStyle, processedLinks)
 
+        // ToDo: 创建 handleAddedNodes 减少缩进
         // 创建MutationObserver来监听新添加的链接
         const observer = new MutationObserver((mutations) => {
                 for (const mutation of mutations) {

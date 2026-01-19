@@ -1,5 +1,4 @@
 import './style.css'
-// 导入所有功能CSS文件
 import './feature/anchor/anchor.css'
 import './feature/downloadLink/downloadLink.css'
 import './feature/linkTarget/linkTarget.css'
@@ -12,7 +11,6 @@ import { pin } from './feature/anchor/init'
 console.log('-'.repeat(20))
 console.log('content script loaded')
 
-// 初始化函数
 initFunctions()
         .then(() => {
                 pin()
