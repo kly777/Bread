@@ -5,10 +5,10 @@
 
 // 排除的链接选择器（避免在某些元素上应用样式）
 export const EXCLUDED_LINK_SELECTORS = [
-        '.bread-exclude', 
+        '.bread-exclude',
         '[data-bread-exclude]',
         '.bread-translation-container a',
-        '.bread-highlight a', 
+        '.bread-highlight a',
         'nav a', // 导航链接
         'header a', // 头部链接
         'footer a', // 底部链接
@@ -112,11 +112,10 @@ export function createLinkStyleManager(
         // ToDo: 创建 handleAddedNodes 减少缩进
         // 创建MutationObserver来监听新添加的链接
         const observer = new MutationObserver((mutations) => {
-                for (const mutation of mutations) {
+                mutations.forEach((mutation) => {
                         if (mutation.type === 'childList') {
-                                for (const node of mutation.addedNodes) {
+                                mutation.addedNodes.forEach((node) => {
                                         if (node instanceof HTMLElement) {
-                                                // 检查新节点中的链接
                                                 const links =
                                                         node.querySelectorAll(
                                                                 'a'
@@ -135,7 +134,6 @@ export function createLinkStyleManager(
                                                                 )
                                                         }
                                                 })
-
                                                 // 如果节点本身就是链接
                                                 if (
                                                         node instanceof
@@ -148,9 +146,9 @@ export function createLinkStyleManager(
                                                         processedLinks.add(node)
                                                 }
                                         }
-                                }
+                                })
                         }
-                }
+                })
         })
 
         // 开始观察文档变化

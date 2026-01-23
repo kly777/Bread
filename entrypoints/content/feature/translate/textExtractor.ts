@@ -16,8 +16,7 @@ const EXCLUDE_TAGS = [
 // 全局标记，用于记录已经被排除翻译的元素
 const excludedElements = new WeakSet<HTMLElement>()
 
-const EXCLUDE_CLASSES = ['code-line', 'anchor-container','react-code-lines']
-
+const EXCLUDE_CLASSES = ['code-line', 'anchor-container', 'react-code-lines']
 
 /**
  * 检查单个元素是否应该被排除翻译
@@ -31,7 +30,7 @@ function isElementExcludable(element: HTMLElement): boolean {
         // 检查元素是否具有排除的类名
         if (element.className) {
                 const classList = element.className.split(' ')
-                console.log('classList',classList)
+                console.log('classList', classList)
                 if (EXCLUDE_CLASSES.some((cls) => classList.includes(cls))) {
                         return true
                 }
