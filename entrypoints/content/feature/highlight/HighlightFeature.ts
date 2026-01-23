@@ -9,13 +9,13 @@ import { isSearchEnginePage } from '../../utils/page/info'
 export class HighlightFeature extends Feature {
         readonly name = 'highlight'
         get default(): boolean {
+                console.log('highlightInit')
                 return isSearchEnginePage()
         }
 
         private manager = getHighlightManager()
 
         async init() {
-                // 初始化高亮系统
                 initializeHighlightSystem()
         }
 

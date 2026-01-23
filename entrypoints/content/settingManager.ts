@@ -8,11 +8,12 @@ import { LinkTargetFeature } from './feature/linkTarget/LinkTargetFeature'
 
 interface SettingState {
         value: boolean
+        // isDefault: 是否使用 value 作为默认值，如果为false，使用 feature 的 default 作为默认值
         isDefault: boolean
 }
 
 const setting: Record<string, SettingState> = {
-        highlight: { value: false, isDefault: true },
+        highlight: { value: false, isDefault: false },
         stripe: { value: false, isDefault: true },
         translate: { value: false, isDefault: false },
         bionic: { value: false, isDefault: true },

@@ -33,6 +33,7 @@ export function pageLang(): string {
  */
 export function isSearchEnginePage(): boolean {
         const host = window.location.host
+        console.log('[highlight]:Is %s a search engine page?', host)
 
         for (const engine of searchEngines) {
                 if (engine.urlPattern && host.includes(engine.urlPattern)) {

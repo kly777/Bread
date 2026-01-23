@@ -7,7 +7,7 @@
         "type": "module",
         "scripts": {
                 "dev": "rollup -c --environment NODE_ENV:development --watch",
-                "dev:ext": "web-ext run --source-dir=dist --firefox=firefoxdeveloperedition --reload",
+                "dev:ext": "web-ext run --browser-console --devtools --source-dir=dist --firefox=firefoxdeveloperedition --start-url www.google.com --start-url wikipedia.org",
                 "dev:all": "pnpm run build:dev && concurrently --kill-others \"pnpm run dev\" \"pnpm run dev:ext\"",
                 "build": "pnpm clean && rollup -c --environment NODE_ENV:production",
                 "build:dev": "rollup -c --environment NODE_ENV:development",

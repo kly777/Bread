@@ -50,8 +50,6 @@ export default {
         },
         run: {
                 firefox: 'firefoxdeveloperedition',
-                reload: true,
-                watchFile: ['dist/**/*'],
         },
         // Source directory for web-ext run and build
         sourceDir: './dist',
