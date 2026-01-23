@@ -22,7 +22,7 @@
                 "submit:unlisted": "pnpm run build && pnpm run sign:unlisted"
         },
         "devDependencies": {
-                "@babel/core": "^7.28.5",
+                "@babel/core": "^7.28.6",
                 "@eslint/js": "^9.39.2",
                 "@rollup/plugin-alias": "^6.0.0",
                 "@rollup/plugin-babel": "^6.1.0",
@@ -31,22 +31,22 @@
                 "@rollup/plugin-replace": "^6.0.3",
                 "@rollup/plugin-terser": "^0.4.4",
                 "@rollup/plugin-typescript": "^12.3.0",
-                "@types/chrome": "^0.1.32",
-                "@typescript-eslint/eslint-plugin": "^8.50.1",
-                "@typescript-eslint/parser": "^8.50.1",
+                "@types/chrome": "^0.1.36",
+                "@types/firefox-webext-browser": "^143.0.0",
+                "@typescript-eslint/eslint-plugin": "^8.53.1",
+                "@typescript-eslint/parser": "^8.53.1",
                 "babel-preset-solid": "^1.9.10",
                 "concurrently": "^9.2.1",
                 "eslint": "^9.39.2",
-                "globals": "^16.5.0",
+                "globals": "^17.1.0",
                 "postcss": "^8.5.6",
                 "postcss-csso": "^6.0.1",
                 "postcss-import": "^16.1.1",
-                "rollup": "^4.54.0",
+                "rollup": "^4.56.0",
                 "rollup-plugin-copy": "^3.5.0",
                 "typescript": "5.9.3",
-                "typescript-eslint": "^8.50.1",
-                "web-ext": "^9.2.0",
-                "@types/firefox-webext-browser": "^143.0.0"
+                "typescript-eslint": "^8.53.1",
+                "web-ext": "^9.2.0"
         },
         "dependencies": {
                 "solid-js": "^1.9.10"
