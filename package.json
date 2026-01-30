@@ -33,22 +33,22 @@
                 "@rollup/plugin-typescript": "^12.3.0",
                 "@types/chrome": "^0.1.36",
                 "@types/firefox-webext-browser": "^143.0.0",
-                "@typescript-eslint/eslint-plugin": "^8.53.1",
-                "@typescript-eslint/parser": "^8.53.1",
+                "@typescript-eslint/eslint-plugin": "^8.54.0",
+                "@typescript-eslint/parser": "^8.54.0",
                 "babel-preset-solid": "^1.9.10",
                 "concurrently": "^9.2.1",
                 "eslint": "^9.39.2",
-                "globals": "^17.1.0",
+                "globals": "^17.2.0",
                 "postcss": "^8.5.6",
                 "postcss-csso": "^6.0.1",
                 "postcss-import": "^16.1.1",
-                "rollup": "^4.56.0",
+                "rollup": "^4.57.1",
                 "rollup-plugin-copy": "^3.5.0",
                 "typescript": "5.9.3",
-                "typescript-eslint": "^8.53.1",
+                "typescript-eslint": "^8.54.0",
                 "web-ext": "^9.2.0"
         },
         "dependencies": {
-                "solid-js": "^1.9.10"
+                "solid-js": "^1.9.11"
         }
 }

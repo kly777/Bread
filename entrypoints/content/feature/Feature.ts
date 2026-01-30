@@ -21,9 +21,7 @@ export abstract class Feature implements IFeature {
         abstract readonly name: string
         abstract readonly default: boolean
 
-        init?(): void | Promise<void> {
-                // 默认无操作
-        }
+        init?(): void | Promise<void>
 
         abstract on(): void | Promise<void>
         abstract off(): void | Promise<void>
