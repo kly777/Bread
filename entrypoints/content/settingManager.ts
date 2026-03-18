@@ -4,6 +4,8 @@ import { HighlightFeature } from './feature/highlight/HighlightFeature'
 import { TranslateFeature } from './feature/translate/TranslateFeature'
 import { StripeFeature } from './feature/stripe/StripeFeature'
 import { LinkTargetFeature } from './feature/linkTarget/LinkTargetFeature'
+import { AIFeature } from './feature/ai/AIFeature'
+
 // import { AIFeature } from './feature/ai/AIFeature'
 
 interface SettingState {
@@ -18,7 +20,7 @@ const setting: Record<string, SettingState> = {
         translate: { value: false, isDefault: false },
         bionic: { value: false, isDefault: true },
         linkTarget: { value: false, isDefault: true },
-        // ai: { value: false, isDefault: true },
+        ai: { value: false, isDefault: true },
 }
 
 // 创建功能实例
@@ -28,7 +30,7 @@ const featureInstances: Record<string, IFeature> = {
         translate: new TranslateFeature(),
         stripe: new StripeFeature(),
         linkTarget: new LinkTargetFeature(),
-        // ai: new AIFeature(),
+        ai: new AIFeature(),
 }
 
 // 跟踪功能初始化状态

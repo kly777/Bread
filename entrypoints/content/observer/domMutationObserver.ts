@@ -127,7 +127,7 @@ function processAddedNodes(
                                 continue
                         }
 
-                        console.log(`新增元素: ${element.tagName}`, element)
+                        // console.log(`新增元素: ${element.tagName}`, element)
                         newElementsSet.add(element)
                 }
         }
