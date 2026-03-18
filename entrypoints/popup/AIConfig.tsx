@@ -14,7 +14,7 @@ interface AIConfigProps {
 }
 
 interface AIProvider {
-        id: 'openai' | 'deepseek' | 'mock'
+        id: 'deepseek'
         name: string
         description: string
         defaultEndpoint: string
@@ -23,31 +23,18 @@ interface AIProvider {
 
 const AI_PROVIDERS: AIProvider[] = [
         {
-                id: 'openai',
-                name: 'OpenAI',
-                description: 'OpenAI GPT 系列模型 (GPT-3.5, GPT-4 等)',
-                defaultEndpoint: 'https://api.openai.com/v1/chat/completions',
-                defaultModel: 'gpt-3.5-turbo',
-        },
-        {
                 id: 'deepseek',
                 name: 'DeepSeek',
                 description: 'DeepSeek AI 模型 (兼容 OpenAI API)',
                 defaultEndpoint: 'https://api.deepseek.com/v1/chat/completions',
                 defaultModel: 'deepseek-chat',
         },
-        {
-                id: 'mock',
-                name: '模拟模式',
-                description: '用于开发和测试的模拟服务',
-                defaultEndpoint: 'mock-endpoint',
-                defaultModel: 'mock-model',
-        },
+
 ]
 
 const AIConfig: Component<AIConfigProps> = (props) => {
         const [selectedProvider, setSelectedProvider] =
-                createSignal<AIProvider['id']>('mock')
+                createSignal<AIProvider['id']>('deepseek')
         const [apiKey, setApiKey] = createSignal('')
         const [endpoint, setEndpoint] = createSignal('')
         const [model, setModel] = createSignal('')
@@ -77,12 +64,12 @@ const AIConfig: Component<AIConfigProps> = (props) => {
                                         )
                                         setEndpoint(
                                                 savedConfig.config.endpoint ||
-                                                        ''
+                                                ''
                                         )
                                         setModel(savedConfig.config.model || '')
                                         setMaxTokens(
                                                 savedConfig.config.maxTokens ||
-                                                        1000
+                                                1000
                                         )
                                         setTemperature(
                                                 savedConfig.config
@@ -160,9 +147,7 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 
         // 验证配置
         const validateConfig = () => {
-                if (selectedProvider() === 'mock') {
-                        return true
-                }
+
 
                 if (!apiKey().trim()) {
                         return false
@@ -254,183 +239,159 @@ const AIConfig: Component<AIConfigProps> = (props) => {
                                 </div>
 
                                 {/* API配置 */}
-                                <Show when={selectedProvider() !== 'mock'}>
+
+                                <div class="ai-config-section">
+                                        <label class="ai-config-label">
+                                                API密钥
+                                        </label>
+                                        <input
+                                                type="password"
+                                                class="ai-config-input"
+                                                placeholder="输入API密钥"
+                                                value={apiKey()}
+                                                onInput={(e) =>
+                                                        setApiKey(
+                                                                e
+                                                                        .currentTarget
+                                                                        .value
+                                                        )
+                                                }
+                                        />
+                                        <div class="ai-config-hint">
+                                                您的API密钥仅保存在本地浏览器中，不会发送到任何服务器。
+                                        </div>
+                                </div>
+
+                                <div class="ai-config-section">
+                                        <label class="ai-config-label">
+                                                API端点
+                                        </label>
+                                        <input
+                                                type="text"
+                                                class="ai-config-input"
+                                                placeholder="API端点URL"
+                                                value={endpoint()}
+                                                onInput={(e) =>
+                                                        setEndpoint(
+                                                                e
+                                                                        .currentTarget
+                                                                        .value
+                                                        )
+                                                }
+                                        />
+                                        <div class="ai-config-hint">
+                                                默认:{' '}
+                                                {
+                                                        getCurrentProvider()
+                                                                .defaultEndpoint
+                                                }
+                                        </div>
+                                </div>
+
+                                <div class="ai-config-section">
+                                        <label class="ai-config-label">
+                                                模型名称
+                                        </label>
+                                        <input
+                                                type="text"
+                                                class="ai-config-input"
+                                                placeholder="模型名称"
+                                                value={model()}
+                                                onInput={(e) =>
+                                                        setModel(
+                                                                e
+                                                                        .currentTarget
+                                                                        .value
+                                                        )
+                                                }
+                                        />
+                                        <div class="ai-config-hint">
+                                                默认:{' '}
+                                                {
+                                                        getCurrentProvider()
+                                                                .defaultModel
+                                                }
+                                        </div>
+                                </div>
+
+                                <div class="ai-config-grid">
                                         <div class="ai-config-section">
                                                 <label class="ai-config-label">
-                                                        API密钥
+                                                        最大Token数
                                                 </label>
                                                 <input
-                                                        type="password"
+                                                        type="number"
                                                         class="ai-config-input"
-                                                        placeholder="输入API密钥"
-                                                        value={apiKey()}
+                                                        min="100"
+                                                        max="4000"
+                                                        step="100"
+                                                        value={maxTokens()}
                                                         onInput={(e) =>
-                                                                setApiKey(
-                                                                        e
-                                                                                .currentTarget
-                                                                                .value
+                                                                setMaxTokens(
+                                                                        parseInt(
+                                                                                e
+                                                                                        .currentTarget
+                                                                                        .value
+                                                                        ) ||
+                                                                        1000
                                                                 )
                                                         }
                                                 />
                                                 <div class="ai-config-hint">
-                                                        您的API密钥仅保存在本地浏览器中，不会发送到任何服务器。
+                                                        控制响应长度
+                                                        (100-4000)
                                                 </div>
                                         </div>
 
                                         <div class="ai-config-section">
                                                 <label class="ai-config-label">
-                                                        API端点
+                                                        温度
                                                 </label>
                                                 <input
-                                                        type="text"
+                                                        type="number"
                                                         class="ai-config-input"
-                                                        placeholder="API端点URL"
-                                                        value={endpoint()}
+                                                        min="0"
+                                                        max="2"
+                                                        step="0.1"
+                                                        value={temperature()}
                                                         onInput={(e) =>
-                                                                setEndpoint(
-                                                                        e
-                                                                                .currentTarget
-                                                                                .value
+                                                                setTemperature(
+                                                                        parseFloat(
+                                                                                e
+                                                                                        .currentTarget
+                                                                                        .value
+                                                                        ) ||
+                                                                        0.7
                                                                 )
                                                         }
                                                 />
                                                 <div class="ai-config-hint">
-                                                        默认:{' '}
-                                                        {
-                                                                getCurrentProvider()
-                                                                        .defaultEndpoint
-                                                        }
+                                                        控制随机性 (0-2)
                                                 </div>
                                         </div>
+                                </div>
 
-                                        <div class="ai-config-section">
-                                                <label class="ai-config-label">
-                                                        模型名称
-                                                </label>
-                                                <input
-                                                        type="text"
-                                                        class="ai-config-input"
-                                                        placeholder="模型名称"
-                                                        value={model()}
-                                                        onInput={(e) =>
-                                                                setModel(
-                                                                        e
-                                                                                .currentTarget
-                                                                                .value
-                                                                )
-                                                        }
-                                                />
-                                                <div class="ai-config-hint">
-                                                        默认:{' '}
-                                                        {
-                                                                getCurrentProvider()
-                                                                        .defaultModel
-                                                        }
-                                                </div>
-                                        </div>
 
-                                        <div class="ai-config-grid">
-                                                <div class="ai-config-section">
-                                                        <label class="ai-config-label">
-                                                                最大Token数
-                                                        </label>
-                                                        <input
-                                                                type="number"
-                                                                class="ai-config-input"
-                                                                min="100"
-                                                                max="4000"
-                                                                step="100"
-                                                                value={maxTokens()}
-                                                                onInput={(e) =>
-                                                                        setMaxTokens(
-                                                                                parseInt(
-                                                                                        e
-                                                                                                .currentTarget
-                                                                                                .value
-                                                                                ) ||
-                                                                                        1000
-                                                                        )
-                                                                }
-                                                        />
-                                                        <div class="ai-config-hint">
-                                                                控制响应长度
-                                                                (100-4000)
-                                                        </div>
-                                                </div>
-
-                                                <div class="ai-config-section">
-                                                        <label class="ai-config-label">
-                                                                温度
-                                                        </label>
-                                                        <input
-                                                                type="number"
-                                                                class="ai-config-input"
-                                                                min="0"
-                                                                max="2"
-                                                                step="0.1"
-                                                                value={temperature()}
-                                                                onInput={(e) =>
-                                                                        setTemperature(
-                                                                                parseFloat(
-                                                                                        e
-                                                                                                .currentTarget
-                                                                                                .value
-                                                                                ) ||
-                                                                                        0.7
-                                                                        )
-                                                                }
-                                                        />
-                                                        <div class="ai-config-hint">
-                                                                控制随机性 (0-2)
-                                                        </div>
-                                                </div>
-                                        </div>
-                                </Show>
-
-                                {/* 模拟模式提示 */}
-                                <Show when={selectedProvider() === 'mock'}>
-                                        <div class="ai-config-mock-info">
-                                                <div class="ai-config-mock-icon">
-                                                        🎭
-                                                </div>
-                                                <div class="ai-config-mock-text">
-                                                        <strong>
-                                                                模拟模式已启用
-                                                        </strong>
-                                                        <p>
-                                                                此模式用于开发和测试，无需API密钥即可体验AI功能。
-                                                        </p>
-                                                        <p>
-                                                                要使用真实的AI服务，请选择OpenAI或DeepSeek提供者。
-                                                        </p>
-                                                </div>
-                                        </div>
-                                </Show>
 
                                 {/* 操作按钮 */}
                                 <div class="ai-config-actions">
-                                        <Show
-                                                when={
-                                                        selectedProvider() !==
-                                                        'mock'
+
+                                        <button
+                                                class="ai-config-btn ai-config-btn-secondary"
+                                                onClick={
+                                                        resetToDefaults
                                                 }
                                         >
-                                                <button
-                                                        class="ai-config-btn ai-config-btn-secondary"
-                                                        onClick={
-                                                                resetToDefaults
-                                                        }
-                                                >
-                                                        重置为默认
-                                                </button>
-                                        </Show>
+                                                重置为默认
+                                        </button>
+
                                         <button
                                                 class="ai-config-btn ai-config-btn-primary"
                                                 onClick={saveConfig}
                                                 disabled={
                                                         !validateConfig() ||
                                                         saveStatus() ===
-                                                                'saving'
+                                                        'saving'
                                                 }
                                         >
                                                 {saveStatus() === 'saving'
@@ -439,42 +400,8 @@ const AIConfig: Component<AIConfigProps> = (props) => {
                                         </button>
                                 </div>
 
-                                {/* DeepSeek特别提示 */}
-                                <Show when={selectedProvider() === 'deepseek'}>
-                                        <div class="ai-config-tip">
-                                                <strong>
-                                                        DeepSeek使用提示:
-                                                </strong>
-                                                <ul>
-                                                        <li>
-                                                                DeepSeek
-                                                                API兼容OpenAI格式，可直接使用
-                                                        </li>
-                                                        <li>
-                                                                需要申请API密钥:{' '}
-                                                                <a
-                                                                        href="https://platform.deepseek.com/"
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                >
-                                                                        DeepSeek平台
-                                                                </a>
-                                                        </li>
-                                                        <li>
-                                                                支持模型:
-                                                                deepseek-chat
-                                                                (非思考模式),
-                                                                deepseek-reasoner
-                                                                (思考模式)
-                                                        </li>
-                                                        <li>
-                                                                也可使用基础URL:
-                                                                https://api.deepseek.com
-                                                                (不带/v1)
-                                                        </li>
-                                                </ul>
-                                        </div>
-                                </Show>
+
+
                         </Show>
                 </div>
         )
