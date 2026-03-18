@@ -164,14 +164,17 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 			<Show when={!isLoading()}>
 				{/* 提供者选择 */}
 				<div class="ai-config-section">
-					<label class="ai-config-label">AI服务提供者</label>
+					<label class="ai-config-label" for="ai-providers">
+						AI服务提供者
+					</label>
 					<div class="ai-providers">
 						{AI_PROVIDERS.map((provider) => (
-							<div
+							<button
 								class="ai-provider"
 								classList={{
 									"ai-provider-selected": selectedProvider() === provider.id,
 								}}
+								type="button"
 								onClick={() => {
 									setSelectedProvider(provider.id);
 									// 切换到新提供者时重置为默认配置
@@ -183,7 +186,7 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 								<div class="ai-provider-description">
 									{provider.description}
 								</div>
-							</div>
+							</button>
 						))}
 					</div>
 				</div>
@@ -191,8 +194,11 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 				{/* API配置 */}
 
 				<div class="ai-config-section">
-					<label class="ai-config-label">API密钥</label>
+					<label class="ai-config-label" for="api-key">
+						API密钥
+					</label>
 					<input
+						id="api-key"
 						type="password"
 						class="ai-config-input"
 						placeholder="输入API密钥"
@@ -205,11 +211,14 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 				</div>
 
 				<div class="ai-config-section">
-					<label class="ai-config-label">API端点</label>
+					<label class="ai-config-label" for="api-endpoint">
+						API端点
+					</label>
 					<input
+						id="api-endpoint"
 						type="text"
 						class="ai-config-input"
-						placeholder="API端点URL"
+						placeholder="输入API端点URL"
 						value={endpoint()}
 						onInput={(e) => setEndpoint(e.currentTarget.value)}
 					/>
@@ -219,11 +228,14 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 				</div>
 
 				<div class="ai-config-section">
-					<label class="ai-config-label">模型名称</label>
+					<label class="ai-config-label" for="model-name">
+						模型名称
+					</label>
 					<input
+						id="model-name"
 						type="text"
 						class="ai-config-input"
-						placeholder="模型名称"
+						placeholder="输入模型名称"
 						value={model()}
 						onInput={(e) => setModel(e.currentTarget.value)}
 					/>
@@ -234,8 +246,11 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 
 				<div class="ai-config-grid">
 					<div class="ai-config-section">
-						<label class="ai-config-label">最大Token数</label>
+						<label class="ai-config-label" for="max-tokens">
+							最大Token数
+						</label>
 						<input
+							id="max-tokens"
 							type="number"
 							class="ai-config-input"
 							min="100"
@@ -250,8 +265,11 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 					</div>
 
 					<div class="ai-config-section">
-						<label class="ai-config-label">温度</label>
+						<label class="ai-config-label" for="temperature">
+							温度
+						</label>
 						<input
+							id="temperature"
 							type="number"
 							class="ai-config-input"
 							min="0"
@@ -269,6 +287,7 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 				{/* 操作按钮 */}
 				<div class="ai-config-actions">
 					<button
+						type="button"
 						class="ai-config-btn ai-config-btn-secondary"
 						onClick={resetToDefaults}
 					>
@@ -276,6 +295,7 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 					</button>
 
 					<button
+						type="button"
 						class="ai-config-btn ai-config-btn-primary"
 						onClick={saveConfig}
 						disabled={!validateConfig() || saveStatus() === "saving"}

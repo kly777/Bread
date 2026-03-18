@@ -1,4 +1,7 @@
-import { searchEngines, type SearchEngineConfig } from "../../utils/page/search";
+import {
+	searchEngines,
+	type SearchEngineConfig,
+} from "../../utils/page/search";
 
 /**
  * 关键词来源接口

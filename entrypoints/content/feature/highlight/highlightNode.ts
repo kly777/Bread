@@ -1,5 +1,8 @@
 // highlightNode.ts
-import { getTextWalker, type GetTextNodesOptions } from "../../utils/dom/textNodes";
+import {
+	getTextWalker,
+	type GetTextNodesOptions,
+} from "../../utils/dom/textNodes";
 interface TextNodeEntry {
 	node: Text;
 	start: number;
@@ -211,13 +214,15 @@ function findMatches(mergedText: string, selectedText: string): MatchRange[] {
 	const searchMergedText = mergedText.toLowerCase();
 
 	// 循环查找所有匹配项
-	while ((index = searchMergedText.indexOf(searchText, index)) !== -1) {
+	index = searchMergedText.indexOf(searchText, index);
+	while (index !== -1) {
 		// 记录匹配范围（左闭右开区间）
 		matches.push({
 			start: index,
 			end: index + selectedText.length,
 		});
 		index += selectedText.length; // 跳过已匹配区域继续搜索
+		index = searchMergedText.indexOf(searchText, index);
 	}
 
 	return matches;

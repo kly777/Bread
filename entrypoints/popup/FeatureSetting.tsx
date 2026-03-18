@@ -60,7 +60,9 @@ export default function FeatureSetting(props: FeatureSettingProps) {
 	return (
 		<div class="feature-settings">
 			<div class="setting-item">
-				<label>{props.settingName}:</label>
+				<label for={`${props.featureName}-${props.settingName}-checkbox`}>
+					{props.settingName}:
+				</label>
 
 				{/* 布尔值类型 */}
 				{props.type === "boolean" && (

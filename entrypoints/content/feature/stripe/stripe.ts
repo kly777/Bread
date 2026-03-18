@@ -25,11 +25,13 @@ export function initStripe() {
 function stripeAll() {
 	const walker = getTextWalker(document.body, { excludeHidden: false });
 	let node: Node | null;
-	while ((node = walker.nextNode())) {
+	node = walker.nextNode();
+	while (node) {
 		const parent = node.parentElement;
 		if (parent && node.textContent?.trim()) {
 			stripeElement(parent);
 		}
+		node = walker.nextNode();
 	}
 }
 

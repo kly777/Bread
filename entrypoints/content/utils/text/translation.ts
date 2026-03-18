@@ -128,11 +128,13 @@ export function extractTextFragments(element: HTMLElement): string[] {
 	});
 
 	let node: Node | null;
-	while ((node = walker.nextNode())) {
+	node = walker.nextNode();
+	while (node) {
 		const text = node.textContent?.trim();
 		if (text) {
 			fragments.push(text);
 		}
+		node = walker.nextNode();
 	}
 
 	return fragments;

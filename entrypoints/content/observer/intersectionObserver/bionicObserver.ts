@@ -59,7 +59,9 @@ function processVisibleTextElement(entry: IntersectionObserverEntry): void {
  * 实现细节：遍历每个文本节点并调用bionicTextNode进行处理
  */
 function applyBionicEffect(textNodes: Text[]) {
-	textNodes.forEach((text) => bionicTextNode(text));
+	for (const text of textNodes) {
+		bionicTextNode(text);
+	}
 }
 
 /**

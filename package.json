@@ -13,7 +13,6 @@
 		"build:dev": "rollup -c --environment NODE_ENV:development",
 		"compile": "tsc --noEmit",
 		"fmt": "biome format --write .",
-		"format": "biome format --write .",
 		"lint": "biome lint .",
 		"lint:fix": "biome lint --write .",
 		"check": "biome check .",

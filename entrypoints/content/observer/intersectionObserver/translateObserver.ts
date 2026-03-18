@@ -226,7 +226,9 @@ export function initializeTranslateObserver(): void {
  * 遍历根元素下的所有文本容器元素并开始观察
  */
 export function observeTranslateElements(root: Element): void {
-	getTextContainerElement(root).forEach((el) => translateObserver.observe(el));
+	for (const el of getTextContainerElement(root)) {
+		translateObserver.observe(el);
+	}
 }
 
 /**
