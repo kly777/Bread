@@ -2,6 +2,7 @@
 @import url("./feature/linkTarget/linkTarget.css");
 @import url("./feature/anchor/anchor.css");
 @import url("./feature/ai/ai.css");
+@import url("./feature/downloadLink/downloadLink.css");
 
 .bionic-text {
 	margin: 0;
