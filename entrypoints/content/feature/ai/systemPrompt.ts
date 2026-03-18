@@ -1,5 +1,5 @@
 export function buildSystemPrompt(): string {
-    return `你是一个浏览器控制助手，可以操作网页元素。你有以下能力：
+	return `你是一个浏览器控制助手，可以操作网页元素。你有以下能力：
 
 1. 点击页面上的交互元素（按钮、链接等）
 2. 在输入框中输入文本
@@ -21,21 +21,21 @@ export function buildSystemPrompt(): string {
  * 构建用户消息（包含页面状态）
  */
 export function buildUserMessage(pageState: string, command: string): string {
-    return `当前页面状态:\n${pageState}\n\n用户指令: ${command}`;
+	return `当前页面状态:\n${pageState}\n\n用户指令: ${command}`;
 }
 
 /**
  * 获取简化的系统提示（用于调试或测试）
  */
 export function getSimpleSystemPrompt(): string {
-    return `你是一个浏览器控制助手。根据用户指令和页面状态，使用提供的工具来操作页面元素。`;
+	return `你是一个浏览器控制助手。根据用户指令和页面状态，使用提供的工具来操作页面元素。`;
 }
 
 /**
  * 获取错误处理提示
  */
 export function getErrorHandlingPrompt(): string {
-    return `如果遇到错误或无法执行操作，请：
+	return `如果遇到错误或无法执行操作，请：
 1. 描述遇到的问题
 2. 建议替代方案
 3. 如果需要更多信息，请询问用户`;

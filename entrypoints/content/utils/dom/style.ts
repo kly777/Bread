@@ -11,17 +11,17 @@
  * @returns 如果是内联元素返回 true，否则返回 false
  */
 export function isInlineElement(element: HTMLElement): boolean {
-        // 定义内联显示模式的合法枚举值
-        const inlineDisplayValues = new Set([
-                'inline',
-                'inline-block',
-                'inline-flex',
-                'inline-grid',
-                'inline-table',
-        ])
+	// 定义内联显示模式的合法枚举值
+	const inlineDisplayValues = new Set([
+		"inline",
+		"inline-block",
+		"inline-flex",
+		"inline-grid",
+		"inline-table",
+	]);
 
-        const display = window.getComputedStyle(element).display
-        return inlineDisplayValues.has(display)
+	const display = window.getComputedStyle(element).display;
+	return inlineDisplayValues.has(display);
 }
 
 /**
@@ -33,8 +33,8 @@ export function isInlineElement(element: HTMLElement): boolean {
  * @returns 如果是定位元素返回 true，否则返回 false
  */
 export function isPositionedElement(element: HTMLElement): boolean {
-        const position = window.getComputedStyle(element).position
-        return position === 'absolute' || position === 'fixed'
+	const position = window.getComputedStyle(element).position;
+	return position === "absolute" || position === "fixed";
 }
 
 /**
@@ -46,14 +46,13 @@ export function isPositionedElement(element: HTMLElement): boolean {
  * @returns 如果在弹性布局上下文中返回 true，否则返回 false
  */
 export function isInFlexContext(element: HTMLElement): boolean {
-        const parent = element.parentElement
-        if (!parent) return false
+	const parent = element.parentElement;
+	if (!parent) return false;
 
-        const parentStyle = window.getComputedStyle(parent)
-        return (
-                parentStyle.display === 'flex' ||
-                parentStyle.display === 'inline-flex'
-        )
+	const parentStyle = window.getComputedStyle(parent);
+	return (
+		parentStyle.display === "flex" || parentStyle.display === "inline-flex"
+	);
 }
 
 /**
@@ -65,12 +64,12 @@ export function isInFlexContext(element: HTMLElement): boolean {
  * @returns 如果有尺寸约束返回 true，否则返回 false
  */
 export function hasSizeConstraints(element: HTMLElement): boolean {
-        const style = window.getComputedStyle(element)
-        return (
-                style.width !== 'auto' ||
-                style.maxWidth !== 'none' ||
-                style.minWidth !== 'auto'
-        )
+	const style = window.getComputedStyle(element);
+	return (
+		style.width !== "auto" ||
+		style.maxWidth !== "none" ||
+		style.minWidth !== "auto"
+	);
 }
 
 /**
@@ -82,8 +81,8 @@ export function hasSizeConstraints(element: HTMLElement): boolean {
  * @returns 如果有文本溢出处理返回 true，否则返回 false
  */
 export function hasTextOverflow(element: HTMLElement): boolean {
-        const overflow = window.getComputedStyle(element).overflow
-        return overflow === 'hidden' || overflow === 'clip'
+	const overflow = window.getComputedStyle(element).overflow;
+	return overflow === "hidden" || overflow === "clip";
 }
 
 /**
@@ -95,8 +94,8 @@ export function hasTextOverflow(element: HTMLElement): boolean {
  * @returns 如果有特殊垂直对齐方式返回 true，否则返回 false
  */
 export function hasVerticalAlign(element: HTMLElement): boolean {
-        const align = window.getComputedStyle(element).verticalAlign
-        return align !== 'baseline'
+	const align = window.getComputedStyle(element).verticalAlign;
+	return align !== "baseline";
 }
 
 /**
@@ -108,23 +107,23 @@ export function hasVerticalAlign(element: HTMLElement): boolean {
  * @returns 如果应该使用行内容器返回 true，否则返回 false
  */
 export function shouldWrapElement(element: HTMLElement): boolean {
-        // 获取元素当前计算后的文本换行模式
-        const whiteSpace = window.getComputedStyle(element).whiteSpace
+	// 获取元素当前计算后的文本换行模式
+	const whiteSpace = window.getComputedStyle(element).whiteSpace;
 
-        // 如果元素本身设置了 nowrap，则使用行内容器
-        if (whiteSpace === 'nowrap') {
-                return true
-        }
+	// 如果元素本身设置了 nowrap，则使用行内容器
+	if (whiteSpace === "nowrap") {
+		return true;
+	}
 
-        // 检查其他需要行内容器的情况
-        return (
-                isInlineElement(element) ||
-                isPositionedElement(element) ||
-                isInFlexContext(element) ||
-                hasSizeConstraints(element) ||
-                hasTextOverflow(element) ||
-                hasVerticalAlign(element)
-        )
+	// 检查其他需要行内容器的情况
+	return (
+		isInlineElement(element) ||
+		isPositionedElement(element) ||
+		isInFlexContext(element) ||
+		hasSizeConstraints(element) ||
+		hasTextOverflow(element) ||
+		hasVerticalAlign(element)
+	);
 }
 
 /**
@@ -134,18 +133,18 @@ export function shouldWrapElement(element: HTMLElement): boolean {
  * @returns 包含样式信息的对象
  */
 export function getElementStyleInfo(element: HTMLElement): {
-        shouldUseInline: boolean
-        display: string
-        position: string
-        whiteSpace: string
-        overflow: string
+	shouldUseInline: boolean;
+	display: string;
+	position: string;
+	whiteSpace: string;
+	overflow: string;
 } {
-        const style = window.getComputedStyle(element)
-        return {
-                shouldUseInline: shouldWrapElement(element),
-                display: style.display,
-                position: style.position,
-                whiteSpace: style.whiteSpace,
-                overflow: style.overflow,
-        }
+	const style = window.getComputedStyle(element);
+	return {
+		shouldUseInline: shouldWrapElement(element),
+		display: style.display,
+		position: style.position,
+		whiteSpace: style.whiteSpace,
+		overflow: style.overflow,
+	};
 }

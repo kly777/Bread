@@ -9,32 +9,32 @@
  * 这些标签通常不包含可读文本内容
  */
 const EXCLUDED_TAGS = new Set([
-        'input',
-        'textarea',
-        'select',
-        'button',
-        'script',
-        'style',
-        'noscript',
-        'template',
-        'svg',
-        'img',
-        'audio',
-        'video',
-        'option',
-        'head',
-        'iframe',
-        'i',
-])
+	"input",
+	"textarea",
+	"select",
+	"button",
+	"script",
+	"style",
+	"noscript",
+	"template",
+	"svg",
+	"img",
+	"audio",
+	"video",
+	"option",
+	"head",
+	"iframe",
+	"i",
+]);
 
 /**
  * 文本节点获取选项接口
  */
 export interface GetTextNodesOptions {
-        /** 是否排除隐藏元素，默认为 true */
-        excludeHidden?: boolean
-        /** 文本内容的最小长度要求，默认为 0 */
-        minContentLength?: number
+	/** 是否排除隐藏元素，默认为 true */
+	excludeHidden?: boolean;
+	/** 文本内容的最小长度要求，默认为 0 */
+	minContentLength?: number;
 }
 
 /**
@@ -51,19 +51,19 @@ export interface GetTextNodesOptions {
  * 4. 支持 Shadow DOM 内容访问
  */
 export function getTextNodes(
-        root: Node = document.body,
-        options: GetTextNodesOptions = {}
+	root: Node = document.body,
+	options: GetTextNodesOptions = {},
 ): Text[] {
-        const walker = getTextWalker(root, options)
+	const walker = getTextWalker(root, options);
 
-        // 遍历收集所有符合条件的文本节点
-        const textNodes: Text[] = []
-        while (walker.nextNode()) {
-                const node = walker.currentNode as Text
-                textNodes.push(node)
-        }
+	// 遍历收集所有符合条件的文本节点
+	const textNodes: Text[] = [];
+	while (walker.nextNode()) {
+		const node = walker.currentNode as Text;
+		textNodes.push(node);
+	}
 
-        return textNodes
+	return textNodes;
 }
 
 /**
@@ -74,52 +74,49 @@ export function getTextNodes(
  * @returns 配置好的 TreeWalker 实例
  */
 export function getTextWalker(
-        root: Node = document.body,
-        options: GetTextNodesOptions = {}
+	root: Node = document.body,
+	options: GetTextNodesOptions = {},
 ): TreeWalker {
-        // 合并默认配置选项
-        const { excludeHidden = true, minContentLength = 0 } = options
+	// 合并默认配置选项
+	const { excludeHidden = true, minContentLength = 0 } = options;
 
-        const acceptNode = (node: Node) => {
-                const parent = node.parentElement
+	const acceptNode = (node: Node) => {
+		const parent = node.parentElement;
 
-                if (!parent) return NodeFilter.FILTER_ACCEPT
+		if (!parent) return NodeFilter.FILTER_ACCEPT;
 
-                // 缓存样式以避免重复计算
-                const style = window.getComputedStyle(parent)
+		// 缓存样式以避免重复计算
+		const style = window.getComputedStyle(parent);
 
-                // 1. 标签名称过滤：直接拒绝整个子树
-                if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
-                        return NodeFilter.FILTER_REJECT
-                }
+		// 1. 标签名称过滤：直接拒绝整个子树
+		if (EXCLUDED_TAGS.has(parent.tagName.toLowerCase())) {
+			return NodeFilter.FILTER_REJECT;
+		}
 
-                // 2. 可见性过滤：根据计算样式判断元素是否隐藏
-                if (excludeHidden) {
-                        if (
-                                style.display === 'none' ||
-                                style.visibility === 'hidden'
-                        ) {
-                                return NodeFilter.FILTER_REJECT
-                        }
-                }
+		// 2. 可见性过滤：根据计算样式判断元素是否隐藏
+		if (excludeHidden) {
+			if (style.display === "none" || style.visibility === "hidden") {
+				return NodeFilter.FILTER_REJECT;
+			}
+		}
 
-                // 3. 内容过滤：检查文本内容长度是否达标
-                const content = node.textContent?.trim() || ''
-                if (content.length < minContentLength) {
-                        return NodeFilter.FILTER_REJECT
-                }
+		// 3. 内容过滤：检查文本内容长度是否达标
+		const content = node.textContent?.trim() || "";
+		if (content.length < minContentLength) {
+			return NodeFilter.FILTER_REJECT;
+		}
 
-                // 4. Shadow DOM 处理
-                if (node.parentElement?.shadowRoot === node.getRootNode()) {
-                        return NodeFilter.FILTER_ACCEPT // 允许访问 Shadow DOM 内容
-                }
+		// 4. Shadow DOM 处理
+		if (node.parentElement?.shadowRoot === node.getRootNode()) {
+			return NodeFilter.FILTER_ACCEPT; // 允许访问 Shadow DOM 内容
+		}
 
-                return NodeFilter.FILTER_ACCEPT
-        }
+		return NodeFilter.FILTER_ACCEPT;
+	};
 
-        // 创建 TreeWalker 进行节点遍历，配置复合过滤条件
-        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-                acceptNode,
-        })
-        return walker
+	// 创建 TreeWalker 进行节点遍历，配置复合过滤条件
+	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+		acceptNode,
+	});
+	return walker;
 }

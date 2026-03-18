@@ -1,19 +1,19 @@
 .translation-result {
-        opacity: 0.9;
-        font-size: 0.81em;
+	opacity: 0.9;
+	font-size: 0.81em;
 }
 
 span.translation-result {
-        display: inline-block;
-        vertical-align: baseline;
+	display: inline-block;
+	vertical-align: baseline;
 }
 
 div.translation-result {
-        margin-top: 0;
-        padding-top: 0;
-        line-height: normal;
+	margin-top: 0;
+	padding-top: 0;
+	line-height: normal;
 }
 
 .translation-result:hover {
-        opacity: 1;
+	opacity: 1;
 }

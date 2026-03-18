@@ -11,15 +11,12 @@
  * @returns 如果存在文本节点则返回 true，否则返回 false
  */
 export function hasTextNodes(element: Element): boolean {
-        for (const node of element.childNodes) {
-                if (
-                        node.nodeType === Node.TEXT_NODE &&
-                        node.textContent?.trim() !== ''
-                ) {
-                        return true
-                }
-        }
-        return false
+	for (const node of element.childNodes) {
+		if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim() !== "") {
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
@@ -29,14 +26,11 @@ export function hasTextNodes(element: Element): boolean {
  * @returns 文本节点数组
  */
 export function getTextNodesFromElement(element: Element): Text[] {
-        const textNodes: Text[] = []
-        for (const node of element.childNodes) {
-                if (
-                        node.nodeType === Node.TEXT_NODE &&
-                        node.textContent?.trim() !== ''
-                ) {
-                        textNodes.push(node as Text)
-                }
-        }
-        return textNodes
+	const textNodes: Text[] = [];
+	for (const node of element.childNodes) {
+		if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim() !== "") {
+			textNodes.push(node as Text);
+		}
+	}
+	return textNodes;
 }

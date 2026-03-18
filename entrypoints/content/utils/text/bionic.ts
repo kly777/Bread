@@ -11,8 +11,8 @@
  * @returns 如果适合应用 Bionic 效果返回 true，否则返回 false
  */
 export function shouldApplyBionic(node: Text): boolean {
-        const text = node.textContent || ''
-        return text.trim().length > 0
+	const text = node.textContent || "";
+	return text.trim().length > 0;
 }
 
 /**
@@ -22,47 +22,47 @@ export function shouldApplyBionic(node: Text): boolean {
  * @returns Bionic 分析结果
  */
 export function analyzeBionicText(node: Text): {
-        text: string
-        words: {
-                word: string
-                isChinese: boolean
-                boldLength: number
-                boldPart: string
-                normalPart: string
-        }[]
+	text: string;
+	words: {
+		word: string;
+		isChinese: boolean;
+		boldLength: number;
+		boldPart: string;
+		normalPart: string;
+	}[];
 } {
-        const text = node.textContent || ''
-        const words = text.split(/(\s+)/)
+	const text = node.textContent || "";
+	const words = text.split(/(\s+)/);
 
-        const analyzedWords = words.map((word) => {
-                if (word.trim() === '') {
-                        return {
-                                word,
-                                isChinese: false,
-                                boldLength: 0,
-                                boldPart: '',
-                                normalPart: word,
-                        }
-                }
+	const analyzedWords = words.map((word) => {
+		if (word.trim() === "") {
+			return {
+				word,
+				isChinese: false,
+				boldLength: 0,
+				boldPart: "",
+				normalPart: word,
+			};
+		}
 
-                const isChinese = isChineseWord(word)
-                const boldLength = isChinese
-                        ? Math.ceil(word.length * 0.5)
-                        : Math.ceil(word.length * 0.6)
+		const isChinese = isChineseWord(word);
+		const boldLength = isChinese
+			? Math.ceil(word.length * 0.5)
+			: Math.ceil(word.length * 0.6);
 
-                return {
-                        word,
-                        isChinese,
-                        boldLength,
-                        boldPart: word.slice(0, boldLength),
-                        normalPart: word.slice(boldLength),
-                }
-        })
+		return {
+			word,
+			isChinese,
+			boldLength,
+			boldPart: word.slice(0, boldLength),
+			normalPart: word.slice(boldLength),
+		};
+	});
 
-        return {
-                text,
-                words: analyzedWords,
-        }
+	return {
+		text,
+		words: analyzedWords,
+	};
 }
 
 // /**
@@ -92,20 +92,20 @@ export function analyzeBionicText(node: Text): {
  * @returns 如果是中文字符返回 true，否则返回 false
  */
 function isChineseChar(char: string): boolean {
-        const code = char.charCodeAt(0)
-        return (
-                (code >= 0x4e00 && code <= 0x9fff) ||
-                (code >= 0x3400 && code <= 0x4dbf) ||
-                (code >= 0x20000 && code <= 0x2a6df) ||
-                (code >= 0x2a700 && code <= 0x2b73f) ||
-                (code >= 0x2b740 && code <= 0x2b81f) ||
-                (code >= 0x2b820 && code <= 0x2ceaf) ||
-                (code >= 0x2ceb0 && code <= 0x2ebe0) ||
-                (code >= 0x2ebf0 && code <= 0x2ee5d) ||
-                (code >= 0x30000 && code <= 0x3134a) ||
-                (code >= 0xf900 && code <= 0xfaff) ||
-                (code >= 0x2f800 && code <= 0x2fa1f)
-        )
+	const code = char.charCodeAt(0);
+	return (
+		(code >= 0x4e00 && code <= 0x9fff) ||
+		(code >= 0x3400 && code <= 0x4dbf) ||
+		(code >= 0x20000 && code <= 0x2a6df) ||
+		(code >= 0x2a700 && code <= 0x2b73f) ||
+		(code >= 0x2b740 && code <= 0x2b81f) ||
+		(code >= 0x2b820 && code <= 0x2ceaf) ||
+		(code >= 0x2ceb0 && code <= 0x2ebe0) ||
+		(code >= 0x2ebf0 && code <= 0x2ee5d) ||
+		(code >= 0x30000 && code <= 0x3134a) ||
+		(code >= 0xf900 && code <= 0xfaff) ||
+		(code >= 0x2f800 && code <= 0x2fa1f)
+	);
 }
 
 /**
@@ -115,7 +115,7 @@ function isChineseChar(char: string): boolean {
  * @returns 如果是中文词语返回 true，否则返回 false
  */
 function isChineseWord(word: string): boolean {
-        return Array.from(word).every(isChineseChar)
+	return Array.from(word).every(isChineseChar);
 }
 
 // /**

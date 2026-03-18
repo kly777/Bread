@@ -1,331 +1,331 @@
 /* 浮动按钮 */
 .bread-page-agent-floating-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 10000;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	z-index: 10000;
+	background: #007bff;
+	color: white;
+	border: none;
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	font-size: 24px;
+	cursor: pointer;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+	transition: all 0.3s ease;
 }
 
 .bread-page-agent-floating-button:hover {
-    background: #0056b3;
-    transform: scale(1.1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+	background: #0056b3;
+	transform: scale(1.1);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* 控制面板 */
 .bread-page-agent-panel {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 500px;
-    max-width: 90vw;
-    max-height: 80vh;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    z-index: 10001;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: bread-page-agent-panel-fade-in 0.3s ease;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 500px;
+	max-width: 90vw;
+	max-height: 80vh;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	z-index: 10001;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	animation: bread-page-agent-panel-fade-in 0.3s ease;
 }
 
 @keyframes bread-page-agent-panel-fade-in {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
+	from {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	}
 }
 
 /* 标题栏 */
 .bread-page-agent-panel-header {
-    background: #007bff;
-    color: white;
-    padding: 12px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+	background: #007bff;
+	color: white;
+	padding: 12px 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .bread-page-agent-panel-title {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
 }
 
 .bread-page-agent-panel-close-button {
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    transition: background 0.2s ease;
+	background: transparent;
+	border: none;
+	color: white;
+	font-size: 20px;
+	cursor: pointer;
+	padding: 0;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	transition: background 0.2s ease;
 }
 
 .bread-page-agent-panel-close-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.2);
 }
 
 /* 内容区域 */
 .bread-page-agent-panel-content {
-    padding: 16px;
-    flex: 1;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+	padding: 16px;
+	flex: 1;
+	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 
 /* 命令输入 */
 .bread-page-agent-command-input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: border-color 0.2s ease;
+	flex: 1;
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+	transition: border-color 0.2s ease;
 }
 
 .bread-page-agent-command-input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+	outline: none;
+	border-color: #007bff;
+	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .bread-page-agent-command-input:disabled {
-    background: #f8f9fa;
-    cursor: not-allowed;
+	background: #f8f9fa;
+	cursor: not-allowed;
 }
 
 .bread-page-agent-execute-button {
-    padding: 8px 16px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background 0.2s ease;
+	padding: 8px 16px;
+	background: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: background 0.2s ease;
 }
 
 .bread-page-agent-execute-button:hover:not(:disabled) {
-    background: #0056b3;
+	background: #0056b3;
 }
 
 .bread-page-agent-execute-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 /* 快捷按钮 */
 .bread-page-agent-quick-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
 }
 
 .bread-page-agent-quick-button {
-    padding: 6px 12px;
-    background: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: background 0.2s ease;
+	padding: 6px 12px;
+	background: #6c757d;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+	transition: background 0.2s ease;
 }
 
 .bread-page-agent-quick-button:hover:not(:disabled) {
-    background: #545b62;
+	background: #545b62;
 }
 
 .bread-page-agent-quick-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 .bread-page-agent-quick-button-primary {
-    background: #28a745;
+	background: #28a745;
 }
 
 .bread-page-agent-quick-button-primary:hover:not(:disabled) {
-    background: #1e7e34;
+	background: #1e7e34;
 }
 
 .bread-page-agent-quick-button-danger {
-    background: #dc3545;
+	background: #dc3545;
 }
 
 .bread-page-agent-quick-button-danger:hover:not(:disabled) {
-    background: #bd2130;
+	background: #bd2130;
 }
 
 /* 结果展示 */
 .bread-page-agent-result-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 .bread-page-agent-result-label {
-    font-size: 14px;
-    font-weight: bold;
-    color: #333;
+	font-size: 14px;
+	font-weight: bold;
+	color: #333;
 }
 
 .bread-page-agent-result-content {
-    flex: 1;
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    overflow: auto;
-    font-size: 13px;
-    white-space: pre-wrap;
-    min-height: 100px;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    line-height: 1.4;
+	flex: 1;
+	padding: 12px;
+	background: #f8f9fa;
+	border-radius: 4px;
+	border: 1px solid #ddd;
+	overflow: auto;
+	font-size: 13px;
+	white-space: pre-wrap;
+	min-height: 100px;
+	font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+	line-height: 1.4;
 }
 
 /* 历史记录 */
 .bread-page-agent-history-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 .bread-page-agent-history-label {
-    font-size: 14px;
-    font-weight: bold;
-    color: #333;
+	font-size: 14px;
+	font-weight: bold;
+	color: #333;
 }
 
 .bread-page-agent-history-list {
-    max-height: 150px;
-    overflow: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 8px;
+	max-height: 150px;
+	overflow: auto;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 8px;
 }
 
 .bread-page-agent-history-item {
-    padding: 6px;
-    border-bottom: 1px solid #eee;
-    font-size: 12px;
+	padding: 6px;
+	border-bottom: 1px solid #eee;
+	font-size: 12px;
 }
 
 .bread-page-agent-history-item:last-child {
-    border-bottom: none;
+	border-bottom: none;
 }
 
 .bread-page-agent-history-command {
-    color: #007bff;
-    font-weight: bold;
-    margin-bottom: 2px;
+	color: #007bff;
+	font-weight: bold;
+	margin-bottom: 2px;
 }
 
 .bread-page-agent-history-result {
-    color: #666;
-    margin-top: 2px;
-    font-size: 11px;
+	color: #666;
+	margin-top: 2px;
+	font-size: 11px;
 }
 
 .bread-page-agent-history-timestamp {
-    color: #999;
-    font-size: 10px;
-    margin-top: 2px;
+	color: #999;
+	font-size: 10px;
+	margin-top: 2px;
 }
 
 /* 使用说明 */
 .bread-page-agent-instructions {
-    padding: 8px;
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 4px;
-    font-size: 12px;
-    color: #856404;
+	padding: 8px;
+	background: #fff3cd;
+	border: 1px solid #ffeaa7;
+	border-radius: 4px;
+	font-size: 12px;
+	color: #856404;
 }
 
 .bread-page-agent-instructions strong {
-    display: block;
-    margin-bottom: 4px;
+	display: block;
+	margin-bottom: 4px;
 }
 
 .bread-page-agent-instructions ul {
-    margin: 4px 0 0 0;
-    padding-left: 16px;
+	margin: 4px 0 0 0;
+	padding-left: 16px;
 }
 
 .bread-page-agent-instructions li {
-    margin-bottom: 2px;
+	margin-bottom: 2px;
 }
 
 /* 遮罩层 */
 .bread-page-agent-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 10000;
-    animation: bread-page-agent-overlay-fade-in 0.3s ease;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 10000;
+	animation: bread-page-agent-overlay-fade-in 0.3s ease;
 }
 
 @keyframes bread-page-agent-overlay-fade-in {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 /* 响应式设计 */
 @media (max-width: 600px) {
-    .bread-page-agent-panel {
-        width: 95vw;
-        max-height: 90vh;
-    }
+	.bread-page-agent-panel {
+		width: 95vw;
+		max-height: 90vh;
+	}
 
-    .bread-page-agent-floating-button {
-        bottom: 10px;
-        right: 10px;
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
-    }
+	.bread-page-agent-floating-button {
+		bottom: 10px;
+		right: 10px;
+		width: 40px;
+		height: 40px;
+		font-size: 20px;
+	}
 
-    .bread-page-agent-quick-buttons {
-        justify-content: center;
-    }
+	.bread-page-agent-quick-buttons {
+		justify-content: center;
+	}
 
-    .bread-page-agent-quick-button {
-        flex: 1;
-        min-width: calc(50% - 4px);
-    }
+	.bread-page-agent-quick-button {
+		flex: 1;
+		min-width: calc(50% - 4px);
+	}
 }

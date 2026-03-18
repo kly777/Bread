@@ -13,11 +13,11 @@
  * @returns 返回选中的文本，如果无文本被选中则返回空字符串
  */
 export function getSelectedText(): string {
-        // 获取当前用户选中的内容
-        const selection = window.getSelection()
-        // 检查是否有选中的文本，如果没有则直接返回
-        if (!selection) return ''
-        return selection.toString().trim().toLowerCase() || ''
+	// 获取当前用户选中的内容
+	const selection = window.getSelection();
+	// 检查是否有选中的文本，如果没有则直接返回
+	if (!selection) return "";
+	return selection.toString().trim().toLowerCase() || "";
 }
 
 /**
@@ -26,8 +26,8 @@ export function getSelectedText(): string {
  * @returns 如果有文本被选中返回 true，否则返回 false
  */
 export function hasSelection(): boolean {
-        const selection = window.getSelection()
-        return !!(selection && selection.toString().trim())
+	const selection = window.getSelection();
+	return !!(selection && selection.toString().trim());
 }
 
 /**
@@ -36,9 +36,9 @@ export function hasSelection(): boolean {
  * @returns 选区范围信息对象，如果没有选区则返回 null
  */
 export function getSelectionRange(): Range | null {
-        const selection = window.getSelection()
-        if (!selection || selection.rangeCount === 0) {
-                return null
-        }
-        return selection.getRangeAt(0)
+	const selection = window.getSelection();
+	if (!selection || selection.rangeCount === 0) {
+		return null;
+	}
+	return selection.getRangeAt(0);
 }

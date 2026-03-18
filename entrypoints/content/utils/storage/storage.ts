@@ -4,7 +4,7 @@
  * 提供基于域名的存储键名生成功能
  */
 
-type StorageKey = `local:${string}`
+type StorageKey = `local:${string}`;
 
 /**
  * 生成带域名的存储键名
@@ -13,11 +13,11 @@ type StorageKey = `local:${string}`
  * @returns 完整的存储键名
  */
 export function getKeyWithDomain(key: string): StorageKey {
-        const domain = getCurrentDomain()
-        return generateStorageKey(domain, key)
+	const domain = getCurrentDomain();
+	return generateStorageKey(domain, key);
 }
 
-let currentDomain: string | null = null
+let currentDomain: string | null = null;
 
 /**
  * 获取当前域名
@@ -25,15 +25,15 @@ let currentDomain: string | null = null
  * @returns 当前域名
  */
 function getCurrentDomain(): string {
-        if (currentDomain) {
-                return currentDomain
-        }
-        // 从当前页面URL提取（content script场景）
-        if (typeof window !== 'undefined') {
-                currentDomain = window.location.hostname
-                return currentDomain
-        }
-        return 'default'
+	if (currentDomain) {
+		return currentDomain;
+	}
+	// 从当前页面URL提取（content script场景）
+	if (typeof window !== "undefined") {
+		currentDomain = window.location.hostname;
+		return currentDomain;
+	}
+	return "default";
 }
 
 /**
@@ -44,5 +44,5 @@ function getCurrentDomain(): string {
  * @returns 完整的存储键名
  */
 function generateStorageKey(domain: string, key: string): StorageKey {
-        return `local:${domain}:${key}`
+	return `local:${domain}:${key}`;
 }

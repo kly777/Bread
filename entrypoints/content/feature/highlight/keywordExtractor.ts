@@ -1,18 +1,13 @@
-import { searchEngines, SearchEngineConfig } from '../../utils/page/search'
+import { searchEngines, SearchEngineConfig } from "../../utils/page/search";
 
 /**
  * 关键词来源接口
  * 描述关键词的来源和可信度
  */
 export interface KeywordSource {
-        type:
-                | 'search_engine'
-                | 'referer'
-                | 'input_box'
-                | 'history'
-                | 'inherited' // 来源类型
-        keywords: string[] // 关键词列表
-        confidence: number // 可信度分数 (0-1)
+	type: "search_engine" | "referer" | "input_box" | "history" | "inherited"; // 来源类型
+	keywords: string[]; // 关键词列表
+	confidence: number; // 可信度分数 (0-1)
 }
 
 /**
@@ -20,218 +15,202 @@ export interface KeywordSource {
  * 负责从搜索引擎URL、页面元素等自动提取搜索关键词
  */
 export class KeywordExtractor {
-        // 支持的搜索引擎配置列表
-        private searchEngines: SearchEngineConfig[] = searchEngines
+	// 支持的搜索引擎配置列表
+	private searchEngines: SearchEngineConfig[] = searchEngines;
 
-        // 搜索框选择器列表，用于识别页面中的搜索输入框
-        private inputSelectors = [
-                '#query',
-                '#search',
-                '#keyword',
-                '#script_q',
-                '#search-q',
-                '.input',
-        ]
+	// 搜索框选择器列表，用于识别页面中的搜索输入框
+	private inputSelectors = [
+		"#query",
+		"#search",
+		"#keyword",
+		"#script_q",
+		"#search-q",
+		".input",
+	];
 
-        /**
-         * 从多个来源提取关键词
-         * 按可信度排序返回关键词来源列表
-         * @returns 排序后的关键词来源数组
-         */
-        extractKeywords(): KeywordSource[] {
-                const sources: KeywordSource[] = []
+	/**
+	 * 从多个来源提取关键词
+	 * 按可信度排序返回关键词来源列表
+	 * @returns 排序后的关键词来源数组
+	 */
+	extractKeywords(): KeywordSource[] {
+		const sources: KeywordSource[] = [];
 
-                // 1. 从当前页面的搜索引擎URL提取（可信度最高）
-                const searchEngineKeywords = this.extractFromSearchEngine()
-                if (searchEngineKeywords.length > 0) {
-                        sources.push({
-                                type: 'search_engine',
-                                keywords: searchEngineKeywords,
-                                confidence: 0.9,
-                        })
-                }
+		// 1. 从当前页面的搜索引擎URL提取（可信度最高）
+		const searchEngineKeywords = this.extractFromSearchEngine();
+		if (searchEngineKeywords.length > 0) {
+			sources.push({
+				type: "search_engine",
+				keywords: searchEngineKeywords,
+				confidence: 0.9,
+			});
+		}
 
-                // 2. 从引用页面（referer）的搜索引擎URL提取
-                const refererKeywords = this.extractFromReferer()
-                if (refererKeywords.length > 0) {
-                        sources.push({
-                                type: 'referer',
-                                keywords: refererKeywords,
-                                confidence: 0.7,
-                        })
-                }
+		// 2. 从引用页面（referer）的搜索引擎URL提取
+		const refererKeywords = this.extractFromReferer();
+		if (refererKeywords.length > 0) {
+			sources.push({
+				type: "referer",
+				keywords: refererKeywords,
+				confidence: 0.7,
+			});
+		}
 
-                // 3. 从页面中的输入框提取
-                const inputBoxKeywords = this.extractFromInputBoxes()
-                if (inputBoxKeywords.length > 0) {
-                        sources.push({
-                                type: 'input_box',
-                                keywords: inputBoxKeywords,
-                                confidence: 0.6,
-                        })
-                }
+		// 3. 从页面中的输入框提取
+		const inputBoxKeywords = this.extractFromInputBoxes();
+		if (inputBoxKeywords.length > 0) {
+			sources.push({
+				type: "input_box",
+				keywords: inputBoxKeywords,
+				confidence: 0.6,
+			});
+		}
 
-                // 4. 从继承的关键词提取（通过window.name传递）
-                const inheritedKeywords = this.extractFromInherited()
-                if (inheritedKeywords.length > 0) {
-                        sources.push({
-                                type: 'inherited',
-                                keywords: inheritedKeywords,
-                                confidence: 0.8,
-                        })
-                }
+		// 4. 从继承的关键词提取（通过window.name传递）
+		const inheritedKeywords = this.extractFromInherited();
+		if (inheritedKeywords.length > 0) {
+			sources.push({
+				type: "inherited",
+				keywords: inheritedKeywords,
+				confidence: 0.8,
+			});
+		}
 
-                // 按可信度降序排序
-                return sources.sort((a, b) => b.confidence - a.confidence)
-        }
+		// 按可信度降序排序
+		return sources.sort((a, b) => b.confidence - a.confidence);
+	}
 
-        private extractFromSearchEngine(): string[] {
-                const currentUrl = window.location.href
-                const host = window.location.host
+	private extractFromSearchEngine(): string[] {
+		const currentUrl = window.location.href;
+		const host = window.location.host;
 
-                for (const engine of this.searchEngines) {
-                        if (
-                                engine.urlPattern &&
-                                host.includes(engine.urlPattern)
-                        ) {
-                                const keywords = this.getKeywordsFromUrl(
-                                        currentUrl,
-                                        engine.keywordParam
-                                )
-                                if (keywords.length > 0) {
-                                        return keywords
-                                }
-                        }
-                }
-                return []
-        }
+		for (const engine of this.searchEngines) {
+			if (engine.urlPattern && host.includes(engine.urlPattern)) {
+				const keywords = this.getKeywordsFromUrl(
+					currentUrl,
+					engine.keywordParam,
+				);
+				if (keywords.length > 0) {
+					return keywords;
+				}
+			}
+		}
+		return [];
+	}
 
-        private extractFromReferer(): string[] {
-                const referer = document.referrer
-                if (!referer) return []
+	private extractFromReferer(): string[] {
+		const referer = document.referrer;
+		if (!referer) return [];
 
-                const host = new URL(referer).host
+		const host = new URL(referer).host;
 
-                for (const engine of this.searchEngines) {
-                        if (
-                                engine.urlPattern &&
-                                host.includes(engine.urlPattern)
-                        ) {
-                                const keywords = this.getKeywordsFromUrl(
-                                        referer,
-                                        engine.keywordParam
-                                )
-                                if (keywords.length > 0) {
-                                        return keywords
-                                }
-                        }
-                }
-                return []
-        }
+		for (const engine of this.searchEngines) {
+			if (engine.urlPattern && host.includes(engine.urlPattern)) {
+				const keywords = this.getKeywordsFromUrl(referer, engine.keywordParam);
+				if (keywords.length > 0) {
+					return keywords;
+				}
+			}
+		}
+		return [];
+	}
 
-        private extractFromInputBoxes(): string[] {
-                for (const selector of this.inputSelectors) {
-                        const input = document.querySelector(
-                                selector
-                        ) as HTMLInputElement
-                        if (input && input.value && input.value.trim()) {
-                                return this.processKeywords(input.value.trim())
-                        }
-                }
-                return []
-        }
+	private extractFromInputBoxes(): string[] {
+		for (const selector of this.inputSelectors) {
+			const input = document.querySelector(selector) as HTMLInputElement;
+			if (input && input.value && input.value.trim()) {
+				return this.processKeywords(input.value.trim());
+			}
+		}
+		return [];
+	}
 
-        private extractFromInherited(): string[] {
-                if (
-                        window.name &&
-                        window.name.startsWith('bread_highlight::')
-                ) {
-                        const match = window.name.match(/bread_highlight::(.+)/)
-                        if (match && match[1]) {
-                                try {
-                                        const decoded = decodeURIComponent(
-                                                match[1]
-                                        )
-                                        return this.processKeywords(decoded)
-                                } catch {
-                                        return []
-                                }
-                        }
-                }
-                return []
-        }
+	private extractFromInherited(): string[] {
+		if (window.name && window.name.startsWith("bread_highlight::")) {
+			const match = window.name.match(/bread_highlight::(.+)/);
+			if (match && match[1]) {
+				try {
+					const decoded = decodeURIComponent(match[1]);
+					return this.processKeywords(decoded);
+				} catch {
+					return [];
+				}
+			}
+		}
+		return [];
+	}
 
-        private getKeywordsFromUrl(url: string, param: string): string[] {
-                try {
-                        const urlObj = new URL(url)
-                        const keywordStr = urlObj.searchParams.get(param)
-                        if (keywordStr) {
-                                return this.processKeywords(keywordStr)
-                        }
-                } catch {
-                        return []
-                }
-                return []
-        }
+	private getKeywordsFromUrl(url: string, param: string): string[] {
+		try {
+			const urlObj = new URL(url);
+			const keywordStr = urlObj.searchParams.get(param);
+			if (keywordStr) {
+				return this.processKeywords(keywordStr);
+			}
+		} catch {
+			return [];
+		}
+		return [];
+	}
 
-        private processKeywords(keywordStr: string): string[] {
-                let processed = keywordStr.replace(/\+/g, ' ').trim()
+	private processKeywords(keywordStr: string): string[] {
+		let processed = keywordStr.replace(/\+/g, " ").trim();
 
-                try {
-                        processed = decodeURIComponent(processed)
-                } catch {
-                        // 解码失败，使用原始字符串
-                }
+		try {
+			processed = decodeURIComponent(processed);
+		} catch {
+			// 解码失败，使用原始字符串
+		}
 
-                const keywords = this.splitKeywords(processed)
-                return this.filterKeywords(keywords)
-        }
+		const keywords = this.splitKeywords(processed);
+		return this.filterKeywords(keywords);
+	}
 
-        private splitKeywords(text: string): string[] {
-                const keywords: string[] = []
+	private splitKeywords(text: string): string[] {
+		const keywords: string[] = [];
 
-                const segments = text.split(/[\s,，、;；]+/)
-                for (const segment of segments) {
-                        if (segment.trim()) {
-                                keywords.push(segment.trim())
-                        }
-                }
+		const segments = text.split(/[\s,，、;；]+/);
+		for (const segment of segments) {
+			if (segment.trim()) {
+				keywords.push(segment.trim());
+			}
+		}
 
-                return keywords
-        }
+		return keywords;
+	}
 
-        private filterKeywords(keywords: string[]): string[] {
-                const skipWords = new Set([
-                        'the',
-                        'to',
-                        'in',
-                        'on',
-                        'among',
-                        'between',
-                        'and',
-                        'a',
-                        'an',
-                        'of',
-                        'by',
-                        'with',
-                ])
+	private filterKeywords(keywords: string[]): string[] {
+		const skipWords = new Set([
+			"the",
+			"to",
+			"in",
+			"on",
+			"among",
+			"between",
+			"and",
+			"a",
+			"an",
+			"of",
+			"by",
+			"with",
+		]);
 
-                return keywords.filter((keyword) => {
-                        if (keyword.length <= 1) return false
-                        if (
-                                skipWords.has(keyword.toLowerCase()) &&
-                                keyword === keyword.toLowerCase()
-                        ) {
-                                return false
-                        }
-                        return true
-                })
-        }
+		return keywords.filter((keyword) => {
+			if (keyword.length <= 1) return false;
+			if (
+				skipWords.has(keyword.toLowerCase()) &&
+				keyword === keyword.toLowerCase()
+			) {
+				return false;
+			}
+			return true;
+		});
+	}
 
-        setWindowKeywords(keywords: string[]) {
-                if (keywords.length > 0) {
-                        const encoded = encodeURIComponent(keywords.join(' '))
-                        window.name = `bread_highlight::${encoded}`
-                }
-        }
+	setWindowKeywords(keywords: string[]) {
+		if (keywords.length > 0) {
+			const encoded = encodeURIComponent(keywords.join(" "));
+			window.name = `bread_highlight::${encoded}`;
+		}
+	}
 }

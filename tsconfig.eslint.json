@@ -1,13 +1,13 @@
 {
-        "extends": "./tsconfig.json",
-        "include": [
-                "entrypoints/**/*.ts",
-                "src/**/*.ts",
-                "entrypoints/**/*.tsx",
-                "entrypoints/**/*.jsx",
-                "src/**/*.tsx",
-                "src/**/*.jsx",
-                "types/**/*.d.ts",
-                "types/global.d.ts"
-        ]
+	"extends": "./tsconfig.json",
+	"include": [
+		"entrypoints/**/*.ts",
+		"src/**/*.ts",
+		"entrypoints/**/*.tsx",
+		"entrypoints/**/*.jsx",
+		"src/**/*.tsx",
+		"src/**/*.jsx",
+		"types/**/*.d.ts",
+		"types/global.d.ts"
+	]
 }

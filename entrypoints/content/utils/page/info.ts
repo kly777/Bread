@@ -4,9 +4,9 @@
  * 提供获取页面语言、搜索引擎识别等功能
  */
 
-import { searchEngines } from './search'
+import { searchEngines } from "./search";
 
-let lang: string | null = null
+let lang: string | null = null;
 
 /**
  * 获取页面语言
@@ -17,11 +17,11 @@ let lang: string | null = null
  * @returns 页面语言代码
  */
 export function pageLang(): string {
-        if (lang !== null) {
-                return lang
-        }
-        lang = document.documentElement.lang || 'en'
-        return lang
+	if (lang !== null) {
+		return lang;
+	}
+	lang = document.documentElement.lang || "en";
+	return lang;
 }
 
 /**
@@ -32,16 +32,16 @@ export function pageLang(): string {
  * @returns 如果是搜索引擎页面返回 true，否则返回 false
  */
 export function isSearchEnginePage(): boolean {
-        const host = window.location.host
-        console.log('[highlight]:Is %s a search engine page?', host)
+	const host = window.location.host;
+	console.log("[highlight]:Is %s a search engine page?", host);
 
-        for (const engine of searchEngines) {
-                if (engine.urlPattern && host.includes(engine.urlPattern)) {
-                        return true
-                }
-        }
+	for (const engine of searchEngines) {
+		if (engine.urlPattern && host.includes(engine.urlPattern)) {
+			return true;
+		}
+	}
 
-        return false
+	return false;
 }
 
 /**
@@ -50,15 +50,15 @@ export function isSearchEnginePage(): boolean {
  * @returns 匹配的搜索引擎配置，如果没有匹配则返回 null
  */
 export function getCurrentSearchEngine(): (typeof searchEngines)[0] | null {
-        const host = window.location.host
+	const host = window.location.host;
 
-        for (const engine of searchEngines) {
-                if (engine.urlPattern && host.includes(engine.urlPattern)) {
-                        return engine
-                }
-        }
+	for (const engine of searchEngines) {
+		if (engine.urlPattern && host.includes(engine.urlPattern)) {
+			return engine;
+		}
+	}
 
-        return null
+	return null;
 }
 
 /**
@@ -67,7 +67,7 @@ export function getCurrentSearchEngine(): (typeof searchEngines)[0] | null {
  * @returns 页面标题
  */
 export function getPageTitle(): string {
-        return document.title
+	return document.title;
 }
 
 /**
@@ -76,5 +76,5 @@ export function getPageTitle(): string {
  * @returns 页面URL
  */
 export function getPageUrl(): string {
-        return window.location.href
+	return window.location.href;
 }
