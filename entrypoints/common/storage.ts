@@ -7,7 +7,7 @@ export class featureSettingStorage {
 		this.domain = domain;
 	}
 	async get(): Promise<SettingState | undefined> {
-		const key = "settings:" + this.domain;
+		const key = `settings:${this.domain}`;
 		const result = (await browser.storage.local.get(key)) as Record<
 			string,
 			Record<string, SettingState>
@@ -19,7 +19,7 @@ export class featureSettingStorage {
 		return domainSettings[this.feature];
 	}
 	async set(value: SettingState) {
-		const key = "settings:" + this.domain;
+		const key = `settings:${this.domain}`;
 		const settingsRecord = (await browser.storage.local.get(key)) as Record<
 			string,
 			Record<string, SettingState> | undefined

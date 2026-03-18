@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount } from "solid-js";
+import { type Component, createSignal, onMount } from "solid-js";
 
 const ApplyWebsites: Component = () => {
 	const [currentUrl, setCurrentUrl] = createSignal("加载中...");

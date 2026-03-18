@@ -27,7 +27,7 @@ export function getSelectedText(): string {
  */
 export function hasSelection(): boolean {
 	const selection = window.getSelection();
-	return !!(selection && selection.toString().trim());
+	return !!(selection?.toString().trim());
 }
 
 /**

@@ -1,4 +1,4 @@
-import { searchEngines, SearchEngineConfig } from "../../utils/page/search";
+import { searchEngines, type SearchEngineConfig } from "../../utils/page/search";
 
 /**
  * 关键词来源接口
@@ -118,7 +118,7 @@ export class KeywordExtractor {
 	private extractFromInputBoxes(): string[] {
 		for (const selector of this.inputSelectors) {
 			const input = document.querySelector(selector) as HTMLInputElement;
-			if (input && input.value && input.value.trim()) {
+			if (input?.value?.trim()) {
 				return this.processKeywords(input.value.trim());
 			}
 		}
@@ -126,9 +126,9 @@ export class KeywordExtractor {
 	}
 
 	private extractFromInherited(): string[] {
-		if (window.name && window.name.startsWith("bread_highlight::")) {
+		if (window.name?.startsWith("bread_highlight::")) {
 			const match = window.name.match(/bread_highlight::(.+)/);
-			if (match && match[1]) {
+			if (match?.[1]) {
 				try {
 					const decoded = decodeURIComponent(match[1]);
 					return this.processKeywords(decoded);

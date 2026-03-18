@@ -15,9 +15,9 @@ import {
 	statSync,
 	readdirSync,
 	unlinkSync,
-} from "fs";
+} from "node:fs";
 
-import { join } from "path";
+import { join } from "node:path";
 import postcss from "postcss";
 import csso from "postcss-csso";
 import postcss_import from "postcss-import";
@@ -262,7 +262,7 @@ const backgroundPopupConfig = {
 		},
 		{
 			name: "inject-popup-assets",
-			writeBundle(options, bundle) {
+			writeBundle(_options, bundle) {
 				const distDir = "dist";
 				const htmlPath = join(distDir, "popup", "index.html");
 
@@ -281,18 +281,20 @@ const backgroundPopupConfig = {
 
 				// 查找所有script标签（支持相对路径）
 				const scriptRegex = /<script\s+[^>]*src="([^"]+)"[^>]*><\/script>/gi;
-				let match;
-				while ((match = scriptRegex.exec(html)) !== null) {
+				let match = scriptRegex.exec(html);
+				while (match !== null) {
 					const src = match[1];
 					// 只处理本地文件，忽略外部URL
 					if (!src.startsWith("http") && !src.startsWith("//")) {
 						sourceRefs.js.push(src);
 					}
+					match = scriptRegex.exec(html);
 				}
 
 				// 查找所有link标签（支持相对路径）
 				const linkRegex = /<link\s+[^>]*href="([^"]+)"[^>]*>/gi;
-				while ((match = linkRegex.exec(html)) !== null) {
+				match = linkRegex.exec(html);
+				while (match !== null) {
 					const href = match[1];
 					// 只处理本地CSS文件，忽略外部URL
 					if (
@@ -302,6 +304,7 @@ const backgroundPopupConfig = {
 					) {
 						sourceRefs.css.push(href);
 					}
+					match = linkRegex.exec(html);
 				}
 
 				// 2. 构建源文件到构建产物的映射

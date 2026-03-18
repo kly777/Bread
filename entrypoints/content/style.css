@@ -6,7 +6,7 @@
 .bionic-text {
 	margin: 0;
 	padding: 0;
-	display: contents !important;
+	display: contents;
 }
 
 .striped {

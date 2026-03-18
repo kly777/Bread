@@ -1,6 +1,6 @@
 import { createSignal, createEffect, onCleanup, For } from "solid-js";
 import { render } from "solid-js/web";
-import { AIFeature } from "./AIFeature";
+import type { AIFeature } from "./AIFeature";
 
 interface UIProps {
 	feature: AIFeature;
@@ -169,6 +169,7 @@ export function UI(props: UIProps) {
 				}}
 			>
 				<button
+					type="button"
 					onClick={handleToggleVisibility}
 					style={{
 						background: "#007bff",
@@ -222,6 +223,7 @@ export function UI(props: UIProps) {
 					>
 						<h3 style={{ margin: "0", "font-size": "18px" }}>AI 助手</h3>
 						<button
+							type="button"
 							onClick={handleClose}
 							style={{
 								background: "transparent",
@@ -497,7 +499,7 @@ export function UI(props: UIProps) {
 													}}
 												>
 													{item.result.length > 100
-														? item.result.substring(0, 100) + "..."
+														? `${item.result.substring(0, 100)}...`
 														: item.result}
 												</div>
 											</div>

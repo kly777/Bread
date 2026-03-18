@@ -149,7 +149,7 @@ export default function HighlightKeywords() {
 					class="keyword-input"
 				></textarea>
 				<div class="button-group">
-					<button onClick={clearPersistentKeywords} class="btn btn-secondary">
+					<button type="button" onClick={clearPersistentKeywords} class="btn btn-secondary">
 						清除
 					</button>
 				</div>

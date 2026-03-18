@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, For } from "solid-js";
+import { type Component, createSignal, onMount, For } from "solid-js";
 import FeatureSetting from "./FeatureSetting";
 import { featureSettingStorage } from "../common/storage";
 import { getDomain } from "./domain";

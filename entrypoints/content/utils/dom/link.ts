@@ -54,7 +54,7 @@ export function processAllLinks(
 	links.forEach((link) => {
 		if (link instanceof HTMLAnchorElement) {
 			// 如果提供了缓存，检查是否已处理
-			if (processedLinks && processedLinks.has(link)) {
+			if (processedLinks?.has(link)) {
 				return;
 			}
 			applyStyle(link);

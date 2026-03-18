@@ -1,4 +1,4 @@
-import { IFeature } from "./feature/Feature";
+import type { IFeature } from "./feature/Feature";
 import { BionicFeature } from "./feature/bionic/BionicFeature";
 import { HighlightFeature } from "./feature/highlight/HighlightFeature";
 import { TranslateFeature } from "./feature/translate/TranslateFeature";
@@ -124,7 +124,7 @@ async function loadInitialSettings(): Promise<void> {
 			let value: boolean;
 			let isDefault = false;
 
-			if (domainSettings && domainSettings[key]) {
+			if (domainSettings?.[key]) {
 				const storedValue = domainSettings[key];
 				if (storedValue === "enabled") {
 					value = true;
@@ -209,7 +209,7 @@ function initShortcuts() {
 	document.addEventListener("keydown", (event) => {
 		if (event.ctrlKey && event.key === "q") {
 			const currentSetting = getSetting();
-			const newValue = !currentSetting["translate"];
+			const newValue = !currentSetting.translate;
 			switchFeature("translate", newValue).catch((err) =>
 				console.error("切换翻译功能失败", err),
 			);

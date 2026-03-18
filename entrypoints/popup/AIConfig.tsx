@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, Show } from "solid-js";
+import { type Component, createSignal, onMount, Show } from "solid-js";
 
 interface AIConfigProps {
 	onConfigChange?: (config: {
@@ -243,7 +243,7 @@ const AIConfig: Component<AIConfigProps> = (props) => {
 							step="100"
 							value={maxTokens()}
 							onInput={(e) =>
-								setMaxTokens(parseInt(e.currentTarget.value) || 1000)
+								setMaxTokens(parseInt(e.currentTarget.value, 10) || 1000)
 							}
 						/>
 						<div class="ai-config-hint">控制响应长度 (100-4000)</div>

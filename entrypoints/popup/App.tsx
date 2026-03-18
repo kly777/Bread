@@ -1,4 +1,4 @@
-import { Component } from "solid-js";
+import type { Component } from "solid-js";
 import ApplyWebsites from "./ApplyWebsites";
 import FeatureSwitch from "./FeatureSwitch";
 // import HighlightKeywords from './HighlightKeywords'

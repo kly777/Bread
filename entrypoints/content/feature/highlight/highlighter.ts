@@ -4,7 +4,7 @@
  */
 
 import { highlightWordsInDocument, removeHighlights } from "./highlightNode";
-import { getWordsManager, HighlightWord } from "./wordsManager";
+import { getWordsManager, type HighlightWord } from "./wordsManager";
 
 export class Highlighter {
 	private isActive = false;

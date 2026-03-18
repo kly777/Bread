@@ -106,7 +106,7 @@ function handleRemoveHighlight(): void {
 function handlePersistentKeywordsChange(newKeywords: string | undefined): void {
 	const wordsManager = getWordsManager();
 
-	if (newKeywords && newKeywords.trim()) {
+	if (newKeywords?.trim()) {
 		const keywords = newKeywords
 			.split("\n")
 			.map((word: string) => word.trim())
@@ -128,7 +128,7 @@ async function applyPersistentHighlightOnLoad(): Promise<void> {
 		const persistentKeywords = result["local:persistent_highlight_keywords"] as
 			| string
 			| undefined;
-		if (persistentKeywords && persistentKeywords.trim()) {
+		if (persistentKeywords?.trim()) {
 			console.log("页面加载时自动应用持久高亮");
 			const keywords = persistentKeywords
 				.split("\n")

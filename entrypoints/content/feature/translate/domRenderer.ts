@@ -34,7 +34,7 @@ const tagNameStyleCache = new Map<
 ]);
 
 function desString(content: string, shouldWrap: boolean): string {
-	const resultContent = shouldWrap ? "- " + content : " <" + content + "> ";
+	const resultContent = shouldWrap ? `- ${content}` : ` <${content}> `;
 	return resultContent;
 }
 
@@ -136,7 +136,7 @@ function scheduleDomOperation(
  * 处理批量DOM操作队列
  */
 function processDomOperationQueue(): void {
-	if (getSetting()["translate"] === false) {
+	if (getSetting().translate === false) {
 		return;
 	}
 	domOperationScheduled = false;

@@ -56,7 +56,7 @@ export class AIFeature extends Feature {
 
 			// 初始化 UI
 			import("./UI")
-				.then(({ initUI: initUI }) => {
+				.then(({ initUI }) => {
 					initUI(this);
 				})
 				.catch((error) => {
@@ -84,7 +84,7 @@ export class AIFeature extends Feature {
 		}
 
 		import("./UI")
-			.then(({ destroyUI: destroyUI }) => {
+			.then(({ destroyUI }) => {
 				destroyUI();
 			})
 			.catch((error) => {
@@ -254,7 +254,7 @@ export class AIFeature extends Feature {
 			}
 
 			if (toolResults.length > 0) {
-				result += "\n\n" + toolResults.join("\n");
+				result += `\n\n${toolResults.join("\n")}`;
 			}
 		}
 
@@ -326,8 +326,6 @@ export class AIFeature extends Feature {
 								}
 							}
 						} else if (type === "finish") {
-							// 流结束，可以继续处理
-							continue;
 						} else if (type === "error") {
 							controller.enqueue(`[错误: ${String(data)}]`);
 						}
@@ -356,7 +354,7 @@ export class AIFeature extends Feature {
 			console.log(`自动化循环迭代 ${iteration}`);
 
 			const response = await this.executeCommand(command);
-			result += response + "\n\n";
+			result += `${response}\n\n`;
 
 			// 检查是否还有工具调用
 			// 这里简化处理：如果响应包含"工具调用"，则继续循环

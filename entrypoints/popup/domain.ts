@@ -28,7 +28,7 @@ export async function initDomain(): Promise<void> {
 		const response = await browser.runtime.sendMessage({
 			action: "getDomain",
 		});
-		if (response && response.domain) {
+		if (response?.domain) {
 			currentDomain = response.domain;
 		} else {
 			currentDomain = "default";

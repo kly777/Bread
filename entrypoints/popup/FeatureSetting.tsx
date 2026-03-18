@@ -49,7 +49,7 @@ export default function FeatureSetting(props: FeatureSettingProps) {
 			value = target.checked;
 		} else if (props.type === "number") {
 			value = parseFloat(target.value);
-			if (isNaN(value)) value = 0;
+			if (Number.isNaN(value)) value = 0;
 		} else {
 			value = target.value;
 		}

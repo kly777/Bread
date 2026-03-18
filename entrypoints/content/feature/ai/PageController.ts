@@ -2,7 +2,7 @@ import {
 	getPageInfo,
 	getInteractiveElements,
 	formatInteractiveElements,
-	PageInfo,
+	type PageInfo,
 } from "./utils/domTools";
 
 export interface PageControllerConfig {
@@ -192,6 +192,7 @@ export class PageController {
 
 	async executeJavaScript(code: string): Promise<ActionResult> {
 		try {
+			// biome-ignore lint/security/noGlobalEval: AI功能需要执行AI提供的JavaScript代码
 			const result = eval(code);
 			return {
 				success: true,

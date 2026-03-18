@@ -1,10 +1,10 @@
 import { KeywordExtractor } from "./keywordExtractor";
-import { HighlightConfig, DEFAULT_CONFIG } from "./highlightConfig";
+import { type HighlightConfig, DEFAULT_CONFIG } from "./highlightConfig";
 import { getKeyWithDomain } from "../../utils/storage/storage";
 import { highlightWordsInDocument, removeHighlights } from "./highlightNode";
 import { getHighlightStyle } from "./highlightConfig";
 import { manageMutationObserver } from "../../observer/domMutationObserver";
-import { getWordsManager, HighlightWord } from "./wordsManager";
+import { getWordsManager, type HighlightWord } from "./wordsManager";
 import { registerDomStableHook } from "../../observer/observerHooks";
 
 /**
